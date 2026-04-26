@@ -13,6 +13,7 @@ const LoginPage: React.FC = () => {
     // Simulate login delay
     setTimeout(() => {
       setLoading(false);
+      localStorage.setItem('token', 'mock_token_123');
       // Ensure we navigate to a dashboard after successful login
       navigate('/dashboard');
     }, 1500);

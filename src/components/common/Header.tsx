@@ -7,15 +7,17 @@ const Header: React.FC = () => {
   // Format the path to a readable title
   const getPageTitle = () => {
     const path = location.pathname.split('/')[1];
-    if (!path) return 'Dashboard';
-    return path.charAt(0).toUpperCase() + path.slice(1).replace('-', ' ');
+    if (path === 'dashboard') return 'Tổng quan';
+    if (path === 'staff') return 'Quản lý nhân sự';
+    if (path === 'patients') return 'Tiếp nhận bệnh nhân';
+    return 'Tổng quan';
   };
 
   return (
     <header className="h-[88px] bg-surface flex items-center justify-between px-8 relative z-0">
       <div>
         <h1 className="font-display text-2xl font-semibold text-on-surface">{getPageTitle()}</h1>
-        <p className="font-body text-sm text-on-surface-variant mt-1">Today is {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+        <p className="font-body text-sm text-on-surface-variant mt-1">Hôm nay là {new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
       </div>
       
       <div className="flex items-center gap-6">
@@ -30,11 +32,11 @@ const Header: React.FC = () => {
         
         <div className="flex items-center gap-3 cursor-pointer group">
           <div className="w-11 h-11 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-sm shadow-sm group-hover:shadow-md transition-shadow">
-            RS
+            BS
           </div>
           <div className="hidden sm:block">
-            <p className="font-body text-sm font-semibold text-on-surface group-hover:text-primary transition-colors">Dr. Robert Smith</p>
-            <p className="font-body text-xs text-on-surface-variant">Cardiology</p>
+            <p className="font-body text-sm font-semibold text-on-surface group-hover:text-primary transition-colors">Bs. Robert Smith</p>
+            <p className="font-body text-xs text-on-surface-variant">Khoa Tim mạch</p>
           </div>
         </div>
       </div>

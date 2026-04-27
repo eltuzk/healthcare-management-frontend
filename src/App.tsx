@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import MainLayout from './components/common/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -16,12 +17,7 @@ function App() {
             <MainLayout />
           </ProtectedRoute>
         }>
-          <Route path="/dashboard" element={
-            <div className="w-full bg-surface-container-lowest rounded-[24px] p-8 shadow-ambient min-h-[400px]">
-              <h2 className="font-display text-2xl font-semibold mb-4 text-on-surface">Admin Dashboard Overview</h2>
-              <p className="font-body text-on-surface-variant">Welcome to the administration panel.</p>
-            </div>
-          } />
+          <Route path="/dashboard" element={<AdminDashboardPage />} />
           <Route path="/staff" element={
             <div className="w-full bg-surface-container-lowest rounded-[24px] p-8 shadow-ambient min-h-[400px]">
               <h2 className="font-display text-2xl font-semibold mb-4 text-on-surface">Staff Management</h2>

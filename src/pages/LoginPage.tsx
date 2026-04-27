@@ -32,17 +32,17 @@ const LoginPage: React.FC = () => {
               </svg>
             </div>
             <h1 className="font-display text-[2rem] leading-tight font-semibold text-on-surface tracking-tight mb-3">
-              Welcome back
+              Chào mừng trở lại
             </h1>
             <p className="text-on-surface-variant font-body text-[0.95rem]">
-              Sign in to access the clinical system
+              Đăng nhập để truy cập hệ thống quản lý y tế
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-7">
             <div className="space-y-2">
               <label className="block text-[0.75rem] font-bold tracking-wider uppercase text-on-surface-variant">
-                Email Address
+                Địa chỉ Email
               </label>
               <input
                 type="email"
@@ -50,17 +50,17 @@ const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-surface-container-low text-on-surface font-body px-4 py-3.5 rounded-xl border border-transparent focus:bg-surface-container-lowest focus:border-outline-variant focus:ring-0 outline-none transition-all duration-200"
-                placeholder="doctor@clinic.com"
+                placeholder="bacsi@phongkham.com"
               />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="block text-[0.75rem] font-bold tracking-wider uppercase text-on-surface-variant">
-                  Password
+                  Mật khẩu
                 </label>
                 <a href="#" className="text-[0.8rem] font-medium text-primary hover:text-primary-container transition-colors">
-                  Forgot password?
+                  Quên mật khẩu?
                 </a>
               </div>
               <input
@@ -85,7 +85,7 @@ const LoginPage: React.FC = () => {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                 ) : (
-                  "Sign In"
+                  "Đăng nhập"
                 )}
               </button>
             </div>
@@ -93,7 +93,7 @@ const LoginPage: React.FC = () => {
           
           <div className="mt-10 pt-6 text-center">
              <p className="text-xs text-on-surface-variant/60 font-medium">
-                Secure Clinical Portal v1.0
+                Cổng Thông Tin Lâm Sàng v1.0
              </p>
           </div>
         </div>

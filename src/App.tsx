@@ -14,6 +14,8 @@ import LabTestRequestsPage from './pages/LabTestRequestsPage';
 import LabResultEntryPage from './pages/LabResultEntryPage';
 import PharmacyInventoryPage from './pages/PharmacyInventoryPage';
 import PrescriptionDispensingPage from './pages/PrescriptionDispensingPage';
+import InpatientBedMapPage from './pages/InpatientBedMapPage';
+import HospitalFeeCollectionPage from './pages/HospitalFeeCollectionPage';
 import MainLayout from './components/common/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -44,6 +46,8 @@ function App() {
           <Route path="/lab-results-entry" element={<LabResultEntryPage />} />
           <Route path="/pharmacy-inventory" element={<PharmacyInventoryPage />} />
           <Route path="/dispensing" element={<PrescriptionDispensingPage />} />
+          <Route path="/bed-map" element={<InpatientBedMapPage />} />
+          <Route path="/billing" element={<HospitalFeeCollectionPage />} />
         </Route>
       </Routes>
     </Router>

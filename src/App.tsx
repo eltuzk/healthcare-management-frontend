@@ -10,6 +10,10 @@ import DailyPatientListPage from './pages/DailyPatientListPage';
 import ExaminationScreenPage from './pages/ExaminationScreenPage';
 import MedicalHistoryPage from './pages/MedicalHistoryPage';
 import AppointmentBookingPage from './pages/AppointmentBookingPage';
+import LabTestRequestsPage from './pages/LabTestRequestsPage';
+import LabResultEntryPage from './pages/LabResultEntryPage';
+import PharmacyInventoryPage from './pages/PharmacyInventoryPage';
+import PrescriptionDispensingPage from './pages/PrescriptionDispensingPage';
 import MainLayout from './components/common/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -36,6 +40,10 @@ function App() {
           <Route path="/examination" element={<ExaminationScreenPage />} />
           <Route path="/medical-history" element={<MedicalHistoryPage />} />
           <Route path="/appointments" element={<AppointmentBookingPage />} />
+          <Route path="/lab-tests" element={<LabTestRequestsPage />} />
+          <Route path="/lab-results-entry" element={<LabResultEntryPage />} />
+          <Route path="/pharmacy-inventory" element={<PharmacyInventoryPage />} />
+          <Route path="/dispensing" element={<PrescriptionDispensingPage />} />
         </Route>
       </Routes>
     </Router>

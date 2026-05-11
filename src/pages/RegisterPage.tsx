@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from '../services/authService';
+import { register } from '../services/authService';
 
-const LoginPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [success, setSuccess] = useState<string | null>(null);
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -60,26 +62,21 @@ const LoginPage: React.FC = () => {
 		};
 	}, []);
 
-	const handleLogin = async (e: React.FormEvent) => {
+	const handleRegister = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (password !== confirmPassword) {
+			setError('Mật khẩu xác nhận không khớp.');
+			return;
+		}
 		setLoading(true);
 		setError(null);
+		setSuccess(null);
 		try {
-			const response = await login({ email, password });
-			localStorage.setItem('token', response.accessToken);
-			localStorage.setItem('role', response.role);
-			
-			switch (response.role) {
-				case 'ADMIN': navigate('/dashboard'); break;
-				case 'DOCTOR': navigate('/daily-patients'); break;
-				case 'RECEPTIONIST': navigate('/patients'); break;
-				case 'TECHNICIAN': navigate('/lab-tests'); break;
-				case 'PHARMACIST': navigate('/pharmacy-inventory'); break;
-				case 'ACCOUNTANT': navigate('/billing'); break;
-				default: navigate('/dashboard');
-			}
+			await register({ email, password });
+			setSuccess('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.');
+			setTimeout(() => navigate('/login'), 3000);
 		} catch (err: any) {
-			setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+			setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại sau.');
 		} finally {
 			setLoading(false);
 		}
@@ -140,14 +137,15 @@ const LoginPage: React.FC = () => {
 							<div className="account-content">
 								<div className="row align-items-center justify-content-center">
 									<div className="col-md-7 col-lg-6 login-left">
-										<img src="/assets/img/login-banner.png" className="img-fluid" alt="Login" />	
+										<img src="/assets/img/login-banner.png" className="img-fluid" alt="Register" />	
 									</div>
 									<div className="col-md-12 col-lg-6 login-right">
 										<div className="login-header">
-											<h3>Đăng nhập <span>The Clinical Curator</span></h3>
+											<h3>Đăng ký tài khoản <span>Bệnh nhân</span></h3>
 										</div>
 										{error && <div className="alert alert-danger">{error}</div>}
-										<form onSubmit={handleLogin}>
+										{success && <div className="alert alert-success">{success}</div>}
+										<form onSubmit={handleRegister}>
 											<div className="mb-3">
 												<label className="form-label">Email</label>
 												<input 
@@ -156,13 +154,11 @@ const LoginPage: React.FC = () => {
 													value={email}
 													onChange={(e) => setEmail(e.target.value)}
 													required
+													placeholder="example@gmail.com"
 												/>
 											</div>
 											<div className="mb-3">
-												<div className="form-group-flex">
-													<label className="form-label">Mật khẩu</label>
-													<Link to="/forgot-password" style={{ color: '#007bff', fontSize: '14px' }} className="forgot-link">Quên mật khẩu?</Link>
-												</div>
+												<label className="form-label">Mật khẩu</label>
 												<div className="pass-group">
 													<input 
 														type="password" 
@@ -170,12 +166,25 @@ const LoginPage: React.FC = () => {
 														value={password}
 														onChange={(e) => setPassword(e.target.value)}
 														required
+														placeholder="Tối thiểu 8 ký tự, có chữ hoa & số"
+													/>
+												</div>
+											</div>
+											<div className="mb-3">
+												<label className="form-label">Xác nhận mật khẩu</label>
+												<div className="pass-group">
+													<input 
+														type="password" 
+														className="form-control pass-input"
+														value={confirmPassword}
+														onChange={(e) => setConfirmPassword(e.target.value)}
+														required
 													/>
 												</div>
 											</div>
 											<div className="mb-3">
 												<button className="btn btn-primary-gradient w-100" type="submit" disabled={loading}>
-													{loading ? 'Đang xử lý...' : 'Đăng nhập'}
+													{loading ? 'Đang xử lý...' : 'Đăng ký'}
 												</button>
 											</div>
 											<div className="login-or">
@@ -184,11 +193,11 @@ const LoginPage: React.FC = () => {
 											</div>
 											<div className="social-login-btn">
 												<Link to="#" className="btn w-100">
-													<img src="/assets/img/icons/google-icon.svg" alt="google" /> Đăng nhập với Google
+													<img src="/assets/img/icons/google-icon.svg" alt="google" /> Đăng ký với Google
 												</Link>
 											</div>
 											<div className="account-signup">
-												<p>Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></p>
+												<p>Đã có tài khoản? <Link to="/login">Đăng nhập</Link></p>
 											</div>
 										</form>
 									</div>
@@ -274,4 +283,4 @@ const LoginPage: React.FC = () => {
 	);
 };
 
-export default LoginPage;
+export default RegisterPage;

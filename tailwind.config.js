@@ -21,10 +21,15 @@ export default {
         "outline-variant": "#c4c7c5",
         "on-surface": "#1b1c1c",
         "on-surface-variant": "#49454f",
+        "deep-navy": "#003366",
+        "medical-blue": "#0052CC",
+        "grey-blue": "#546E7A",
       },
       fontFamily: {
         display: ["Manrope", "sans-serif"],
         body: ["Inter", "sans-serif"],
+        sans: ["Inter", "sans-serif"],
+        montserrat: ["Montserrat", "sans-serif"],
       },
       boxShadow: {
         ambient: "0px 12px 32px -4px rgba(27, 28, 28, 0.05)",

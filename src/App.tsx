@@ -19,11 +19,13 @@ import HospitalFeeCollectionPage from './pages/HospitalFeeCollectionPage';
 import MainLayout from './components/common/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
+import LandingPage from './pages/LandingPage';
+
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         
         {/* Protected Routes wrapped in MainLayout */}

@@ -1,22 +1,59 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../services/authService';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Handle Login started with:", { email, password });
     setLoading(true);
-    // Simulate login delay
-    setTimeout(() => {
+    setError(null);
+    try {
+      console.log("Calling login service...");
+      const response = await login({ email, password });
+      console.log("Login success, response:", response);
+      
+      localStorage.setItem('token', response.accessToken);
+      localStorage.setItem('role', response.role);
+      
+      console.log("Redirecting based on role:", response.role);
+      
+      // Chuyển hướng linh hoạt theo quyền
+      switch (response.role) {
+        case 'ADMIN':
+          navigate('/dashboard');
+          break;
+        case 'DOCTOR':
+          navigate('/daily-patients');
+          break;
+        case 'RECEPTIONIST':
+          navigate('/patients');
+          break;
+        case 'TECHNICIAN':
+          navigate('/lab-tests');
+          break;
+        case 'PHARMACIST':
+          navigate('/pharmacy-inventory');
+          break;
+        case 'ACCOUNTANT':
+          navigate('/billing');
+          break;
+        default:
+          navigate('/dashboard');
+      }
+    } catch (err: any) {
+      console.error('Login failed error object:', err);
+      setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+    } finally {
       setLoading(false);
-      localStorage.setItem('token', 'mock_token_123');
-      // Ensure we navigate to a dashboard after successful login
-      navigate('/dashboard');
-    }, 1500);
+      console.log("Handle Login finished.");
+    }
   };
 
   return (
@@ -38,6 +75,15 @@ const LoginPage: React.FC = () => {
               Đăng nhập để truy cập hệ thống quản lý y tế
             </p>
           </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-error-container/10 border border-error/20 rounded-xl flex items-center gap-3 text-error animate-shake">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm font-medium">{error}</p>
+            </div>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-7">
             <div className="space-y-2">

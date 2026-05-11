@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import StaffListPage from './pages/StaffListPage';
 import StaffPermissionsPage from './pages/StaffPermissionsPage';
@@ -16,6 +18,7 @@ import PharmacyInventoryPage from './pages/PharmacyInventoryPage';
 import PrescriptionDispensingPage from './pages/PrescriptionDispensingPage';
 import InpatientBedMapPage from './pages/InpatientBedMapPage';
 import HospitalFeeCollectionPage from './pages/HospitalFeeCollectionPage';
+import UnauthorizedPage from './pages/UnauthorizedPage';
 import MainLayout from './components/common/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -23,8 +26,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         
         {/* Protected Routes wrapped in MainLayout */}
         <Route element={
@@ -32,22 +37,86 @@ function App() {
             <MainLayout />
           </ProtectedRoute>
         }>
-          <Route path="/dashboard" element={<AdminDashboardPage />} />
-          <Route path="/staff" element={<StaffListPage />} />
-          <Route path="/permissions" element={<StaffPermissionsPage />} />
-          <Route path="/schedule" element={<DoctorSchedulePage />} />
-          <Route path="/reports" element={<RevenueReportsPage />} />
-          <Route path="/patients" element={<PatientReceptionPage />} />
-          <Route path="/daily-patients" element={<DailyPatientListPage />} />
-          <Route path="/examination" element={<ExaminationScreenPage />} />
-          <Route path="/medical-history" element={<MedicalHistoryPage />} />
-          <Route path="/appointments" element={<AppointmentBookingPage />} />
-          <Route path="/lab-tests" element={<LabTestRequestsPage />} />
-          <Route path="/lab-results-entry" element={<LabResultEntryPage />} />
-          <Route path="/pharmacy-inventory" element={<PharmacyInventoryPage />} />
-          <Route path="/dispensing" element={<PrescriptionDispensingPage />} />
-          <Route path="/bed-map" element={<InpatientBedMapPage />} />
-          <Route path="/billing" element={<HospitalFeeCollectionPage />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/staff" element={
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <StaffListPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/permissions" element={
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <StaffPermissionsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/schedule" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST', 'DOCTOR']}>
+              <DoctorSchedulePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/reports" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'ACCOUNTANT']}>
+              <RevenueReportsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/patients" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST']}>
+              <PatientReceptionPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/daily-patients" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST', 'DOCTOR']}>
+              <DailyPatientListPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/examination" element={
+            <ProtectedRoute allowedRoles={['DOCTOR']}>
+              <ExaminationScreenPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/medical-history" element={
+            <ProtectedRoute allowedRoles={['DOCTOR', 'RECEPTIONIST', 'ADMIN']}>
+              <MedicalHistoryPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/appointments" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST', 'PATIENT']}>
+              <AppointmentBookingPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/lab-tests" element={
+            <ProtectedRoute allowedRoles={['TECHNICIAN', 'DOCTOR', 'ADMIN']}>
+              <LabTestRequestsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/lab-results-entry" element={
+            <ProtectedRoute allowedRoles={['TECHNICIAN', 'DOCTOR', 'ADMIN']}>
+              <LabResultEntryPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/pharmacy-inventory" element={
+            <ProtectedRoute allowedRoles={['PHARMACIST', 'ADMIN']}>
+              <PharmacyInventoryPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/dispensing" element={
+            <ProtectedRoute allowedRoles={['PHARMACIST']}>
+              <PrescriptionDispensingPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/bed-map" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST', 'DOCTOR']}>
+              <InpatientBedMapPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/billing" element={
+            <ProtectedRoute allowedRoles={['ACCOUNTANT', 'ADMIN']}>
+              <HospitalFeeCollectionPage />
+            </ProtectedRoute>
+          } />
         </Route>
       </Routes>
     </Router>

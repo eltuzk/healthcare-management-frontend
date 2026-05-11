@@ -1,105 +1,277 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { login } from '../services/authService';
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    // Simulate login delay
-    setTimeout(() => {
-      setLoading(false);
-      localStorage.setItem('token', 'mock_token_123');
-      // Ensure we navigate to a dashboard after successful login
-      navigate('/dashboard');
-    }, 1500);
-  };
+	useEffect(() => {
+		// Thêm class account-page vào body
+		document.body.classList.add('account-page');
 
-  return (
-    <div className="min-h-screen bg-surface flex flex-col justify-center items-center p-6">
-      <div className="w-full max-w-[440px] bg-surface-container-lowest rounded-[24px] shadow-ambient overflow-hidden">
-        {/* Generous asymmetrical padding per DESIGN.md */}
-        <div className="pt-14 px-10 pb-12">
-          <div className="mb-12 text-center">
-            {/* The Clinical Curator branding icon */}
-            <div className="w-14 h-14 bg-surface-container-low rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <svg className="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
-            </div>
-            <h1 className="font-display text-[2rem] leading-tight font-semibold text-on-surface tracking-tight mb-3">
-              Chào mừng trở lại
-            </h1>
-            <p className="text-on-surface-variant font-body text-[0.95rem]">
-              Đăng nhập để truy cập hệ thống quản lý y tế
-            </p>
-          </div>
+		const cssFiles = [
+			'/assets/css/bootstrap.min.css',
+			'/assets/plugins/fontawesome/css/fontawesome.min.css',
+			'/assets/plugins/fontawesome/css/all.min.css',
+			'/assets/css/iconsax.css',
+			'/assets/css/feather.css',
+			'/assets/plugins/fancybox/jquery.fancybox.min.css',
+			'/assets/css/style.min.css'
+		];
+		const jsFiles = [
+			'/assets/js/jquery-3.7.1.min.js',
+			'/assets/js/bootstrap.bundle.min.js',
+			'/assets/plugins/fancybox/jquery.fancybox.min.js',
+			'/assets/js/script.min.js'
+		];
 
-          <form onSubmit={handleLogin} className="space-y-7">
-            <div className="space-y-2">
-              <label className="block text-[0.75rem] font-bold tracking-wider uppercase text-on-surface-variant">
-                Địa chỉ Email
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-surface-container-low text-on-surface font-body px-4 py-3.5 rounded-xl border border-transparent focus:bg-surface-container-lowest focus:border-outline-variant focus:ring-0 outline-none transition-all duration-200"
-                placeholder="bacsi@phongkham.com"
-              />
-            </div>
+		const injectedLinks: HTMLLinkElement[] = [];
+		const injectedScripts: HTMLScriptElement[] = [];
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="block text-[0.75rem] font-bold tracking-wider uppercase text-on-surface-variant">
-                  Mật khẩu
-                </label>
-                <a href="#" className="text-[0.8rem] font-medium text-primary hover:text-primary-container transition-colors">
-                  Quên mật khẩu?
-                </a>
-              </div>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-surface-container-low text-on-surface font-body px-4 py-3.5 rounded-xl border border-transparent focus:bg-surface-container-lowest focus:border-outline-variant focus:ring-0 outline-none transition-all duration-200"
-                placeholder="••••••••"
-              />
-            </div>
+		cssFiles.forEach(href => {
+			const link = document.createElement('link');
+			link.rel = 'stylesheet'; link.href = href;
+			document.head.appendChild(link);
+			injectedLinks.push(link);
+		});
 
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-primary to-primary-container hover:opacity-90 text-white font-bold text-[0.875rem] rounded-xl py-4 transition-all duration-200 shadow-sm disabled:opacity-50 flex justify-center items-center"
-              >
-                {loading ? (
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                ) : (
-                  "Đăng nhập"
-                )}
-              </button>
-            </div>
-          </form>
-          
-          <div className="mt-10 pt-6 text-center">
-             <p className="text-xs text-on-surface-variant/60 font-medium">
-                Cổng Thông Tin Lâm Sàng v1.0
-             </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+		const loadScripts = async () => {
+			for (const src of jsFiles) {
+				await new Promise((resolve) => {
+					const script = document.createElement('script');
+					script.src = src; script.async = false;
+					script.onload = resolve;
+					document.body.appendChild(script);
+					injectedScripts.push(script);
+				});
+			}
+		};
+		loadScripts();
+
+		return () => {
+			// Cleanup
+			document.body.classList.remove('account-page');
+			injectedLinks.forEach(l => l.parentNode?.removeChild(l));
+			injectedScripts.forEach(s => s.parentNode?.removeChild(s));
+		};
+	}, []);
+
+	const handleLogin = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setLoading(true);
+		setError(null);
+		try {
+			const response = await login({ email, password });
+			localStorage.setItem('token', response.accessToken);
+			localStorage.setItem('role', response.role);
+			
+			switch (response.role) {
+				case 'ADMIN': navigate('/dashboard'); break;
+				case 'DOCTOR': navigate('/daily-patients'); break;
+				case 'RECEPTIONIST': navigate('/patients'); break;
+				case 'TECHNICIAN': navigate('/lab-tests'); break;
+				case 'PHARMACIST': navigate('/pharmacy-inventory'); break;
+				case 'ACCOUNTANT': navigate('/billing'); break;
+				default: navigate('/dashboard');
+			}
+		} catch (err: any) {
+			setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	return (
+		<div className="main-wrapper">
+			{/* Header */}
+			<header className="header header-default">
+				<div className="container">
+					<nav className="navbar navbar-expand-lg header-nav">
+						<div className="navbar-header">
+							<Link id="mobile_btn" to="#">
+								<i className="fa-solid fa-bars"></i>
+							</Link>
+							<Link to="/" className="navbar-brand logo">
+								<img src="/assets/img/logo.svg" className="img-fluid" alt="Logo" />
+							</Link>
+						</div>
+						<div className="header-menu">
+							<div className="main-menu-wrapper">
+								<div className="menu-header">
+									<Link to="/" className="menu-logo">
+										<img src="/assets/img/logo.svg" className="img-fluid" alt="Logo" />
+									</Link>
+									<Link id="menu_close" className="menu-close" to="#">
+										<i className="fas fa-times"></i>
+									</Link>
+								</div>
+								<ul className="main-nav">
+									<li><Link to="/">Trang chủ</Link></li>
+									<li><Link to="/doctors">Bác sĩ</Link></li>
+									<li><Link to="/patients">Bệnh nhân</Link></li>
+									<li><Link to="/pharmacy">Nhà thuốc</Link></li>
+								</ul>
+							</div>
+						</div>
+						<ul className="nav header-navbar-rht">
+							<li>
+								<Link to="/login" className="btn btn-md btn-primary-gradient">
+									<i className="isax isax-lock-1 me-2"></i><span>Đăng nhập</span> 
+								</Link>
+							</li>
+							<li>
+								<Link to="/register" className="btn btn-md btn-dark">
+									<i className="isax isax-user-tick me-2"></i><span>Đăng ký</span> 
+								</Link>
+							</li>
+						</ul>
+					</nav>
+				</div>
+			</header>
+			
+			<div className="content">
+				<div className="container-fluid">
+					<div className="row">
+						<div className="col-md-8 offset-md-2">
+							<div className="account-content">
+								<div className="row align-items-center justify-content-center">
+									<div className="col-md-7 col-lg-6 login-left">
+										<img src="/assets/img/login-banner.png" className="img-fluid" alt="Login" />	
+									</div>
+									<div className="col-md-12 col-lg-6 login-right">
+										<div className="login-header">
+											<h3>Đăng nhập <span>The Clinical Curator</span></h3>
+										</div>
+										{error && <div className="alert alert-danger">{error}</div>}
+										<form onSubmit={handleLogin}>
+											<div className="mb-3">
+												<label className="form-label">Email</label>
+												<input 
+													type="email" 
+													className="form-control" 
+													value={email}
+													onChange={(e) => setEmail(e.target.value)}
+													required
+												/>
+											</div>
+											<div className="mb-3">
+												<div className="form-group-flex">
+													<label className="form-label">Mật khẩu</label>
+													<Link to="/forgot-password" style={{ color: '#007bff', fontSize: '14px' }} className="forgot-link">Quên mật khẩu?</Link>
+												</div>
+												<div className="pass-group">
+													<input 
+														type="password" 
+														className="form-control pass-input"
+														value={password}
+														onChange={(e) => setPassword(e.target.value)}
+														required
+													/>
+												</div>
+											</div>
+											<div className="mb-3">
+												<button className="btn btn-primary-gradient w-100" type="submit" disabled={loading}>
+													{loading ? 'Đang xử lý...' : 'Đăng nhập'}
+												</button>
+											</div>
+											<div className="login-or">
+												<span className="or-line"></span>
+												<span className="span-or">hoặc</span>
+											</div>
+											<div className="social-login-btn">
+												<Link to="#" className="btn w-100">
+													<img src="/assets/img/icons/google-icon.svg" alt="google" /> Đăng nhập với Google
+												</Link>
+											</div>
+											<div className="account-signup">
+												<p>Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></p>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>		
+
+			<footer className="footer inner-footer">
+				<div className="footer-top">
+					<div className="container">
+						<div className="row">
+							<div className="col-lg-3 col-md-6">
+								<div className="footer-widget footer-about">
+									<div className="footer-logo">
+										<img src="/assets/img/logo.svg" alt="logo" />
+									</div>
+									<div className="footer-about-content">
+										<p>The Clinical Curator - Hệ thống quản lý y tế thông minh, kết nối bác sĩ và bệnh nhân một cách hiệu quả nhất.</p>
+									</div>
+								</div>
+							</div>
+							<div className="col-lg-3 col-md-6">
+								<div className="footer-widget footer-menu">
+									<h2 className="footer-title">Dành cho Bệnh nhân</h2>
+									<ul>
+										<li><Link to="/search">Tìm kiếm Bác sĩ</Link></li>
+										<li><Link to="/login">Đăng nhập</Link></li>
+										<li><Link to="/register">Đăng ký</Link></li>
+									</ul>
+								</div>
+							</div>
+							<div className="col-lg-3 col-md-6">
+								<div className="footer-widget footer-menu">
+									<h2 className="footer-title">Dành cho Bác sĩ</h2>
+									<ul>
+										<li><Link to="/appointments">Lịch hẹn</Link></li>
+										<li><Link to="/chat">Trò chuyện</Link></li>
+										<li><Link to="/login">Cổng thông tin</Link></li>
+									</ul>
+								</div>
+							</div>
+							<div className="col-lg-3 col-md-6">
+								<div className="footer-widget footer-contact">
+									<h2 className="footer-title">Liên hệ</h2>
+									<div className="footer-contact-info">
+										<div className="footer-address">
+											<p><i className="fas fa-map-marker-alt"></i> 123 Đường y học, TP. Hồ Chí Minh</p>
+										</div>
+										<p><i className="fas fa-phone-alt"></i> +1 315 369 5943</p>
+										<p className="mb-0"><i className="fas fa-envelope"></i> curator@example.com</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div className="footer-bottom">
+					<div className="container">
+						<div className="copyright">
+							<div className="row">
+								<div className="col-md-6 col-lg-6">
+									<div className="copyright-text">
+										<p className="mb-0">Bản quyền &copy; 2026 The Clinical Curator. Bảo lưu mọi quyền.</p>
+									</div>
+								</div>
+								<div className="col-md-6 col-lg-6">
+									<div className="copyright-menu">
+										<ul className="policy-menu">
+											<li><Link to="#">Pháp lý</Link></li>
+											<li><Link to="#">Bảo mật</Link></li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</footer>
+		</div>
+	);
 };
 
 export default LoginPage;

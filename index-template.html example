@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!-- Mirrored from doccure.dreamstechnologies.com/html/template/index-2.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 29 Apr 2026 04:15:40 GMT -->
+<head>
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="The responsive professional Doccure template offers many features, like scheduling appointments with  top doctors, clinics, and hospitals via voice, video call & chat.">
+	<meta name="keywords" content="practo clone, doccure, doctor appointment, Practo clone html template, doctor booking template">
+	<meta name="author" content="Practo Clone HTML Template - Doctor Booking Template">
+	<meta property="og:url" content="https://doccure.dreamstechnologies.com/html/">
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="Doctors Appointment HTML Website Templates | Doccure">
+	<meta property="og:description" content="The responsive professional Doccure template offers many features, like scheduling appointments with  top doctors, clinics, and hospitals via voice, video call & chat.">
+	<meta property="og:image" content="assets/img/preview-banner.jpg">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta property="twitter:domain" content="https://doccure.dreamstechnologies.com/html/">
+	<meta property="twitter:url" content="https://doccure.dreamstechnologies.com/html/">
+	<meta name="twitter:title" content="Doctors Appointment HTML Website Templates | Doccure">
+	<meta name="twitter:description" content="The responsive professional Doccure template offers many features, like scheduling appointments with  top doctors, clinics, and hospitals via voice, video call & chat.">
+	<meta name="twitter:image" content="assets/img/preview-banner.jpg">	
+	<title>General Home Doccure | Doctors Appointment HTML Website Templates</title>
+
+	<!-- Favicon -->
+	<link rel="shortcut icon" href="assets/img/favicon.png" type="image/x-icon">
+
+	<!-- Apple Touch Icon -->
+	<link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png">
+
+	<!-- Theme Settings Js -->
+	<script src="assets/js/theme-script.js" type="709c3c09804e85606b36e985-text/javascript"></script>
+		
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+
+	<!-- Fontawesome CSS -->
+	<link rel="stylesheet" href="assets/plugins/fontawesome/css/fontawesome.min.css">
+	<link rel="stylesheet" href="assets/plugins/fontawesome/css/all.min.css">
+
+	<!-- Fancybox CSS -->	
+    <link rel="stylesheet" href="assets/plugins/fancybox/jquery.fancybox.min.css">
+
+	<!-- Wow CSS -->	
+    <link rel="stylesheet" href="assets/plugins/wow/css/animate.css">
+
+	<!-- Iconsax CSS-->
+	<link rel="stylesheet" href="assets/css/iconsax.css">
+
+	<!-- Feathericon CSS -->
+	<link rel="stylesheet" href="assets/css/feather.css">
+
+	<!-- Main CSS -->
+	<link rel="stylesheet" href="assets/css/style.min.css">
+
+</head>
+
+<body class="theme-1"><a href="https://doccure.dreamstechnologies.com/cdn-cgi/content?id=zZBq_skszJ0X7TX.35XaRgPR202vKdHs4h1V6B3znxE-1777436140.0847037-1.0.1.1-gH71O96sAeGaxqVE9nKqZ0d4a8ah0ulIk0VSxWxhM.U" aria-hidden="true" rel="nofollow noopener" style="display: none !important; visibility: hidden !important"></a>
+
+	<!-- Main Wrapper -->
+	<div class="main-wrapper">
+
+		<div class="header-theme header-theme-two">
+			<button type="button" id="dark-mode-toggle" class="theme-toggle moon" aria-label="dark mode">
+				<i class="isax isax-moon5"></i>
+			</button>
+			<button type="button" id="light-mode-toggle" class="theme-toggle sun" aria-label="light mode">
+				<i class="isax isax-sun-15"></i>
+			</button>
+		</div>
+
+		<!-- Header -->
+		<header class="header header-two home-menu">
+			<div class="container">
+				<nav class="navbar navbar-expand-lg header-nav">
+					<div class="navbar-header">
+						<a id="mobile_btn" href="#" aria-label="Open menu" role="button">
+							<i class="fa-solid fa-bars"></i>
+						</a>
+						<a href="index-2.html" class="navbar-brand logo">
+							<img src="assets/img/logo-white-02.svg" class="img-fluid white-logo" alt="Logo">
+							<img src="assets/img/logo-02.svg" class="img-fluid normal-logo" alt="Logo">
+						</a>
+					</div>
+					<div class="main-menu-wrapper">
+						<div class="menu-header">
+							<a href="index-2.html" class="menu-logo">
+								<img src="assets/img/logo-02.svg" class="img-fluid" alt="Logo">
+							</a>
+							<a id="menu_close" class="menu-close" href="#" aria-label="Close menu" role="button">
+								<i class="fas fa-times"></i>
+							</a>
+						</div>
+						<ul class="main-nav">
+							<li class="has-submenu megamenu active">
+								<a href="#" class="main-menu" role="button">Home <span><i class="fas fa-chevron-down"></i></span></a>
+								<ul class="submenu mega-submenu">
+									<li>
+										<div class="megamenu-wrapper">
+											<div class="row">
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index.html" class="inner-demo-img"><img src="assets/img/home/home.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index.html" class="inner-demo-img">General Home 1</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo active">
+														<div class="demo-img">
+															<a href="index-2.html" class="inner-demo-img"><img src="assets/img/home/home-01.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-2.html" class="inner-demo-img">General Home 2</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-3.html" class="inner-demo-img"><img src="assets/img/home/home-02.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-3.html" class="inner-demo-img">Dental</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-4.html" class="inner-demo-img"><img src="assets/img/home/home-03.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-4.html" class="inner-demo-img">Pediatrics</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-5.html" class="inner-demo-img"><img src="assets/img/home/home-04.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-5.html" class="inner-demo-img">ENT</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-6.html" class="inner-demo-img"><img src="assets/img/home/home-05.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-6.html" class="inner-demo-img">Veterinary</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo ">
+														<div class="demo-img">
+															<a href="index-7.html" class="inner-demo-img"><img src="assets/img/home/home-06.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-7.html" class="inner-demo-img">Cardiology</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-8.html" class="inner-demo-img"><img src="assets/img/home/home-07.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-8.html" class="inner-demo-img">Eye Care</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-9.html" class="inner-demo-img"><img src="assets/img/home/home-08.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-9.html" class="inner-demo-img">Home Care</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-10.html" class="inner-demo-img"><img src="assets/img/home/home-09.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-10.html" class="inner-demo-img">Fertility</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-11.html" class="inner-demo-img"><img src="assets/img/home/home-10.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-11.html" class="inner-demo-img">Cosmetic Surgery</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-12.html" class="inner-demo-img"><img src="assets/img/home/home-11.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-12.html" class="inner-demo-img">Laboratory</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-13.html" class="inner-demo-img"><img src="assets/img/home/home-12.jpg" class="img-fluid" alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-13.html" class="inner-demo-img">Pharmacy</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-14.html" class="inner-demo-img"><img src="assets/img/home/home-14.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-14.html" class="inner-demo-img">Dermatology</a>
+														</div>
+													</div>
+												</div>
+												<div class="col">
+													<div class="single-demo">
+														<div class="demo-img">
+															<a href="index-15.html" class="inner-demo-img"><img src="assets/img/home/home-15.jpg" class="img-fluid " alt="img"></a>
+														</div>
+														<div class="demo-info">
+															<a href="index-15.html" class="inner-demo-img">Mental Health</a>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li class="has-submenu">
+								<a href="#" class="main-menu" role="button">Doctors <span><i class="fas fa-chevron-down"></i></span></a>
+								<ul class="submenu sub-menu-one">
+									<li>
+										<div class="row">
+											<div class="col-lg-6">
+												<ul class="sub-menu-list">
+													<li><a href="doctor-dashboard.html">Doctor Dashboard</a></li>
+													<li><a href="appointments.html">Appointments</a></li>
+													<li><a href="available-timings.html">Available Timing</a></li>
+													<li><a href="my-patients.html">Patients List</a></li>
+													<li><a href="chat-doctor.html">Chat</a></li>
+													<li><a href="invoices.html">Invoices</a></li>
+													<li><a href="doctor-profile-settings.html">Profile Settings</a></li>
+												</ul>
+											</div>
+											<div class="col-lg-6">
+												<div class="menu-img">
+													<img src="assets/img/home/menu-img-1.jpg" alt="listing" class="img-fluid">
+												</div>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li class="has-submenu">
+								<a href="#" class="main-menu" role="button">Patients <span><i class="fas fa-chevron-down"></i></span></a>
+								<ul class="submenu sub-menu-one sub-menu-two">
+									<li>
+										<div class="row">
+											<div class="col-lg-4 sub-menu-left">
+												<ul class="sub-menu-list">
+													<li><a href="patient-dashboard.html">Patient Dashboard</a></li>
+													<li><a href="map-grid.html">Doctors Grid</a></li>
+													<li><a href="map-list.html">Doctors List</a></li>
+													<li><a href="map-list-availability.html">Doctors Availability</a></li>
+													<li><a href="booking.html">Booking</a></li>
+													<li><a href="booking-1.html">Booking 1</a></li>
+													<li><a href="booking-2.html">Booking 2</a></li>
+													<li><a href="booking-popup.html">Booking Popup</a></li>
+												</ul>
+											</div>
+											<div class="col-lg-4">
+												<ul class="sub-menu-list">
+													<li><a href="search.html">Search Doctor 1</a></li>
+													<li><a href="search-2.html">Search Doctor 2</a></li>
+													<li><a href="doctor-profile.html">Doctor Profile 1</a></li>
+													<li><a href="doctor-profile-2.html">Doctor Profile 2</a></li>
+													<li><a href="checkout.html">Checkout</a></li>
+													<li><a href="favourites.html">Favourites</a></li>
+													<li><a href="chat.html">Chat</a></li>
+													<li><a href="profile-settings.html">Profile Settings</a></li>
+												</ul>
+											</div>
+											<div class="col-lg-4">
+												<div class="menu-img">
+													<img src="assets/img/home/menu-img-2.jpg" alt="listing" class="img-fluid">
+												</div>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li class="has-submenu">
+								<a href="#" class="main-menu" role="button">Pharmacy <span><i class="fas fa-chevron-down"></i></span></a>
+								<ul class="submenu sub-menu-one sub-menu-three">
+									<li>
+										<div class="row">
+											<div class="col-lg-6">
+												<ul class="sub-menu-list">
+													<li><a href="index-13.html">Pharmacy</a></li>
+													<li><a href="pharmacy-details.html">Pharmacy Details</a></li>
+													<li><a href="pharmacy-search.html">Pharmacy Search</a></li>
+													<li><a href="product-all.html">Product</a></li>
+													<li><a href="product-description.html">Product Description</a></li>
+													<li><a href="cart.html">Cart</a></li>
+													<li><a href="product-checkout.html">Product Checkout</a></li>
+													<li><a href="payment-success.html">Payment Success</a></li>
+													<li><a href="pharmacy-register.html">Pharmacy Register</a></li>
+												</ul>
+											</div>
+											<div class="col-lg-6">
+												<div class="menu-img">
+													<img src="assets/img/home/menu-img-3.jpg" alt="listing" class="img-fluid">
+												</div>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li class="has-submenu megamenu">
+								<a href="#" class="main-menu" role="button">Pages <span><i class="fas fa-chevron-down"></i></span></a>
+								<ul class="submenu mega-submenu">
+									<li>
+										<div class="megamenu-wrapper megamenu-wrapper-one">
+											<div class="row">
+												<div class="col-lg-3 sub-menu-left">
+													<ul class="sub-menu-list">
+														<li><a href="about-us.html">About Us</a></li>
+														<li><a href="contact-us.html">Contact Us</a></li>
+														<li><a href="hospitals.html">Hospitals</a></li>
+														<li><a href="speciality.html">Speciality</a></li>
+														<li><a href="clinic.html">Clinic</a></li>
+														<li><a href="blank-page.html">Starter Page</a></li>
+														<li><a href="pricing.html">Pricing Plan</a></li>
+														<li><a href="faq.html">FAQ</a></li>
+													</ul>
+												</div>
+												<div class="col-lg-3 sub-menu-left">
+													<ul class="sub-menu-list">
+														<li><a href="login-email.html">Login Email</a></li>
+														<li><a href="login-phone.html">Login Phone</a></li>
+														<li><a href="doctor-signup.html">Doctor Signup</a></li>
+														<li><a href="patient-signup.html">Patient Signup</a></li>
+														<li><a href="forgot-password.html">Forgot Password 1</a></li>
+														<li><a href="forgot-password2.html">Forgot Password 2</a></li>
+														<li><a href="login-email-otp.html">Email OTP</a></li>
+														<li><a href="login-phone-otp.html">Phone OTP</a></li>
+													</ul>
+												</div>
+												<div class="col-lg-3 sub-menu-left">
+													<ul class="sub-menu-list">
+														<li><a href="maintenance.html">Maintenance</a></li>
+														<li><a href="coming-soon.html">Coming Soon</a></li>
+														<li><a href="terms-condition.html">Terms & Condition</a></li>
+														<li><a href="privacy-policy.html">Privacy Policy</a></li>
+														<li><a href="components.html">Components</a></li>
+														<li><a href="invoices.html">Invoices</a></li>
+														<li><a href="invoice-view.html">Invoice View</a></li>
+													</ul>
+												</div>
+												<div class="col-lg-3">
+													<ul class="sub-menu-list">
+														<li><a href="voice-call.html">Voice Call</a></li>
+														<li><a href="video-call.html">Video Call</a></li>
+														<li><a href="error-404.html">404 Error</a></li>
+														<li><a href="error-500.html">500 Error</a></li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li class="has-submenu">
+								<a href="#" class="main-menu" role="button">Blog <span><i class="fas fa-chevron-down"></i></span></a>
+								<ul class="submenu sub-menu-one sub-menu-default">
+									<li><a href="blog-list.html">Blog List</a></li>
+									<li><a href="blog-grid.html">Blog Grid</a></li>
+									<li><a href="blog-details.html">Blog Details</a></li>
+								</ul>
+							</li>
+							<li class="has-submenu">
+								<a href="#" class="main-menu" role="button">Admin <span><i class="fas fa-chevron-down"></i></span></a>
+								<ul class="submenu sub-menu-one sub-menu-default">
+									<li><a href="admin/index.html" target="_blank">Admin</a></li>
+									<li><a href="pharmacy/index.html" target="_blank">Pharmacy Admin</a></li>
+								</ul>
+							</li>
+						</ul>
+						<div class="header-items">
+							<!-- Item 1 -->
+							<div class="about-popup-item border-0 pb-0">
+								<h3 class="title">Contact Information</h3>
+								<div class="support-item mb-3">
+									<div class="avatar avatar-lg bg-primary rounded-circle">
+										<i class="isax isax-messages-3"></i>
+									</div>
+									<div>
+										<p class="title">General Inquiries</p>
+										<h5 class="link">info@example.com</h5>
+									</div>
+								</div>
+								<div class="support-item">
+									<div class="avatar avatar-lg bg-primary rounded-circle">
+										<i class="isax isax-call-calling"></i>
+									</div>
+									<div>
+										<p class="title">Emergency Cases</p>
+										<h5 class="link">+1 24565 89856</h5>
+									</div>
+								</div>
+							</div>
+							<!-- Item 2 -->
+							<div class="about-popup-item border-0 pb-0">
+								<h3 class="title">Follow Us</h3>
+								<ul class="d-flex align-items-center gap-2 social-iyem">
+									<li>
+										<a href="#" class="social-icon" aria-label="facebook"><i class="fa-brands fa-facebook"></i></a>
+									</li>
+									<li>
+										<a href="#" class="social-icon" aria-label="twitter"><i class="fa-brands fa-x-twitter"></i></a>
+									</li>
+									<li>
+										<a href="#" class="social-icon" aria-label="instagram"><i class="fa-brands fa-instagram"></i></a>
+									</li>
+									<li>
+										<a href="#" class="social-icon" aria-label="linkedin"><i class="fa-brands fa-linkedin"></i></a>
+									</li>
+								</ul>
+							</div>
+
+							<div class="header-items-button">
+								<a href="login.html" class="btn btn-primary"><i class="isax isax-lock-1 me-2"></i>Sign In</a>
+								<a href="register.html" class="btn btn-secondary"><i class="isax isax-user-tick4 me-2"></i>Sign Up</a>
+							</div>
+						</div>
+					</div>
+					<ul class="nav header-navbar-rht">
+						<li>
+							<a href="login.html" class="btn btn-md btn-primary">
+								<i class="isax isax-lock-1"></i> <span>Sign Up</span> 
+							</a>
+						</li>
+						<li>
+							<a href="register.html" class="btn btn-md btn-secondary">
+								<i class="isax isax-user-tick"></i> <span>Register</span> 
+							</a>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</header>
+		<!-- Header End -->
+
+		<!-- Banner -->
+		<section class="banner-section-two">
+			<div class="container">
+				<div class="row align-items-end">
+					<div class="col-xl-6">
+						<div class="banner-content wow fadeInUp" data-wow-duration="1s">
+							<div class="banner-badge">
+								<span>Advanced Technology</span> 
+								<p>Comprehensive diagnosis by top specialists.</p>
+							</div>
+							<h1>Consult <span>Best Doctors</span> Your Nearby Location.</h1>
+							<p>Embark on your healing journey with Doccure, where finding trusted doctors, booking appointments, and managing your health</p>
+							<a href="booking.html" class="btn btn-md btn-white"><i class="isax isax-lock me-2"></i>Book an Appointment</a>
+						</div>
+					</div>
+					<div class="col-xl-6">
+						<div class="banner-img wow fadeInUp" data-wow-duration="2s">
+							<img src="assets/img/banner/banner-02.png" alt="banner" fetchpriority="high" class="img-fluid">
+							<div class="banner-user-call">
+								<span class="avatar">
+									<img src="assets/img/patients/patient22.jpg" alt="patient" class="img-fluid rounded-circle">
+								</span>
+								<p>Calling.......</p>
+							</div>
+							<div class="call-items">
+								<a href="#" class="item-1 item" aria-label="Video call"><i class="isax isax-video"></i></a>
+								<a href="#" class="item-2 item" aria-label="End call"><i class="isax isax-call-slash"></i></a>
+								<a href="#" class="item-3 item" aria-label="Mute microphone"><i class="isax isax-microphone-2"></i></a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<img src="assets/img/bg/banner-01.png" alt="bg" class="img-fluid banner-bg-01">
+			<img src="assets/img/bg/banner-02.png" alt="bg" class="img-fluid banner-bg-02">
+			<img src="assets/img/bg/banner-03.png" alt="bg" class="img-fluid banner-bg-03">
+			<img src="assets/img/bg/banner-04.png" alt="bg" class="img-fluid banner-bg-04">
+			<img src="assets/img/bg/banner-05.png" alt="bg" class="img-fluid banner-bg-05">
+			<img src="assets/img/bg/banner-06.png" alt="bg" class="img-fluid banner-bg-06">
+			<img src="assets/img/bg/banner-07.png" alt="bg" class="img-fluid banner-bg-07">
+		</section>
+		<!-- Banner End -->
+
+		<!-- Slider Section -->
+		<section class="slider-section wow fadeInUp" data-wow-duration="1s">
+			<div class="horizontal-slide slide-one bg-primary d-flex" data-direction="left" data-speed="slow">
+				<div class="slide-list d-flex gap-4">
+					<div class="services-slide">
+						<h3>Certified Medical Professionals</h3>
+					</div>
+					<div class="services-slide">
+						<h3>Advanced Diagnostic Tools</h3>
+					</div>
+					<div class="services-slide">
+						<h3>Online Appointment Booking</h3>
+					</div>
+					<div class="services-slide">
+						<h3>Electronic Health Records</h3>
+					</div>
+				</div>
+			</div>
+			<div class="horizontal-slide slide-two bg-dark d-flex" data-direction="right" data-speed="slow">
+				<div class="slide-list d-flex gap-4">
+					<div class="services-slide">
+						<h3>Fast Reports & Test Results</h3>
+					</div>
+					<div class="services-slide">
+						<h3>Telemedicine Consultations</h3>
+					</div>
+					<div class="services-slide">
+						<h3>Health Monitoring & Follow-Ups</h3>
+					</div>
+					<div class="services-slide">
+						<h3>Emergency & Critical Care</h3>
+					</div>
+				</div>
+			</div>
+		</section>
+		<!-- Slider Section End -->
+
+		<!-- Service Section -->
+		<section class="section service-section">
+			<div class="container">
+
+				<div class="row g-4">
+
+					<!-- Service Item -->
+					<div class="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div class="services-item-two bg-primary-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+							<div class="service-icon">
+								<img src="assets/img/icons/booking.svg" alt="booking" class="img-fluid">
+							</div>
+							<h3><a href="booking.html">Book Appointment</a></h3>
+						</div>
+					</div>
+					<!-- Service Item End -->
+
+					<!-- Service Item -->
+					<div class="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div class="services-item-two bg-success-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="2s">
+							<div class="service-icon">
+								<img src="assets/img/icons/lab.svg" alt="lab" class="img-fluid">
+							</div>
+							<h3><a href="index-12.html">Lab Testing Services</a></h3>
+						</div>
+					</div>
+					<!-- Service Item End -->
+
+					<!-- Service Item -->
+					<div class="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div class="services-item-two bg-pink-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="3s">
+							<div class="service-icon">
+								<img src="assets/img/icons/doctor.svg" alt="booking" class="img-fluid">
+							</div>
+							<h3><a href="doctor-grid.html">Talk to Doctor’s</a></h3>
+						</div>
+					</div>
+					<!-- Service Item End -->
+
+					<!-- Service Item -->
+					<div class="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div class="services-item-two bg-gray-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="4s">
+							<div class="service-icon">
+								<img src="assets/img/icons/health-care.svg" alt="health care" class="img-fluid">
+							</div>
+							<h3><a href="index.html">Health Care Services</a></h3>
+						</div>
+					</div>
+					<!-- Service Item End -->
+
+					<!-- Service Item -->					
+					<div class="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div class="services-item-two bg-secondary-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="5s">
+							<div class="service-icon">
+								<img src="assets/img/icons/medicine.svg" alt="medicine" class="img-fluid">
+							</div>
+							<h3><a href="index-13.html">Medicines & Supplies</a></h3>
+						</div>
+					</div>
+					<!-- Service Item End -->
+
+					<!-- Service Item -->
+					<div class="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div class="services-item-two bg-orange-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="6s">
+							<div class="service-icon">
+								<img src="assets/img/icons/home-care.svg" alt="home care" class="img-fluid">
+							</div>
+							<h3><a href="index-9.html">Home Care Services</a></h3>
+						</div>
+					</div>
+					<!-- Service Item End -->
+
+				</div>
+
+			</div>
+		</section>
+		<!-- Service Section End -->
+
+		<!-- About Section -->
+		<section class="section about-section-two">
+			<div class="container">
+				<div class="row align-items-center">
+					
+					<!-- About Img -->
+					<div class="col-lg-6">
+						<div class="about-img-two wow fadeInUp" data-wow-duration="2s">
+							<img src="assets/img/about/about.png" alt="about" class="img-fluid">
+							<a href="https://youtu.be/MyQxnFgPgQU?si=Z9y2WdynImbFnqL2" data-fancybox>
+								<button class="animate-button" data-text="Play Video · Play Video ·" aria-label="Play video">
+									<p class="button-text"></p>
+									<span class="button-circle">
+										<i class="isax isax-play"></i>
+									</span>
+								</button>
+							</a>
+						</div>
+					</div>
+					<!-- About Img End -->
+					
+					<!-- About Content -->
+					<div class="col-lg-6">
+						<div class="about-content-two">
+							<div class="section-header section-header-two">
+								<div class="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon">About Us</div>
+								<h2 class="section-title">We Understand That Each One Is Unique & Their <span>Health Journey.</span></h2>
+								<p>We aim to provide faster diagnosis, clearer insights, and more accurate treatment decisions ensuring every patient receives safe, precise, and personalized care.</p>
+							</div>
+							<div class="row g-4">
+								<div class="col-md-6">
+									<div class="mission-item wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+										<div class="mission-inner">
+											<div class="mission-info">
+												<div class="mission-icon bg-primary">
+													<img src="assets/img/icons/mission.svg" alt="mission" class="img-fluid">
+												</div>
+												<h3 class="custom-title">Our Mission</h3>
+											</div>
+											<p>To deliver compassionate, patient-first healthcare by combining expert clinical judgment with technology.</p>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="mission-item wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="4s">
+										<div class="mission-inner">
+											<div class="mission-info">
+												<div class="mission-icon bg-secondary">
+													<img src="assets/img/icons/vision.svg" alt="vision" class="img-fluid">
+												</div>
+												<h3 class="custom-title">Our Vision</h3>
+											</div>
+											<p>Empower doctors to detect conditions earlier, improve outcomes, and redefine the future of modern healthcare.</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<a href="about-us.html" class="btn btn-md btn-primary">Know More<i class="isax isax-arrow-right-34 ms-2"></i></a>
+						</div>
+					</div>
+					<!-- About Content End -->
+
+				</div>
+			</div>
+			<img src="assets/img/bg/about-bg.png" alt="icon" class="img-fluid about-bg-01">
+		</section>
+		<!-- About Section End -->
+
+		<!-- Speciality Section -->
+		<section class="section speciality-section-two">
+			<div class="container">
+				<div class="section-header section-header-two">
+					<div class="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon">Specialities</div>
+					<h2 class="section-title mb-0">Medical Support For <span>Every Need.</span></h2>
+				</div>
+
+				<div class="row justify-content-center g-4">
+
+					<!-- Specility Item -->
+					<div class="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div class="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+							<div class="speciality-info">
+								<a href="doctor-grid.html" class="speciality-icon">
+									<img src="assets/img/icons/specilaity-01.svg" alt="speciality">
+								</a>
+								<div>
+									<h3 class="custom-title"><a href="doctor-grid.html">Urology</a></h3>
+									<p>21 Doctors</p>
+								</div>
+							</div>
+							<a href="doctor-grid.html" class="link-icon" aria-label="View doctors"><i class="isax isax-arrow-right-1"></i></a>
+						</div>
+					</div>
+					<!-- Specility Item End -->
+
+					<!-- Specility Item -->
+					<div class="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div class="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="2s">
+							<div class="speciality-info">
+								<a href="doctor-grid.html" class="speciality-icon">
+									<img src="assets/img/icons/specilaity-02.svg" alt="speciality">
+								</a>
+								<div>
+									<h3 class="custom-title"><a href="doctor-grid.html">Orthopedic</a></h3>
+									<p>30 Doctors</p>
+								</div>
+							</div>
+							<a href="doctor-grid.html" class="link-icon" aria-label="View doctors"><i class="isax isax-arrow-right-1"></i></a>
+						</div>
+					</div>
+					<!-- Specility Item End -->
+
+					<!-- Specility Item -->
+					<div class="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div class="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="3s">
+							<div class="speciality-info">
+								<a href="doctor-grid.html" class="speciality-icon">
+									<img src="assets/img/icons/specilaity-03.svg" alt="speciality">
+								</a>
+								<div>
+									<h3 class="custom-title"><a href="doctor-grid.html">Cardiologist</a></h3>
+									<p>15 Doctors</p>
+								</div>
+							</div>
+							<a href="doctor-grid.html" class="link-icon" aria-label="View doctors"><i class="isax isax-arrow-right-1"></i></a>
+						</div>
+					</div>
+					<!-- Specility Item End -->
+
+					<!-- Specility Item -->
+					<div class="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div class="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="4s">
+							<div class="speciality-info">
+								<a href="doctor-grid.html" class="speciality-icon">
+									<img src="assets/img/icons/specilaity-04.svg" alt="speciality">
+								</a>
+								<div>
+									<h3 class="custom-title"><a href="doctor-grid.html">Dentist</a></h3>
+									<p>35 Doctors</p>
+								</div>
+							</div>
+							<a href="doctor-grid.html" class="link-icon" aria-label="View doctors"><i class="isax isax-arrow-right-1"></i></a>
+						</div>
+					</div>
+					<!-- Specility Item End -->
+
+					<!-- Specility Item -->
+					<div class="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div class="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="5s">
+							<div class="speciality-info">
+								<a href="doctor-grid.html" class="speciality-icon">
+									<img src="assets/img/icons/specilaity-05.svg" alt="speciality">
+								</a>
+								<div>
+									<h3 class="custom-title"><a href="doctor-grid.html">Neurology</a></h3>
+									<p>25 Doctors</p>
+								</div>
+							</div>
+							<a href="doctor-grid.html" class="link-icon" aria-label="View doctors"><i class="isax isax-arrow-right-1"></i></a>
+						</div>
+					</div>
+					<!-- Specility Item End -->
+
+					<!-- Specility Item -->
+					<div class="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div class="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="6s">
+							<div class="speciality-info">
+								<a href="doctor-grid.html" class="speciality-icon">
+									<img src="assets/img/icons/specilaity-06.svg" alt="speciality">
+								</a>
+								<div>
+									<h3 class="custom-title"><a href="doctor-grid.html">Pediatrics</a></h3>
+									<p>10 Doctors</p>
+								</div>
+							</div>
+							<a href="doctor-grid.html" class="link-icon" aria-label="View doctors"><i class="isax isax-arrow-right-1"></i></a>
+						</div>
+					</div>
+					<!-- Specility Item End -->
+
+					<!-- Specility Item -->
+					<div class="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div class="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="7s">
+							<div class="speciality-info">
+								<a href="doctor-grid.html" class="speciality-icon">
+									<img src="assets/img/icons/specilaity-07.svg" alt="speciality">
+								</a>
+								<div>
+									<h3 class="custom-title"><a href="doctor-grid.html">Veterinary</a></h3>
+									<p>20 Doctors</p>
+								</div>
+							</div>
+							<a href="doctor-grid.html" class="link-icon" aria-label="View doctors"><i class="isax isax-arrow-right-1"></i></a>
+						</div>
+					</div>
+					<!-- Specility Item End -->
+
+					<!-- Specility Item -->
+					<div class="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div class="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="8s">
+							<div class="speciality-info">
+								<a href="doctor-grid.html" class="speciality-icon">
+									<img src="assets/img/icons/specilaity-08.svg" alt="speciality">
+								</a>
+								<div>
+									<h3 class="custom-title"><a href="doctor-grid.html">Psychiatrist</a></h3>
+									<p>12 Doctors</p>
+								</div>
+							</div>
+							<a href="doctor-grid.html" class="link-icon" aria-label="View doctors"><i class="isax isax-arrow-right-1"></i></a>
+						</div>
+					</div>
+					<!-- Specility Item End -->
+
+				</div>
+
+			</div>
+		</section>
+		<!-- Speciality Section End -->
+
+		<!-- Doctor Section -->
+		<section class="section doctor-section-two">
+			<div class="container">
+
+				<!-- Section Header -->
+				<div class="section-header section-header-two">
+					<div class="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon">Our Team</div>
+					<h2 class="section-title mb-0">Top Specialists <span>Dedicated to Your Care</span></h2>
+				</div>
+				<!-- Section Header End -->
+
+				<div class="row g-4">
+					<div class="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+
+						<!-- Doctor Widget -->
+						<div class="doctor-item-two">
+							<div class="doctor-image">
+								<a href="doctor-profile.html">
+									<img class="img-fluid" alt="doctor" src="assets/img/doctors/general-01.jpg">
+								</a>
+							</div>
+							<div class="doctor-content">
+								<h3 class="custom-title">
+									<a href="doctor-profile.html">Dr. Hattie Driskell</a>
+								</h3>
+								<p class="speciality">Orthopedic</p>
+								<div class="available-info">
+									<p><i class="isax isax-location me-1"></i>Los Angeles, CA</p>
+									<span class="badge bg-success"><i class="fa-solid fa-circle fs-5 me-1"></i>Available</span>
+								</div>
+								<a href="booking.html" class="btn btn-md btn-light w-100"><i class="isax isax-calendar-1 me-2"></i>Book Now</a>
+							</div>
+						</div>
+						<!-- Doctor Widget End -->
+
+					</div>
+
+					<div class="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+						
+						<!-- Doctor Widget -->
+						<div class="doctor-item-two">
+							<div class="doctor-image">
+								<a href="doctor-profile.html">
+									<img class="img-fluid" alt="doctor" src="assets/img/doctors/general-02.jpg">
+								</a>
+							</div>
+							<div class="doctor-content">
+								<h3 class="custom-title">
+									<a href="doctor-profile.html">Dr. Calvin Haley</a>
+								</h3>
+								<p class="speciality">Dentist</p>
+								<div class="available-info">
+									<p><i class="isax isax-location me-1"></i>Austin, TX</p>
+									<span class="badge bg-success"><i class="fa-solid fa-circle fs-5 me-1"></i>Available</span>
+								</div>
+								<a href="booking.html" class="btn btn-md btn-light w-100"><i class="isax isax-calendar-1 me-2"></i>Book Now</a>
+							</div>
+						</div>
+						<!-- Doctor Widget End -->
+
+					</div>
+
+					<div class="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+						
+						<!-- Doctor Widget -->
+						<div class="doctor-item-two">
+							<div class="doctor-image">
+								<a href="doctor-profile.html">
+									<img class="img-fluid" alt="doctor" src="assets/img/doctors/general-03.jpg">
+								</a>
+							</div>
+							<div class="doctor-content">
+								<h3 class="custom-title">
+									<a href="doctor-profile.html">Dr. Lisa Labonte</a>
+								</h3>
+								<p class="speciality">Neurologist</p>
+								<div class="available-info">
+									<p><i class="isax isax-location me-1"></i>Newyork, USA</p>
+									<span class="badge bg-success"><i class="fa-solid fa-circle fs-5 me-1"></i>Available</span>
+								</div>
+								<a href="booking.html" class="btn btn-md btn-light w-100"><i class="isax isax-calendar-1 me-2"></i>Book Now</a>
+							</div>
+						</div>
+						<!-- Doctor Widget End -->
+
+					</div>
+
+					<div class="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+						
+						<!-- Doctor Widget -->
+						<div class="doctor-item-two">
+							<div class="doctor-image">
+								<a href="doctor-profile.html">
+									<img class="img-fluid" alt="doctor" src="assets/img/doctors/general-04.jpg">
+								</a>
+							</div>
+							<div class="doctor-content">
+								<h3 class="custom-title">
+									<a href="doctor-profile.html">Dr. James Davidson</a>
+								</h3>
+								<p class="speciality">Immunologist</p>
+								<div class="available-info">
+									<p><i class="isax isax-location me-1"></i>Waipahu, HI</p>
+									<span class="badge bg-success"><i class="fa-solid fa-circle fs-5 me-1"></i>Available</span>
+								</div>
+								<a href="booking.html" class="btn btn-md btn-light w-100"><i class="isax isax-calendar-1 me-2"></i>Book Now</a>
+							</div>
+						</div>
+						<!-- Doctor Widget End -->
+
+					</div>
+
+				</div>
+			</div>
+			<img src="assets/img/bg/doctor-bg-01.png" alt="bg" class="img-fluid doctor-bg-01">
+			<img src="assets/img/bg/about-bg.png" alt="bg" class="img-fluid doctor-bg-02">
+		</section>
+		<!-- Doctor Section End -->
+		 
+		<!-- Speciality Section -->
+		<section class="section speciality-section-two">
+			<div class="container">
+				<div class="section-header section-header-two">
+					<div class="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon">Pricing Plan</div>
+					<h2 class="section-title mb-0">Choose the <span>Plans of your Needs</span></h2>
+				</div>
+
+				<div class="row align-items-end g-4">
+
+					<!-- Price Item -->
+					<div class="col-xl-3 col-md-6 d-flex">
+						<div class="price-item flex-fill wow fadeInUp" data-wow-duration="1s">
+							<div class="price-header">
+								<p class="sub-title">Free</p>
+								<div class="price">$0<span>/monthly</span></div>
+								<a href="login.html" class="btn btn-md btn-dark">Get Started</a>
+							</div>
+							<div class="price-body">
+								<h3>What’s included</h3>
+								<ul>
+									<li>1 Users</li>
+									<li>EMR / EHR</li>
+									<li>Billing & Payments</li>
+									<li>Family Account Management</li>
+									<li>Order Tests, Track Samples</li>
+									<li>Report Generation</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<!-- Price Item End -->
+
+					<!-- Price Item -->
+					<div class="col-xl-3 col-md-6 d-flex">
+						<div class="price-item flex-fill wow fadeInUp" data-wow-duration="1s">
+							<div class="price-header">
+								<p class="sub-title">Basic</p>
+								<div class="price">$39<span>/monthly</span></div>
+								<a href="login.html" class="btn btn-md btn-dark">Get Started</a>
+							</div>
+							<div class="price-body">
+								<h3>What’s included</h3>
+								<ul>
+									<li>10 Users</li>
+									<li>Pharmacy Access</li>
+									<li>Automate Billing</li>
+									<li>Family Account Management</li>
+									<li>Order Tests, Track Samples</li>
+									<li>Analytics & Reports</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<!-- Price Item End -->
+
+					<!-- Price Item -->
+					<div class="col-xl-3 col-md-6 d-flex">
+						<div class="price-item active flex-fill wow fadeInUp" data-wow-duration="1s">
+							<span class="recommend">Recommended</span>
+							<div class="price-header">
+								<p class="sub-title">Premium</p>
+								<div class="price">$99<span>/monthly</span></div>
+								<a href="login.html" class="btn btn-md btn-dark">Get Started</a>
+							</div>
+							<div class="price-body">
+								<h3>What’s included</h3>
+								<ul>
+									<li>100 Users</li>
+									<li>Billing & Invoicing</li>
+									<li>Dedicated Support</li>
+									<li>Family Account Management</li>
+									<li>Order Tests, Track Samples</li>
+									<li>Analytics & Reports</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<!-- Price Item End -->
+
+					<!-- Price Item -->
+					<div class="col-xl-3 col-md-6 d-flex">
+						<div class="price-item flex-fill wow fadeInUp" data-wow-duration="1s">
+							<div class="price-header">
+								<p class="sub-title">Enterprise</p>
+								<div class="price">$129<span>/monthly</span></div>
+								<a href="login.html" class="btn btn-md btn-dark">Get Started</a>
+							</div>
+							<div class="price-body">
+								<h3>What’s included</h3>
+								<ul>
+									<li>Unlimited Users</li>
+									<li>Pharmacy Access</li>
+									<li>Dedicated Support</li>
+									<li>Family Account Management</li>
+									<li>Order Tests, Track Samples</li>
+									<li>Analytics & Reports</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<!-- Price Item End -->
+
+				</div>
+			</div>
+		</section>
+		<!-- Speciality Section End -->
+
+		<!-- Work Section -->
+		<section class="section work-section-two">
+			<div class="container">
+
+				<div class="row">
+					<div class="col-xl-5">
+						<div class="work-img-two">
+							<img src="assets/img/about/about-01.png" alt="work" class="img-fluid">
+						</div>
+					</div>
+
+					<div class="col-xl-7 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+						<div class="section-header section-header-two text-start">
+							<div class="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon">How it Works</div>
+							<h2 class="section-title mb-0">4 Easy Steps to <span>Get Your Solution</span></h2>
+						</div>
+						<div class="row g-4">
+
+							<!-- Work Item -->
+							<div class="col-md-6 d-flex">
+								<div class="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+									<div class="work-icon">
+										<img src="assets/img/icons/search.svg" alt="search doctor">	
+									</div>
+									<div>
+										<h3 class="custom-title">Search Doctor</h3>
+										<p>Search for a doctor based on specialization, location, or availability. </p>
+									</div>
+								</div>
+							</div>
+							<!-- Work Item End -->
+
+							<!-- Work Item -->
+							<div class="col-md-6 d-flex">
+								<div class="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+									<div class="work-icon">
+										<img src="assets/img/icons/profile.svg" alt="profile">	
+									</div>
+									<div>
+										<h3 class="custom-title">Check Profile</h3>
+										<p>Explore detailed doctor profiles on our platform to make informed healthcare. </p>
+									</div>
+								</div>
+							</div>
+							<!-- Work Item End -->
+
+							<!-- Work Item -->
+							<div class="col-md-6 d-flex">
+								<div class="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+									<div class="work-icon">
+										<img src="assets/img/icons/schedule.svg" alt="booking">	
+									</div>
+									<div>
+										<h3 class="custom-title">Schedule Boooking</h3>
+										<p>After choose your preferred doctor, select a convenient time slot, & confirm. </p>
+									</div>
+								</div>
+							</div>
+							<!-- Work Item End -->
+
+							<!-- Work Item -->
+							<div class="col-md-6 d-flex">
+								<div class="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+									<div class="work-icon">
+										<img src="assets/img/icons/solution.svg" alt="your solution">	
+									</div>
+									<div>
+										<h3 class="custom-title">Get Your Solution</h3>
+										<p>Search for a doctor based on specialization, location, or availability. </p>
+									</div>
+								</div>
+							</div>
+							<!-- Work Item End -->
+
+						</div>
+					</div>
+				</div>
+			</div>
+			<img src="assets/img/bg/about-bg.png" alt="bg" class="img-fluid work-bg-01">
+			<img src="assets/img/bg/work-bg.png" alt="bg" class="work-bg-02">
+			<img src="assets/img/bg/work-bg-01.png" alt="bg" class="work-bg-03">
+			<img src="assets/img/bg/work-bg-02.png" alt="bg" class="work-bg-04">
+		</section>
+		<!-- Work Section End -->
+
+		<!-- Testimonial Section -->
+		<section class="section testimonial-section-two">
+			<div class="container-fluid">
+
+				<!-- Section Header -->
+				<div class="section-header section-header-two">
+					<div class="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon">Client Reviews</div>
+					<h2 class="section-title mb-0">What Our Patients <span>Say About Us</span></h2>
+				</div>
+				<!-- Section Header End -->
+
+				<div class="testimonial-slider-two">
+
+					<!-- Testimonial Item -->
+					<div class="testimonial-item-two">
+						<div class="testimonial-author-img">
+							<img src="assets/img/patients/patient22.jpg" class="rounded-circle" alt="patient">
+						</div>
+						<div class="quote-icon">
+							<img src="assets/img/icons/quote-icon-01.svg" alt="quote">
+						</div>
+						<div class="testimonial-content">
+							<p class="description">The emergency department responded promptly and efficiently when I arrived with severe pain. The doctors didn’t rush and made sure I understood. Best healthcare experiences</p>
+						</div>
+						<div class="testimonial-author-info">
+							<div>
+								<h3 class="custom-title">Daniel Carter</h3>
+								<p class="author-location">Dallas, CA</p>
+							</div>
+							<div class="rating">
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled"></i>
+							</div>
+						</div>
+					</div>
+					<!-- Testimonial Item End -->
+
+					<!-- Testimonial Item -->
+					<div class="testimonial-item-two">
+						<div class="testimonial-author-img">
+							<img src="assets/img/patients/patient25.jpg" class="rounded-circle" alt="patient">
+						</div>
+						<div class="quote-icon">
+							<img src="assets/img/icons/quote-icon-01.svg" alt="quote">
+						</div>
+						<div class="testimonial-content">
+							<p class="description">The care I received at this hospital was exceptional. The doctors explained everything clearly, the nurses were incredibly kind, and the facilities were spotless. I felt safe, supported, and genuinely cared for throughout my stay. Truly one of the best healthcare experiences.</p>
+						</div>
+						<div class="testimonial-author-info">
+							<div>
+								<h3 class="custom-title">Jeni Adams</h3>
+								<p class="author-location">Los Boston, USA</p>
+							</div>
+							<div class="rating">
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled"></i>
+							</div>
+						</div>
+					</div>
+					<!-- Testimonial Item End -->
+
+					<!-- Testimonial Item -->
+					<div class="testimonial-item-two">
+						<div class="testimonial-author-img">
+							<img src="assets/img/patients/patient24.jpg" class="rounded-circle" alt="patient">
+						</div>
+						<div class="quote-icon">
+							<img src="assets/img/icons/quote-icon-01.svg" alt="quote">
+						</div>
+						<div class="testimonial-content">
+							<p class="description">Exceptional service and a friendly atmosphere. The staff is knowledgeable and truly cares about their patients health, ensuring every visit is enjoyable.</p>
+						</div>
+						<div class="testimonial-author-info">
+							<div>
+								<h3 class="custom-title">Mike Smith</h3>
+								<p class="author-location">San Francisco, CA</p>
+							</div>
+							<div class="rating">
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled"></i>
+							</div>
+						</div>
+					</div>
+					<!-- Testimonial Item End -->
+
+					<!-- Testimonial Item -->
+					<div class="testimonial-item-two">
+						<div class="testimonial-author-img">
+							<img src="assets/img/patients/patient27.jpg" class="rounded-circle" alt="patient">
+						</div>
+						<div class="quote-icon">
+							<img src="assets/img/icons/quote-icon-01.svg" alt="quote">
+						</div>
+						<div class="testimonial-content">
+							<p class="description">The staff is knowledgeable and truly cares about their patients health, ensuring every visit is enjoyable. Exceptional service and a friendly atmosphere.</p>
+						</div>
+						<div class="testimonial-author-info">
+							<div>
+								<h3 class="custom-title">Mark Andrew</h3>
+								<p class="author-location">San Francisco, CA</p>
+							</div>
+							<div class="rating">
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled me-1"></i>
+								<i class="fa-solid fa-star filled"></i>
+							</div>
+						</div>
+					</div>
+					<!-- Testimonial Item End -->
+
+				</div>
+
+			</div>
+		</section>
+		<!-- Testimonial Section End -->
+
+		<!-- App Section -->
+		<section class="app-section-two">
+			<div class="container">
+				<div class="company-slider-two">
+					<div class="slide-item">
+						<img src="assets/img/company/company-09.svg" alt="client logo">
+					</div>
+					<div class="slide-item">
+						<img src="assets/img/company/company-10.svg" alt="client logo">
+					</div>
+					<div class="slide-item">
+						<img src="assets/img/company/company-11.svg" alt="client logo">
+					</div>
+					<div class="slide-item">
+						<img src="assets/img/company/company-12.svg" alt="client logo">
+					</div>
+					<div class="slide-item">
+						<img src="assets/img/company/company-13.svg" alt="client logo">
+					</div>
+					<div class="slide-item">
+						<img src="assets/img/company/company-14.svg" alt="client logo">
+					</div>
+					<div class="slide-item">
+						<img src="assets/img/company/company-11.svg" alt="client logo">
+					</div>
+				</div>
+				<div class="app-sec">
+					<div class="row align-items-end">
+						<div class="col-lg-6">
+							<div class="app-content d-flex flex-column justify-content-center">
+
+								<div class="section-header sec-header-one wow fadeInUp" data-wow-duration="1s">
+									<p class="sub-title">Working for Your Better Health.</p>
+									<h2 class="section-title">Download the Doccure App today!</h2>
+								</div>
+								<div class="app-imgs wow fadeInUp" data-wow-duration="1s">
+									<a href="#" aria-label="Download on App Store"><img src="assets/img/icons/app-store.svg" alt="apple-icon"></a>
+									<a href="#" aria-label="Get it on Google Play"><img src="assets/img/icons/google-play.svg" alt="google-play"></a>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-6 wow fadeInUp" data-wow-duration="1s">
+							<div class="app-img">
+								<img src="assets/img/about/app-01.png" class="img-fluid" alt="app">
+							</div>
+						</div>
+					</div>
+					<img src="assets/img/bg/app-bg-05.png" alt="img" class="app-bg-01">
+				</div>
+			</div>
+		</section>
+		<!-- App Section End -->	
+
+		<!-- Blog Section -->
+		<section class="section blog-section">
+			<div class="container">
+
+				<!-- Section Header -->
+				<div class="section-header section-header-two">
+					<div class="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon">Blogs & Articles</div>
+					<h2 class="section-title mb-0">Latest News & Stories</h2>
+				</div>
+				<!-- Section Header End -->
+
+				<div class="row justify-content-center g-4">
+					<div class="col-lg-4 col-md-6 d-flex">
+
+						<!-- Blog Post -->
+						<div class="blog-item-two w-100 wow fadeInUp" data-wow-duration="1s">
+							<div class="blog-img">
+								<a href="blog-details.html">
+									<img class="img-fluid" src="assets/img/blog/general-blog-01.jpg" alt="blog">
+								</a>
+								<a href="blog-grid.html" class="badge">Health Awareness</a>
+							</div>
+							<div class="blog-content">
+								<div class="blog-user-info">
+									<div class="blog-user">
+										<a href="#" class="avatar avatar-md">
+											<img src="assets/img/patients/patient12.jpg" class="img-fluid rounded-circle" alt="user">
+										</a>
+										<a href="#">Grace Morgan</a>
+									</div>
+									<p class="date">10, Sep 2026</p>
+								</div>
+								<h3 class="custom-title"><a href="blog-details.html">The Importance of Early Diagnosis: Why Timing Matters...</a></h3>
+								<p class="mb-0">Early diagnosis can dramatically improve treatment success. Detecting conditions in their earliest...</p>
+							</div>
+						</div>
+						<!-- Blog Post End -->
+
+					</div>
+					<div class="col-lg-4 col-md-6 d-flex">
+
+
+						<!-- Blog Post -->
+						<div class="blog-item-two w-100 wow fadeInUp" data-wow-duration="1s">
+							<div class="blog-img">
+								<a href="blog-details.html">
+									<img class="img-fluid" src="assets/img/blog/general-blog-02.jpg" alt="blog">
+								</a>
+								<a href="blog-grid.html" class="badge">Healthcare Technology</a>
+							</div>
+							<div class="blog-content">
+								<div class="blog-user-info">
+									<div class="blog-user">
+										<a href="#" class="avatar avatar-md">
+											<img src="assets/img/patients/patient20.jpg" class="img-fluid rounded-circle" alt="user">
+										</a>
+										<a href="#">Daniel Scott</a>
+									</div>
+									<p class="date">15, Sep 2026</p>
+								</div>
+								<h3 class="custom-title"><a href="blog-details.html">How Technology Is Transforming Modern Hospitals</a></h3>
+								<p class="mb-0">Hospitals today use advanced diagnostics, AI tools, robotic surgeries, and digital health records...</p>
+							</div>
+						</div>
+						<!-- Blog Post End -->
+
+					</div>
+					<div class="col-lg-4 col-md-6 d-flex">
+
+						<!-- Blog Post -->
+						<div class="blog-item-two w-100 wow fadeInUp" data-wow-duration="1s">
+							<div class="blog-img">
+								<a href="blog-details.html">
+									<img class="img-fluid" src="assets/img/blog/general-blog-03.jpg" alt="blog">
+								</a>
+								<a href="blog-grid.html" class="badge">General Dentistry</a>
+							</div>
+							<div class="blog-content">
+								<div class="blog-user-info">
+									<div class="blog-user">
+										<a href="#" class="avatar avatar-md">
+											<img src="assets/img/patients/patient21.jpg" class="img-fluid rounded-circle" alt="user">
+										</a>
+										<a href="#">Jacob Allen</a>
+									</div>
+									<p class="date">25, Sep 2026</p>
+								</div>
+								<h3 class="custom-title"><a href="blog-details.html">How Technology Is Transforming Modern Hospitals</a></h3>
+								<p class="mb-0">Hospitals today use advanced diagnostics, AI tools, robotic surgeries, and digital health records...</p>
+							</div>
+						</div>
+						<!-- Blog Post End -->
+
+					</div>
+				</div>
+				<div class="view-all text-center wow fadeInUp" data-wow-duration="1s">
+					<a href="blog-list.html" class="btn btn-md btn-dark">View All Blogs</a>
+				</div>
+			</div>
+		</section>
+		<!-- Blog Section End -->
+
+		<!-- Health Section -->
+		<section class="section health-section trail-content">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-10 mx-auto">
+						<div class="content-img">
+							<div class="content-img-single">
+								<img src="assets/img/about/health-03.jpg" class="img-fluid" alt="health">
+							</div>
+						</div>
+						<div class="content-img">
+							<div class="content-img-single">
+								<img src="assets/img/about/health-04.jpg" class="img-fluid" alt="health">
+							</div>
+						</div>
+						<div class="content-img">
+							<div class="content-img-single">
+								<img src="assets/img/about/health-05.jpg" class="img-fluid" alt="health">
+							</div>
+						</div>
+						<div class="health-content">
+							<h2><span class="health-img"><img src="assets/img/about/health-01.jpg" alt="health" class="img-fluid"></span> From common illnesses to chronic disease management, we deliver <span class="avatar-list-stacked avatar-group-lg"><span class="avatar"><img src="assets/img/patients/patient24.jpg" alt="patient" class="img-fluid rounded-circle"></span><span class="avatar"><img src="assets/img/patients/patient25.jpg" alt="patient" class="img-fluid rounded-circle"></span><span class="avatar"><img src="assets/img/patients/patient26.jpg" alt="patient" class="img-fluid rounded-circle"></span><span class="avatar"><img src="assets/img/patients/patient27.jpg" alt="patient" class="img-fluid rounded-circle"></span></span> personalized care designed to improve your long-term health. <span class="health-img"><img src="assets/img/about/health-02.jpg" alt="health" class="img-fluid"></span></h2>
+						</div>
+					</div>
+				</div>
+			</div>
+			<img src="assets/img/bg/doctor-bg-01.png" alt="bg" class="img-fluid health-bg-01">
+			<img src="assets/img/bg/banner-05.png" alt="bg" class="img-fluid health-bg-02">
+		</section>
+		<!-- Health Section End -->
+
+		<!-- Footer -->
+		<footer class="footer-two">
+
+			<!-- Footer Top -->
+			<div class="footer-top">
+				<div class="container">
+					<div class="row g-4">
+						<div class="col-xl-4 col-lg-3 col-md-6">
+
+							<!-- Footer Widget -->
+							<div class="footer-widget footer-about">
+								<div class="footer-logo">
+									<img src="assets/img/logo-02.svg" alt="logo">
+								</div>
+								<div class="footer-about-content">
+									<p>We are a dedicated Eye Care and Vision Health Center committed to providing advanced, Diagnostic Treatments.</p>
+									<div class="social-icon">
+										<ul>
+											<li>
+												<a href="#" aria-label="Facebook">FB</a>
+											</li>
+											<li>
+												<a href="#" aria-label="Twitter">TW</a>
+											</li>
+											<li>
+												<a href="#" aria-label="LinkedIn">LN</a>
+											</li>
+											<li>
+												<a href="#" aria-label="YouTube">YT</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+							<!-- Footer Widget End -->
+
+						</div>
+
+						<div class="col-lg-2 col-md-6">
+
+							<!-- Footer Widget -->
+							<div class="footer-widget">
+								<h3 class="footer-title">Company</h3>
+								<ul class="footer-menu">
+									<li><a href="about-us.html">About</a></li>
+									<li><a href="clinic.html">Clinics</a></li>
+									<li><a href="hospitals.html">Hospitals</a></li>
+									<li><a href="speciality.html">Specialities</a></li>
+									<li><a href="contact-us.html">Contact Us</a></li>
+								</ul>
+							</div>
+							<!-- Footer Widget End -->
+
+						</div>
+
+						<div class="col-xl-2 col-lg-3 col-md-6">
+
+							<!-- Footer Widget -->
+							<div class="footer-widget footer-contact">
+								<h3 class="footer-title">Need help?</h3>
+								<div class="contact-info">
+									<span>Visit Our Clinic</span>
+									<p>1250 Sunset Boulevard</p>
+								</div>
+								<div class="contact-info">
+									<span>General Inquiries</span>
+									<p><a href="mailto:info@example.com">info@example.com</a></p>
+								</div>
+								<div class="contact-info">
+									<span>Call us on</span>
+									<p><a href="tel:5456564578">+1 54565 64578</a></p>
+								</div>
+							</div>
+							<!-- Footer Widget End -->
+
+						</div>
+
+						<div class="col-lg-4 col-md-6">
+
+							<!-- Footer Widget -->
+							<div class="footer-widget">
+								<h3 class="footer-title">Keep in touch with us</h3>
+								<div class="footer-subscribe">
+									<p>Subscribe our newsletter to get the latest news and updates From Doccure !</p>
+									<div class="subscribe-input">
+										<form action="#">
+											<input type="email" class="form-control" placeholder="Enter Email Address" aria-label="Email address">
+											<button type="submit" class="btn-icon btn btn-primary-gradient" aria-label="Subscribe"><i class="isax isax-arrow-right-1"></i></button>
+										</form>
+									</div>
+								</div>
+							</div>
+							<!-- Footer Widget End -->
+
+						</div>
+
+					</div>
+				</div>
+				<img src="assets/img/bg/footer-bg-06.png" alt="bg" class="footer-bg-01">
+				<img src="assets/img/bg/footer-bg-07.png" alt="bg" class="footer-bg-02">
+			</div>
+			<!-- /Footer Top -->
+
+			<!-- Footer Bottom -->
+			<div class="footer-bottom">
+				<div class="container">
+
+					<!-- Copyright -->
+					<div class="copyright">
+						<div class="copyright-text">
+							<p class="mb-0">Copyright &copy; 2026 Doccure. All Rights Reserved</p>
+						</div>
+						<div class="copyright-menu">
+							<ul>
+								<li><a href="#">Legal Notice</a></li>
+								<li><a href="privacy-policy.html">Privacy Policy</a></li>
+								<li><a href="#">Refund Policy</a></li>
+							</ul>
+						</div>
+					</div>
+					<!-- Copyright End -->
+
+				</div>
+			</div>
+			<!-- Footer Bottom End -->
+
+		</footer>
+		<!-- Footer End -->
+
+		<!-- Cursor -->
+		<div class="mouse-cursor cursor-outer"></div>
+		<div class="mouse-cursor cursor-inner"></div>
+		<!-- /Cursor -->
+
+	</div>
+	<!-- Main Wrapper End -->
+
+	<!-- ScrollToTop -->
+	<div class="progress-wrap active-progress" role="button" aria-label="Scroll to top" tabindex="0">
+		<svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+			<path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"
+				style="transition: stroke-dashoffset 10ms linear 0s; stroke-dasharray: 307.919px, 307.919px; stroke-dashoffset: 228.265px;">
+			</path>
+		</svg>
+	</div>
+	<!-- ScrollToTop End -->
+
+	<!-- jQuery -->
+	<script src="assets/js/jquery-3.7.1.min.js" type="709c3c09804e85606b36e985-text/javascript"></script>
+
+	<!-- Bootstrap Core JS -->
+	<script src="assets/js/bootstrap.bundle.min.js" type="709c3c09804e85606b36e985-text/javascript"></script>
+
+	<!-- Slick JS -->
+	<script src="assets/js/slick.js" type="709c3c09804e85606b36e985-text/javascript"></script>
+
+	<!-- BacktoTop JS -->
+	<script src="assets/js/backToTop.js" type="709c3c09804e85606b36e985-text/javascript"></script>
+		
+	<!-- Fancybox JS -->
+	<script src="assets/plugins/fancybox/jquery.fancybox.min.js" type="709c3c09804e85606b36e985-text/javascript"></script>
+
+	<!-- Wow JS -->
+	<script src="assets/plugins/wow/js/wow.min.js" type="709c3c09804e85606b36e985-text/javascript"></script>
+
+	<!-- Gsap JS -->
+	<script src="assets/plugins/gsap/gsap.min.js" type="709c3c09804e85606b36e985-text/javascript"></script>
+
+	<!-- Custom JS -->
+	<script src="assets/js/script.min.js" type="709c3c09804e85606b36e985-text/javascript"></script>
+
+
+<script src="../../cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="709c3c09804e85606b36e985-|49" defer></script></body>
+
+
+<!-- Mirrored from doccure.dreamstechnologies.com/html/template/index-2.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 29 Apr 2026 04:16:27 GMT -->
+</html>

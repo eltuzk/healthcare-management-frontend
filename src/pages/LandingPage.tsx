@@ -1,330 +1,1636 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const LandingPage: React.FC = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+    // List of CSS files
+    const cssFiles = [
+      '/assets/css/bootstrap.min.css',
+      '/assets/plugins/fontawesome/css/fontawesome.min.css',
+      '/assets/plugins/fontawesome/css/all.min.css',
+      '/assets/plugins/fancybox/jquery.fancybox.min.css',
+      '/assets/plugins/wow/css/animate.css',
+      '/assets/css/iconsax.css',
+      '/assets/css/feather.css',
+      '/assets/css/style.min.css'
+    ];
+
+    // List of JS files
+    const jsFiles = [
+      '/assets/js/theme-script.js',
+      '/assets/js/jquery-3.7.1.min.js',
+      '/assets/js/bootstrap.bundle.min.js',
+      '/assets/js/slick.js',
+      '/assets/js/backToTop.js',
+      '/assets/plugins/fancybox/jquery.fancybox.min.js',
+      '/assets/plugins/wow/js/wow.min.js',
+      '/assets/plugins/gsap/gsap.min.js',
+      '/assets/js/script.min.js'
+    ];
+
+    const injectedLinks: HTMLLinkElement[] = [];
+    const injectedScripts: HTMLScriptElement[] = [];
+
+    // Inject CSS
+    cssFiles.forEach(href => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      document.head.appendChild(link);
+      injectedLinks.push(link);
+    });
+
+    // Inject JS sequentially
+    const loadScriptsSequentially = async () => {
+      for (const src of jsFiles) {
+        await new Promise((resolve) => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.async = false; // ensure order
+          script.onload = resolve;
+          document.body.appendChild(script);
+          injectedScripts.push(script);
+        });
+      }
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    loadScriptsSequentially();
+
+    // Cleanup on unmount
+    return () => {
+      injectedLinks.forEach(link => {
+        if (link.parentNode) link.parentNode.removeChild(link);
+      });
+      injectedScripts.forEach(script => {
+        if (script.parentNode) script.parentNode.removeChild(script);
+      });
+    };
   }, []);
 
-  const services = [
-    { title: 'Khám Tổng quát', desc: 'Kiểm tra sức khỏe định kỳ với quy trình nhanh chóng, chuẩn xác.', icon: '🏥', color: 'bg-primary/10 text-primary' },
-    { title: 'Xét nghiệm Lab', desc: 'Hệ thống phòng Lab tự động đạt chuẩn quốc tế, trả kết quả nhanh.', icon: '🔬', color: 'bg-emerald-50 text-emerald-600' },
-    { title: 'Chuyên khoa Nội', desc: 'Đội ngũ giáo sư, tiến sĩ đầu ngành trực tiếp thăm khám và tư vấn.', icon: '🫀', color: 'bg-rose-50 text-rose-600' },
-    { title: 'Chẩn đoán Hình ảnh', desc: 'Công nghệ MRI, CT 128 lát cắt mới nhất cho hình ảnh sắc nét.', icon: '☢️', color: 'bg-amber-50 text-amber-600' },
-    { title: 'Nhà thuốc GPP', desc: 'Cung cấp thuốc chính hãng với sự tư vấn tận tâm của dược sĩ.', icon: '💊', color: 'bg-indigo-50 text-indigo-600' },
-    { title: 'Cấp cứu 24/7', desc: 'Đội ngũ ứng trực sẵn sàng mọi lúc, mọi nơi khi bạn cần nhất.', icon: '🚑', color: 'bg-error-container text-error' },
-  ];
-
-  const steps = [
-    { title: 'Tìm Bác sĩ', desc: 'Tìm kiếm bác sĩ theo chuyên khoa, kinh nghiệm hoặc vị trí của bạn.', icon: '🔍' },
-    { title: 'Xem Hồ sơ', desc: 'Kiểm tra thông tin chi tiết, đánh giá và lịch trình của bác sĩ.', icon: '📋' },
-    { title: 'Đặt Lịch khám', desc: 'Chọn thời gian phù hợp và xác nhận lịch hẹn chỉ trong vài thao tác.', icon: '📅' },
-    { title: 'Nhận Tư vấn', desc: 'Đến phòng khám hoặc nhận tư vấn trực tuyến từ bác sĩ của bạn.', icon: '💡' }
-  ];
-
   return (
-    <div className="min-h-screen bg-background font-body text-on-surface selection:bg-primary/20">
-      {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-lg shadow-sm py-3' : 'bg-transparent py-5'}`}>
-        <div className="container mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-            </div>
-            <span className="font-display text-2xl font-bold tracking-tight text-on-surface">MedCare<span className="text-primary">Plus</span></span>
-          </div>
-          
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#services" className="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">Dịch vụ</a>
-            <a href="#about" className="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">Về chúng tôi</a>
-            <a href="#specialities" className="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">Chuyên khoa</a>
-            <Link to="/login" className="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all">
-              Đăng nhập hệ thống
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <>
+<div className="main-wrapper">
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent"></div>
-          <div className="absolute top-20 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>
-        </div>
+		<div className="header-theme header-theme-two">
+			<button type="button" id="dark-mode-toggle" className="theme-toggle moon" aria-label="dark mode">
+				<i className="isax isax-moon5"></i>
+			</button>
+			<button type="button" id="light-mode-toggle" className="theme-toggle sun" aria-label="light mode">
+				<i className="isax isax-sun-15"></i>
+			</button>
+		</div>
 
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
-            <div className="flex-1 space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                Công nghệ y tế tiên tiến
-              </div>
-              <h1 className="font-display text-5xl lg:text-7xl font-extrabold text-on-surface leading-[1.1] tracking-tight">
-                Tư vấn sức khỏe cùng <br />
-                <span className="text-primary">Chuyên gia hàng đầu</span>
-              </h1>
-              <p className="text-lg text-on-surface-variant leading-relaxed max-w-2xl">
-                Bắt đầu hành trình chăm sóc sức khỏe của bạn với MedCare Plus. Tìm kiếm bác sĩ uy tín, đặt lịch khám dễ dàng và quản lý hồ sơ y tế an toàn trong một nền tảng duy nhất.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
-                <Link to="/appointments" className="w-full sm:w-auto bg-primary text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-primary/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
-                  Đặt lịch khám ngay
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                </Link>
-                <a href="#services" className="w-full sm:w-auto bg-white text-on-surface px-8 py-4 rounded-2xl font-bold border border-surface-container-highest shadow-sm hover:bg-surface-container-low transition-all text-center">
-                  Tìm hiểu dịch vụ
-                </a>
-              </div>
-            </div>
-            
-            <div className="flex-1 relative w-full max-w-lg lg:max-w-none">
-              <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border-8 border-white">
-                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=1000" alt="Doctor" className="w-full h-full object-cover" />
-              </div>
-              
-              {/* Floating "Calling" Card */}
-              <div className="absolute -bottom-8 -left-8 bg-white p-4 rounded-2xl shadow-2xl border border-surface-container-low flex items-center gap-4 animate-bounce hover:animate-none transition-all cursor-pointer">
-                <div className="w-12 h-12 rounded-full bg-surface-container-highest overflow-hidden border-2 border-white shadow-sm">
-                  <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100" alt="Patient" className="w-full h-full object-cover" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-outline mb-1">Cuộc gọi khẩn cấp...</p>
-                  <div className="flex gap-2">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg></div>
-                    <div className="w-8 h-8 rounded-full bg-error-container text-error flex items-center justify-center"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.516l2.257-1.13a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z" /></svg></div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Stats Card */}
-              <div className="absolute -top-6 -right-6 bg-white px-6 py-4 rounded-2xl shadow-xl border border-surface-container-low">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-lg">⭐</div>
-                  <div>
-                    <p className="font-display font-bold text-on-surface text-xl">4.9/5</p>
-                    <p className="text-xs text-on-surface-variant font-medium">Đánh giá bệnh nhân</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+		{/* Header */}
+		<header className="header header-two home-menu">
+			<div className="container">
+				<nav className="navbar navbar-expand-lg header-nav">
+					<div className="navbar-header">
+						<a id="mobile_btn" href="#" aria-label="Open menu" >
+							<i className="fa-solid fa-bars"></i>
+						</a>
+						<Link to="/" className="navbar-brand logo">
+							<img src="assets/img/logo-white-02.svg" className="img-fluid white-logo" alt="Logo" />
+							<img src="assets/img/logo-02.svg" className="img-fluid normal-logo" alt="Logo" />
+						</Link>
+					</div>
+					<div className="main-menu-wrapper">
+						<div className="menu-header">
+							<Link to="/" className="menu-logo">
+								<img src="assets/img/logo-02.svg" className="img-fluid" alt="Logo" />
+							</Link>
+							<a id="menu_close" className="menu-close" href="#" aria-label="Close menu" >
+								<i className="fas fa-times"></i>
+							</a>
+						</div>
+						<ul className="main-nav">
+							<li className="has-submenu megamenu active">
+								<a href="#" className="main-menu" >Trang chủ <span><i className="fas fa-chevron-down"></i></span></a>
+								<ul className="submenu mega-submenu">
+									<li>
+										<div className="megamenu-wrapper">
+											<div className="row">
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/" className="inner-demo-img"><img src="assets/img/home/home.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/" className="inner-demo-img">General Home 1</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo active">
+														<div className="demo-img">
+															<Link to="/" className="inner-demo-img"><img src="assets/img/home/home-01.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/" className="inner-demo-img">General Home 2</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-3" className="inner-demo-img"><img src="assets/img/home/home-02.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-3" className="inner-demo-img">Dental</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-4" className="inner-demo-img"><img src="assets/img/home/home-03.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-4" className="inner-demo-img">Nhi khoa</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-5" className="inner-demo-img"><img src="assets/img/home/home-04.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-5" className="inner-demo-img">ENT</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-6" className="inner-demo-img"><img src="assets/img/home/home-05.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-6" className="inner-demo-img">Thú y</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo ">
+														<div className="demo-img">
+															<Link to="/index-7" className="inner-demo-img"><img src="assets/img/home/home-06.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-7" className="inner-demo-img">Cardiology</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-8" className="inner-demo-img"><img src="assets/img/home/home-07.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-8" className="inner-demo-img">Eye Care</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-9" className="inner-demo-img"><img src="assets/img/home/home-08.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-9" className="inner-demo-img">Home Care</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-10" className="inner-demo-img"><img src="assets/img/home/home-09.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-10" className="inner-demo-img">Fertility</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-11" className="inner-demo-img"><img src="assets/img/home/home-10.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-11" className="inner-demo-img">Cosmetic Surgery</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-12" className="inner-demo-img"><img src="assets/img/home/home-11.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-12" className="inner-demo-img">Laboratory</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-13" className="inner-demo-img"><img src="assets/img/home/home-12.jpg" className="img-fluid" alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-13" className="inner-demo-img">Pharmacy</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-14" className="inner-demo-img"><img src="assets/img/home/home-14.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-14" className="inner-demo-img">Dermatology</Link>
+														</div>
+													</div>
+												</div>
+												<div className="col">
+													<div className="single-demo">
+														<div className="demo-img">
+															<Link to="/index-15" className="inner-demo-img"><img src="assets/img/home/home-15.jpg" className="img-fluid " alt="img" /></Link>
+														</div>
+														<div className="demo-info">
+															<Link to="/index-15" className="inner-demo-img">Mental Health</Link>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li className="has-submenu">
+								<a href="#" className="main-menu" >Bác sĩ <span><i className="fas fa-chevron-down"></i></span></a>
+								<ul className="submenu sub-menu-one">
+									<li>
+										<div className="row">
+											<div className="col-lg-6">
+												<ul className="sub-menu-list">
+													<li><Link to="/doctor-dashboard">Doctor Dashboard</Link></li>
+													<li><Link to="/appointments">Appointments</Link></li>
+													<li><Link to="/available-timings">Sẵn sàng Timing</Link></li>
+													<li><Link to="/my-patients">Patients List</Link></li>
+													<li><Link to="/chat-doctor">Chat</Link></li>
+													<li><Link to="/invoices">Invoices</Link></li>
+													<li><Link to="/doctor-profile-settings">Profile Settings</Link></li>
+												</ul>
+											</div>
+											<div className="col-lg-6">
+												<div className="menu-img">
+													<img src="assets/img/home/menu-img-1.jpg" alt="listing" className="img-fluid" />
+												</div>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li className="has-submenu">
+								<a href="#" className="main-menu" >Bệnh nhân <span><i className="fas fa-chevron-down"></i></span></a>
+								<ul className="submenu sub-menu-one sub-menu-two">
+									<li>
+										<div className="row">
+											<div className="col-lg-4 sub-menu-left">
+												<ul className="sub-menu-list">
+													<li><Link to="/patient-dashboard">Patient Dashboard</Link></li>
+													<li><Link to="/map-grid">Doctors Grid</Link></li>
+													<li><Link to="/map-list">Doctors List</Link></li>
+													<li><Link to="/map-list-availability">Doctors Availability</Link></li>
+													<li><Link to="/booking">Booking</Link></li>
+													<li><Link to="/booking-1">Booking 1</Link></li>
+													<li><Link to="/booking-2">Booking 2</Link></li>
+													<li><Link to="/booking-popup">Booking Popup</Link></li>
+												</ul>
+											</div>
+											<div className="col-lg-4">
+												<ul className="sub-menu-list">
+													<li><Link to="/search">Tìm kiếm Bác sĩ 1</Link></li>
+													<li><Link to="/search-2">Tìm kiếm Bác sĩ 2</Link></li>
+													<li><Link to="/doctor-profile">Doctor Profile 1</Link></li>
+													<li><Link to="/doctor-profile-2">Doctor Profile 2</Link></li>
+													<li><Link to="/checkout">Checkout</Link></li>
+													<li><Link to="/favourites">Favourites</Link></li>
+													<li><Link to="/chat">Chat</Link></li>
+													<li><Link to="/profile-settings">Profile Settings</Link></li>
+												</ul>
+											</div>
+											<div className="col-lg-4">
+												<div className="menu-img">
+													<img src="assets/img/home/menu-img-2.jpg" alt="listing" className="img-fluid" />
+												</div>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li className="has-submenu">
+								<a href="#" className="main-menu" >Nhà thuốc <span><i className="fas fa-chevron-down"></i></span></a>
+								<ul className="submenu sub-menu-one sub-menu-three">
+									<li>
+										<div className="row">
+											<div className="col-lg-6">
+												<ul className="sub-menu-list">
+													<li><Link to="/index-13">Pharmacy</Link></li>
+													<li><Link to="/pharmacy-details">Pharmacy Details</Link></li>
+													<li><Link to="/pharmacy-search">Pharmacy Search</Link></li>
+													<li><Link to="/product-all">Product</Link></li>
+													<li><Link to="/product-description">Product Description</Link></li>
+													<li><Link to="/cart">Cart</Link></li>
+													<li><Link to="/product-checkout">Product Checkout</Link></li>
+													<li><Link to="/payment-success">Payment Success</Link></li>
+													<li><Link to="/pharmacy-register">Pharmacy Register</Link></li>
+												</ul>
+											</div>
+											<div className="col-lg-6">
+												<div className="menu-img">
+													<img src="assets/img/home/menu-img-3.jpg" alt="listing" className="img-fluid" />
+												</div>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li className="has-submenu megamenu">
+								<a href="#" className="main-menu" >Trang <span><i className="fas fa-chevron-down"></i></span></a>
+								<ul className="submenu mega-submenu">
+									<li>
+										<div className="megamenu-wrapper megamenu-wrapper-one">
+											<div className="row">
+												<div className="col-lg-3 sub-menu-left">
+													<ul className="sub-menu-list">
+														<li><Link to="/about-us">Về chúng tôi</Link></li>
+														<li><Link to="/contact-us">Liên hệ</Link></li>
+														<li><Link to="/hospitals">Bệnh viện</Link></li>
+														<li><Link to="/speciality">Speciality</Link></li>
+														<li><Link to="/clinic">Clinic</Link></li>
+														<li><Link to="/blank-page">Starter Page</Link></li>
+														<li><Link to="/pricing">Bảng giá dịch vụ</Link></li>
+														<li><Link to="/faq">FAQ</Link></li>
+													</ul>
+												</div>
+												<div className="col-lg-3 sub-menu-left">
+													<ul className="sub-menu-list">
+														<li><Link to="/login-email">Login Email</Link></li>
+														<li><Link to="/login-phone">Login Phone</Link></li>
+														<li><Link to="/doctor-signup">Doctor Signup</Link></li>
+														<li><Link to="/patient-signup">Patient Signup</Link></li>
+														<li><Link to="/forgot-password">Forgot Password 1</Link></li>
+														<li><Link to="/forgot-password2">Forgot Password 2</Link></li>
+														<li><Link to="/login-email-otp">Email OTP</Link></li>
+														<li><Link to="/login-phone-otp">Phone OTP</Link></li>
+													</ul>
+												</div>
+												<div className="col-lg-3 sub-menu-left">
+													<ul className="sub-menu-list">
+														<li><Link to="/maintenance">Maintenance</Link></li>
+														<li><Link to="/coming-soon">Coming Soon</Link></li>
+														<li><Link to="/terms-condition">Terms & Condition</Link></li>
+														<li><Link to="/privacy-policy">Chính sách bảo mật</Link></li>
+														<li><Link to="/components">Components</Link></li>
+														<li><Link to="/invoices">Invoices</Link></li>
+														<li><Link to="/invoice-view">Invoice View</Link></li>
+													</ul>
+												</div>
+												<div className="col-lg-3">
+													<ul className="sub-menu-list">
+														<li><Link to="/voice-call">Voice Call</Link></li>
+														<li><Link to="/video-call">Video Call</Link></li>
+														<li><Link to="/error-404">404 Error</Link></li>
+														<li><Link to="/error-500">500 Error</Link></li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li className="has-submenu">
+								<a href="#" className="main-menu" >Tin tức <span><i className="fas fa-chevron-down"></i></span></a>
+								<ul className="submenu sub-menu-one sub-menu-default">
+									<li><Link to="/blog-list">Blog List</Link></li>
+									<li><Link to="/blog-grid">Blog Grid</Link></li>
+									<li><Link to="/blog-details">Blog Details</Link></li>
+								</ul>
+							</li>
+							<li className="has-submenu">
+								<a href="#" className="main-menu" >Quản trị <span><i className="fas fa-chevron-down"></i></span></a>
+								<ul className="submenu sub-menu-one sub-menu-default">
+									<li><Link to="/admin/index" target="_blank">Admin</Link></li>
+									<li><Link to="/pharmacy/index" target="_blank">Pharmacy Admin</Link></li>
+								</ul>
+							</li>
+						</ul>
+						<div className="header-items">
+							{/* Item 1 */}
+							<div className="about-popup-item border-0 pb-0">
+								<h3 className="title">Thông tin liên hệ</h3>
+								<div className="support-item mb-3">
+									<div className="avatar avatar-lg bg-primary rounded-circle">
+										<i className="isax isax-messages-3"></i>
+									</div>
+									<div>
+										<p className="title">Yêu cầu chung</p>
+										<h5 className="link">info@example.com</h5>
+									</div>
+								</div>
+								<div className="support-item">
+									<div className="avatar avatar-lg bg-primary rounded-circle">
+										<i className="isax isax-call-calling"></i>
+									</div>
+									<div>
+										<p className="title">Trường hợp khẩn cấp</p>
+										<h5 className="link">+1 24565 89856</h5>
+									</div>
+								</div>
+							</div>
+							{/* Item 2 */}
+							<div className="about-popup-item border-0 pb-0">
+								<h3 className="title">Theo dõi chúng tôi</h3>
+								<ul className="d-flex align-items-center gap-2 social-iyem">
+									<li>
+										<a href="#" className="social-icon" aria-label="facebook"><i className="fa-brands fa-facebook"></i></a>
+									</li>
+									<li>
+										<a href="#" className="social-icon" aria-label="twitter"><i className="fa-brands fa-x-twitter"></i></a>
+									</li>
+									<li>
+										<a href="#" className="social-icon" aria-label="instagram"><i className="fa-brands fa-instagram"></i></a>
+									</li>
+									<li>
+										<a href="#" className="social-icon" aria-label="linkedin"><i className="fa-brands fa-linkedin"></i></a>
+									</li>
+								</ul>
+							</div>
 
-      {/* Highlights */}
-      <div className="bg-primary py-4 overflow-hidden shadow-inner">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-wrap justify-center gap-6 md:gap-12 items-center text-white/90 font-bold text-sm md:text-lg uppercase tracking-wider">
-            <span>Khám chữa bệnh tận tâm</span> <span className="hidden md:inline text-white/50">•</span>
-            <span>Chuyên gia y tế</span> <span className="hidden md:inline text-white/50">•</span>
-            <span>Công nghệ tiên tiến</span> <span className="hidden md:inline text-white/50">•</span>
-            <span>Hỗ trợ 24/7</span>
-          </div>
-        </div>
-      </div>
+							<div className="header-items-button">
+								<Link to="/login" className="btn btn-primary"><i className="isax isax-lock-1 me-2"></i>Đăng nhập</Link>
+								<Link to="/register" className="btn btn-secondary"><i className="isax isax-user-tick4 me-2"></i>Đăng ký</Link>
+							</div>
+						</div>
+					</div>
+					<ul className="nav header-navbar-rht">
+						<li>
+							<Link to="/login" className="btn btn-md btn-primary">
+								<i className="isax isax-lock-1"></i> <span>Đăng nhập</span> 
+							</Link>
+						</li>
+						<li>
+							<Link to="/register" className="btn btn-md btn-secondary">
+								<i className="isax isax-user-tick"></i> <span>Đăng ký</span> 
+							</Link>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</header>
+		{/* Header End */}
 
-      {/* Services Section */}
-      <section id="services" className="py-24 bg-white relative">
-        <div className="container mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-primary font-bold tracking-wider uppercase text-sm mb-2">Dịch Vụ Y Tế</h2>
-            <h3 className="font-display text-3xl md:text-4xl font-extrabold text-on-surface mb-4">Hỗ trợ y tế cho mọi nhu cầu</h3>
-            <p className="text-on-surface-variant">Chúng tôi cung cấp đa dạng các dịch vụ y tế chất lượng cao, đáp ứng mọi nhu cầu chăm sóc sức khỏe của bạn và gia đình.</p>
-          </div>
+		{/* Banner */}
+		<section className="banner-section-two">
+			<div className="container">
+				<div className="row align-items-end">
+					<div className="col-xl-6">
+						<div className="banner-content wow fadeInUp" data-wow-duration="1s">
+							<div className="banner-badge">
+								<span>Công nghệ Tiên tiến</span> 
+								<p>Chẩn đoán toàn diện bởi các chuyên gia hàng đầu.</p>
+							</div>
+							<h1>Tư vấn <span>Bác sĩ chuyên khoa</span> hàng đầu tại cơ sở gần bạn.</h1>
+							<p>Bắt đầu hành trình chăm sóc sức khỏe của bạn với The Clinical Curator, nơi bạn có thể dễ dàng quản lý lịch hẹn và hồ sơ y tế.</p>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, i) => (
-              <div key={i} className="group bg-white border border-surface-container-highest p-8 rounded-3xl shadow-sm hover:shadow-ambient hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6 ${service.color} group-hover:scale-110 transition-transform`}>
-                  {service.icon}
-                </div>
-                <h4 className="font-display text-xl font-bold text-on-surface mb-3">{service.title}</h4>
-                <p className="text-on-surface-variant leading-relaxed mb-6 text-sm">{service.desc}</p>
-                <a href="#" className="inline-flex items-center text-primary font-semibold hover:text-primary-container">
-                  Tìm hiểu thêm <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+							<Link to="/booking" className="btn btn-md btn-white"><i className="isax isax-lock me-2"></i>Đặt lịch hẹn ngay</Link>
+						</div>
+					</div>
+					<div className="col-xl-6">
+						<div className="banner-img wow fadeInUp" data-wow-duration="2s">
+							<img src="assets/img/banner/banner-02.png" alt="banner" fetchpriority="high" className="img-fluid" />
+							<div className="banner-user-call">
+								<span className="avatar">
+									<img src="assets/img/patients/patient22.jpg" alt="patient" className="img-fluid rounded-circle" />
+								</span>
+								<p>Calling.......</p>
+							</div>
+							<div className="call-items">
+								<a href="#" className="item-1 item" aria-label="Video call"><i className="isax isax-video"></i></a>
+								<a href="#" className="item-2 item" aria-label="End call"><i className="isax isax-call-slash"></i></a>
+								<a href="#" className="item-3 item" aria-label="Mute microphone"><i className="isax isax-microphone-2"></i></a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<img src="assets/img/bg/banner-01.png" alt="bg" className="img-fluid banner-bg-01" />
+			<img src="assets/img/bg/banner-02.png" alt="bg" className="img-fluid banner-bg-02" />
+			<img src="assets/img/bg/banner-03.png" alt="bg" className="img-fluid banner-bg-03" />
+			<img src="assets/img/bg/banner-04.png" alt="bg" className="img-fluid banner-bg-04" />
+			<img src="assets/img/bg/banner-05.png" alt="bg" className="img-fluid banner-bg-05" />
+			<img src="assets/img/bg/banner-06.png" alt="bg" className="img-fluid banner-bg-06" />
+			<img src="assets/img/bg/banner-07.png" alt="bg" className="img-fluid banner-bg-07" />
+		</section>
+		{/* Banner End */}
 
-      {/* About Section */}
-      <section id="about" className="py-24 bg-surface-container-low overflow-hidden">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
-            <div className="flex-1 relative w-full">
-              <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border-8 border-white group">
-                <img src="https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&q=80&w=1000" alt="About MedCare" className="w-full h-[500px] object-cover group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                  <button className="w-20 h-20 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/50 transition-colors">
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-primary shadow-lg pl-1">
-                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
-                    </div>
-                  </button>
-                </div>
-              </div>
-              <div className="absolute -bottom-10 -right-10 bg-primary text-white p-8 rounded-[2rem] shadow-xl max-w-xs hidden md:block">
-                <p className="font-display text-4xl font-extrabold mb-1">10+</p>
-                <p className="text-white/80 font-medium">Năm kinh nghiệm trong lĩnh vực y tế</p>
-              </div>
-            </div>
-            
-            <div className="flex-1">
-              <h2 className="text-primary font-bold tracking-wider uppercase text-sm mb-2">Về Chúng Tôi</h2>
-              <h3 className="font-display text-3xl md:text-4xl font-extrabold text-on-surface mb-6 leading-tight">Mỗi bệnh nhân đều là một câu chuyện riêng. <br/>Chúng tôi thấu hiểu.</h3>
-              <p className="text-on-surface-variant leading-relaxed mb-8 text-lg">
-                MedCare Plus hướng tới việc cung cấp dịch vụ chẩn đoán nhanh hơn, thông tin rõ ràng hơn và quyết định điều trị chính xác hơn, đảm bảo mỗi bệnh nhân đều nhận được sự chăm sóc an toàn và cá nhân hóa.
-              </p>
-              
-              <div className="grid sm:grid-cols-2 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-surface-container-highest">
-                  <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center text-xl mb-4">🎯</div>
-                  <h4 className="font-bold text-on-surface mb-2">Sứ Mệnh</h4>
-                  <p className="text-sm text-on-surface-variant">Mang đến dịch vụ chăm sóc sức khỏe tận tâm, lấy bệnh nhân làm trung tâm kết hợp công nghệ.</p>
-                </div>
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-surface-container-highest">
-                  <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl mb-4">👁️</div>
-                  <h4 className="font-bold text-on-surface mb-2">Tầm Nhìn</h4>
-                  <p className="text-sm text-on-surface-variant">Trao quyền cho bác sĩ phát hiện bệnh sớm, cải thiện kết quả và định hình tương lai y tế.</p>
-                </div>
-              </div>
-              
-              <button className="bg-primary text-white px-8 py-3 rounded-xl font-bold shadow-md hover:bg-primary-container transition-colors">
-                Tìm hiểu thêm
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+		{/* Slider Section */}
+		<section className="slider-section wow fadeInUp" data-wow-duration="1s">
+			<div className="horizontal-slide slide-one bg-primary d-flex" data-direction="left" data-speed="slow">
+				<div className="slide-list d-flex gap-4">
+					<div className="services-slide">
+						<h3>Chuyên gia Y tế Chứng nhận</h3>
+					</div>
+					<div className="services-slide">
+						<h3>Công cụ Chẩn đoán Tiên tiến</h3>
+					</div>
+					<div className="services-slide">
+						<h3>Đặt lịch hẹn Trực tuyến</h3>
+					</div>
+					<div className="services-slide">
+						<h3>Hồ sơ Sức khỏe Điện tử</h3>
+					</div>
+				</div>
+			</div>
+			<div className="horizontal-slide slide-two bg-dark d-flex" data-direction="right" data-speed="slow">
+				<div className="slide-list d-flex gap-4">
+					<div className="services-slide">
+						<h3>Báo cáo & Kết quả Xét nghiệm Nhanh</h3>
+					</div>
+					<div className="services-slide">
+						<h3>Tư vấn Khám bệnh Từ xa</h3>
+					</div>
+					<div className="services-slide">
+						<h3>Theo dõi Sức khỏe & Tái khám</h3>
+					</div>
+					<div className="services-slide">
+						<h3>Chăm sóc Khẩn cấp & Cấp cứu</h3>
+					</div>
+				</div>
+			</div>
+		</section>
+		{/* Slider Section End */}
 
-      {/* How it works */}
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-primary font-bold tracking-wider uppercase text-sm mb-2">Quy trình</h2>
-            <h3 className="font-display text-3xl md:text-4xl font-extrabold text-on-surface mb-4">4 Bước Dễ Dàng Đặt Khám</h3>
-          </div>
+		{/* Service Section */}
+		<section className="section service-section">
+			<div className="container">
 
-          <div className="grid md:grid-cols-4 gap-8 relative">
-            <div className="hidden md:block absolute top-12 left-[10%] right-[10%] h-0.5 bg-surface-container-highest z-0"></div>
-            
-            {steps.map((step, i) => (
-              <div key={i} className="relative z-10 text-center group">
-                <div className="w-24 h-24 mx-auto bg-white border-4 border-surface-container-low rounded-full flex items-center justify-center text-4xl mb-6 shadow-ambient group-hover:border-primary/20 group-hover:scale-110 transition-all duration-300">
-                  {step.icon}
-                </div>
-                <h4 className="font-display text-xl font-bold text-on-surface mb-3">{step.title}</h4>
-                <p className="text-on-surface-variant text-sm px-4">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+				<div className="row g-4">
 
-      {/* App Section */}
-      <section className="py-20 bg-on-surface relative overflow-hidden">
-        <div className="container mx-auto px-6 relative z-10 text-center">
-          <h2 className="font-display text-3xl md:text-5xl font-extrabold text-white mb-6">Tải Ứng Dụng MedCare Plus Ngay!</h2>
-          <p className="text-outline-variant text-lg mb-10 max-w-2xl mx-auto">Quản lý lịch khám, theo dõi hồ sơ sức khỏe và nhận tư vấn trực tuyến mọi lúc mọi nơi trên điện thoại của bạn.</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <button className="bg-white/10 text-white border border-white/20 px-8 py-3 rounded-xl font-bold flex items-center gap-3 hover:bg-white hover:text-on-surface transition-colors">
-              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.8 1.49.09 2.58.62 3.32 1.4-2.82 1.63-2.31 5.34.62 6.55-.7 1.95-1.57 3.93-2.52 5.02zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-              <div className="text-left">
-                <div className="text-[10px] font-normal">Download on the</div>
-                <div className="text-sm leading-none">App Store</div>
-              </div>
-            </button>
-            <button className="bg-white/10 text-white border border-white/20 px-8 py-3 rounded-xl font-bold flex items-center gap-3 hover:bg-white hover:text-on-surface transition-colors">
-              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M3.609 1.814L13.792 12l-10.183 10.186c-.198-.242-.317-.549-.317-.887V2.701c0-.338.119-.645.317-.887zM14.619 12.827L18.435 16.64l-11.236 6.319 7.42-10.132zm.833-1.654l4.57-2.612a1.002 1.002 0 0 0 0-1.74l-4.57-2.612-4.116 4.116 4.116 4.115zm-1.66-1.66L6.372 1.042 17.608 7.36l-3.816 2.153z"/></svg>
-              <div className="text-left">
-                <div className="text-[10px] font-normal">GET IT ON</div>
-                <div className="text-sm leading-none">Google Play</div>
-              </div>
-            </button>
-          </div>
-        </div>
-      </section>
+					{/* Service Item */}
+					<div className="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div className="services-item-two bg-primary-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+							<div className="service-icon">
+								<img src="assets/img/icons/booking.svg" alt="booking" className="img-fluid" />
+							</div>
+							<h3><Link to="/reception">Tiếp đón & Đăng ký</Link></h3>
+						</div>
+					</div>
+					{/* Service Item End */}
 
-      {/* Footer */}
-      <footer className="bg-surface-container-low text-on-surface-variant pt-20 pb-10">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-            <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-                </div>
-                <span className="font-display text-2xl font-bold tracking-tight text-on-surface">MedCare<span className="text-primary">Plus</span></span>
-              </div>
-              <p className="text-sm leading-relaxed">
-                Chúng tôi là trung tâm chăm sóc sức khỏe toàn diện, tận tâm cung cấp các phương pháp điều trị và chẩn đoán tiên tiến nhất cho cộng đồng.
-              </p>
-              <div className="flex gap-4">
-                <a href="#" className="w-10 h-10 rounded-full bg-white border border-surface-container-highest flex items-center justify-center hover:bg-primary hover:text-white transition-colors">FB</a>
-                <a href="#" className="w-10 h-10 rounded-full bg-white border border-surface-container-highest flex items-center justify-center hover:bg-primary hover:text-white transition-colors">TW</a>
-                <a href="#" className="w-10 h-10 rounded-full bg-white border border-surface-container-highest flex items-center justify-center hover:bg-primary hover:text-white transition-colors">IG</a>
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="text-on-surface font-bold mb-6 text-lg">Công ty</h4>
-              <ul className="space-y-4 text-sm">
-                <li><a href="#" className="hover:text-primary transition-colors">Về chúng tôi</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Phòng khám</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Bệnh viện</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Chuyên khoa</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Liên hệ</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-on-surface font-bold mb-6 text-lg">Cần hỗ trợ?</h4>
-              <ul className="space-y-6 text-sm">
-                <li>
-                  <span className="block text-outline mb-1">Đến phòng khám</span>
-                  <p className="text-on-surface font-medium">123 Đường Y Học, TP. Hồ Chí Minh</p>
-                </li>
-                <li>
-                  <span className="block text-outline mb-1">Email hỗ trợ</span>
-                  <a href="mailto:info@medcare.plus" className="text-on-surface font-medium hover:text-primary">info@medcare.plus</a>
-                </li>
-                <li>
-                  <span className="block text-outline mb-1">Hotline</span>
-                  <a href="tel:02812345678" className="text-primary font-bold text-lg hover:text-primary-container">028 1234 5678</a>
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-on-surface font-bold mb-6 text-lg">Đăng ký nhận tin</h4>
-              <p className="text-sm mb-4">Nhận thông tin cập nhật mới nhất về sức khỏe từ MedCare Plus!</p>
-              <form className="flex">
-                <input type="email" placeholder="Nhập email của bạn" className="bg-white border border-surface-container-highest rounded-l-xl px-4 py-3 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary text-on-surface" />
-                <button type="button" className="bg-primary px-4 rounded-r-xl hover:bg-primary-container transition-colors">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                </button>
-              </form>
-            </div>
-          </div>
-          
-          <div className="pt-8 border-t border-surface-container-highest flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <p>© 2026 MedCare Plus. Tất cả quyền được bảo lưu.</p>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-primary transition-colors">Chính sách bảo mật</a>
-              <a href="#" className="hover:text-primary transition-colors">Điều khoản dịch vụ</a>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+					{/* Service Item */}
+					<div className="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div className="services-item-two bg-success-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="2s">
+							<div className="service-icon">
+								<img src="assets/img/icons/lab.svg" alt="lab" className="img-fluid" />
+							</div>
+							<h3><Link to="/lab-tests">Xét nghiệm & Chẩn đoán</Link></h3>
+						</div>
+					</div>
+					{/* Service Item End */}
+
+					{/* Service Item */}
+					<div className="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div className="services-item-two bg-pink-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="3s">
+							<div className="service-icon">
+								<img src="assets/img/icons/doctor.svg" alt="booking" className="img-fluid" />
+							</div>
+							<h3><Link to="/examination">Khám bệnh & Tư vấn</Link></h3>
+						</div>
+					</div>
+					{/* Service Item End */}
+
+					{/* Service Item */}
+					<div className="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div className="services-item-two bg-gray-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="4s">
+							<div className="service-icon">
+								<img src="assets/img/icons/health-care.svg" alt="health care" className="img-fluid" />
+							</div>
+							<h3><Link to="/history">Hồ sơ bệnh án</Link></h3>
+						</div>
+					</div>
+					{/* Service Item End */}
+
+					{/* Service Item */}					
+					<div className="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div className="services-item-two bg-secondary-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="5s">
+							<div className="service-icon">
+								<img src="assets/img/icons/medicine.svg" alt="medicine" className="img-fluid" />
+							</div>
+							<h3><Link to="/pharmacy">Dược phẩm & Vật tư</Link></h3>
+						</div>
+					</div>
+					{/* Service Item End */}
+
+					{/* Service Item */}
+					<div className="col-xl-2 col-lg-4 col-sm-6 d-flex">
+						<div className="services-item-two bg-orange-transparent w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="6s">
+							<div className="service-icon">
+								<img src="assets/img/icons/home-care.svg" alt="home care" className="img-fluid" />
+							</div>
+							<h3><Link to="/schedules">Lịch trực Bác sĩ</Link></h3>
+						</div>
+					</div>
+					{/* Service Item End */}
+
+				</div>
+
+			</div>
+		</section>
+		{/* Service Section End */}
+
+		{/* About Section */}
+		<section className="section about-section-two">
+			<div className="container">
+				<div className="row align-items-center">
+					
+					{/* About Img */}
+					<div className="col-lg-6">
+						<div className="about-img-two wow fadeInUp" data-wow-duration="2s">
+							<img src="assets/img/about/about.png" alt="about" className="img-fluid" />
+							<a href="https://youtu.be/MyQxnFgPgQU?si=Z9y2WdynImbFnqL2" data-fancybox>
+								<button className="animate-button" data-text="Play Video · Play Video ·" aria-label="Play video">
+									<p className="button-text"></p>
+									<span className="button-circle">
+										<i className="isax isax-play"></i>
+									</span>
+								</button>
+							</a>
+						</div>
+					</div>
+					{/* About Img End */}
+					
+					{/* About Content */}
+					<div className="col-lg-6">
+						<div className="about-content-two">
+							<div className="section-header section-header-two">
+								<div className="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon" />Về chúng tôi</div>
+								<h2 className="section-title">Thấu hiểu từng cá nhân & hành trình <span>Chăm sóc sức khỏe.</span></h2>
+								<p>Chúng tôi hướng tới việc cung cấp chẩn đoán nhanh hơn, thông tin chi tiết rõ ràng hơn và quyết định điều trị chính xác hơn, đảm bảo mỗi bệnh nhân đều nhận được sự chăm sóc an toàn và cá nhân hóa.</p>
+							</div>
+							<div className="row g-4">
+								<div className="col-md-6">
+									<div className="mission-item wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+										<div className="mission-inner">
+											<div className="mission-info">
+												<div className="mission-icon bg-primary">
+													<img src="assets/img/icons/mission.svg" alt="mission" className="img-fluid" />
+												</div>
+												<h3 className="custom-title">Sứ mệnh của chúng tôi</h3>
+											</div>
+											<p>Mang đến dịch vụ chăm sóc sức khỏe tận tâm, lấy bệnh nhân làm trung tâm bằng cách kết hợp chuyên môn lâm sàng với công nghệ hiện đại.</p>
+										</div>
+									</div>
+								</div>
+								<div className="col-md-6">
+									<div className="mission-item wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="4s">
+										<div className="mission-inner">
+											<div className="mission-info">
+												<div className="mission-icon bg-secondary">
+													<img src="assets/img/icons/vision.svg" alt="vision" className="img-fluid" />
+												</div>
+												<h3 className="custom-title">Tầm nhìn của chúng tôi</h3>
+											</div>
+											<p>Hỗ trợ bác sĩ phát hiện bệnh sớm hơn, cải thiện kết quả điều trị và định nghĩa lại tương lai của ngành y tế hiện đại.</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<Link to="/about-us" className="btn btn-md btn-primary">Tìm hiểu thêm<i className="isax isax-arrow-right-34 ms-2"></i></Link>
+						</div>
+					</div>
+					{/* About Content End */}
+
+				</div>
+			</div>
+			<img src="assets/img/bg/about-bg.png" alt="icon" className="img-fluid about-bg-01" />
+		</section>
+		{/* About Section End */}
+
+		{/* Speciality Section */}
+		<section className="section speciality-section-two">
+			<div className="container">
+				<div className="section-header section-header-two">
+					<div className="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon" />Chuyên khoa</div>
+					<h2 className="section-title mb-0">Hỗ trợ y tế cho <span>Mọi nhu cầu.</span></h2>
+				</div>
+
+				<div className="row justify-content-center g-4">
+
+					
+					{/* Specility Item */}
+					<div className="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div className="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+							<div className="speciality-info">
+								<Link to="/examination" className="speciality-icon">
+									<img src="assets/img/icons/specilaity-01.svg" alt="speciality" />
+								</Link>
+								<div>
+									<h3 className="custom-title"><Link to="/examination">Khám bệnh</Link></h3>
+									<p>Khám chuyên khoa</p>
+								</div>
+							</div>
+							<Link to="/examination" className="link-icon" aria-label="Xem bác sĩ"><i className="isax isax-arrow-right-1"></i></Link>
+						</div>
+					</div>
+					{/* Specility Item End */}
+
+					{/* Specility Item */}
+					<div className="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div className="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="2s">
+							<div className="speciality-info">
+								<Link to="/lab-tests" className="speciality-icon">
+									<img src="assets/img/icons/specilaity-02.svg" alt="speciality" />
+								</Link>
+								<div>
+									<h3 className="custom-title"><Link to="/lab-tests">Xét nghiệm</Link></h3>
+									<p>Cận lâm sàng</p>
+								</div>
+							</div>
+							<Link to="/lab-tests" className="link-icon" aria-label="Xem bác sĩ"><i className="isax isax-arrow-right-1"></i></Link>
+						</div>
+					</div>
+					{/* Specility Item End */}
+
+					{/* Specility Item */}
+					<div className="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div className="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="3s">
+							<div className="speciality-info">
+								<Link to="/pharmacy" className="speciality-icon">
+									<img src="assets/img/icons/specilaity-03.svg" alt="speciality" />
+								</Link>
+								<div>
+									<h3 className="custom-title"><Link to="/pharmacy">Nhà thuốc</Link></h3>
+									<p>Quản lý dược</p>
+								</div>
+							</div>
+							<Link to="/pharmacy" className="link-icon" aria-label="Xem bác sĩ"><i className="isax isax-arrow-right-1"></i></Link>
+						</div>
+					</div>
+					{/* Specility Item End */}
+
+					{/* Specility Item */}
+					<div className="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div className="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="4s">
+							<div className="speciality-info">
+								<Link to="/inpatient" className="speciality-icon">
+									<img src="assets/img/icons/specilaity-04.svg" alt="speciality" />
+								</Link>
+								<div>
+									<h3 className="custom-title"><Link to="/inpatient">Nội trú</Link></h3>
+									<p>Quản lý buồng giường</p>
+								</div>
+							</div>
+							<Link to="/inpatient" className="link-icon" aria-label="Xem bác sĩ"><i className="isax isax-arrow-right-1"></i></Link>
+						</div>
+					</div>
+					{/* Specility Item End */}
+
+					{/* Specility Item */}
+					<div className="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div className="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="5s">
+							<div className="speciality-info">
+								<Link to="/history" className="speciality-icon">
+									<img src="assets/img/icons/specilaity-05.svg" alt="speciality" />
+								</Link>
+								<div>
+									<h3 className="custom-title"><Link to="/history">Hồ sơ bệnh án</Link></h3>
+									<p>Bệnh án điện tử</p>
+								</div>
+							</div>
+							<Link to="/history" className="link-icon" aria-label="Xem bác sĩ"><i className="isax isax-arrow-right-1"></i></Link>
+						</div>
+					</div>
+					{/* Specility Item End */}
+
+					{/* Specility Item */}
+					<div className="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div className="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="6s">
+							<div className="speciality-info">
+								<Link to="/reception" className="speciality-icon">
+									<img src="assets/img/icons/specilaity-06.svg" alt="speciality" />
+								</Link>
+								<div>
+									<h3 className="custom-title"><Link to="/reception">Tiếp đón</Link></h3>
+									<p>Đăng ký khám</p>
+								</div>
+							</div>
+							<Link to="/reception" className="link-icon" aria-label="Xem bác sĩ"><i className="isax isax-arrow-right-1"></i></Link>
+						</div>
+					</div>
+					{/* Specility Item End */}
+
+					{/* Specility Item */}
+					<div className="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div className="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="7s">
+							<div className="speciality-info">
+								<Link to="/billing" className="speciality-icon">
+									<img src="assets/img/icons/specilaity-07.svg" alt="speciality" />
+								</Link>
+								<div>
+									<h3 className="custom-title"><Link to="/billing">Viện phí</Link></h3>
+									<p>Hóa đơn & Thanh toán</p>
+								</div>
+							</div>
+							<Link to="/billing" className="link-icon" aria-label="Xem bác sĩ"><i className="isax isax-arrow-right-1"></i></Link>
+						</div>
+					</div>
+					{/* Specility Item End */}
+
+					{/* Specility Item */}
+					<div className="col-xl-3 col-lg-4 col-md-6 d-flex">
+						<div className="speciality-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="8s">
+							<div className="speciality-info">
+								<Link to="/schedules" className="speciality-icon">
+									<img src="assets/img/icons/specilaity-08.svg" alt="speciality" />
+								</Link>
+								<div>
+									<h3 className="custom-title"><Link to="/schedules">Lịch trực</Link></h3>
+									<p>Bác sĩ & Nhân viên</p>
+								</div>
+							</div>
+							<Link to="/schedules" className="link-icon" aria-label="Xem bác sĩ"><i className="isax isax-arrow-right-1"></i></Link>
+						</div>
+					</div>
+					{/* Specility Item End */}
+  
+
+				</div>
+
+			</div>
+		</section>
+		{/* Speciality Section End */}
+
+		{/* Doctor Section */}
+		<section className="section doctor-section-two">
+			<div className="container">
+
+				{/* Section Header */}
+				<div className="section-header section-header-two">
+					<div className="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon" />Đội ngũ của chúng tôi</div>
+					<h2 className="section-title mb-0">Chuyên gia hàng đầu <span>Tận tâm chăm sóc bạn</span></h2>
+				</div>
+				{/* Section Header End */}
+
+				<div className="row g-4">
+					<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+
+						{/* Doctor Widget */}
+						<div className="doctor-item-two">
+							<div className="doctor-image">
+								<Link to="/doctor-profile">
+									<img className="img-fluid" alt="doctor" src="assets/img/doctors/general-01.jpg" />
+								</Link>
+							</div>
+							<div className="doctor-content">
+								<h3 className="custom-title">
+									<Link to="/doctor-profile">Dr. Hattie Driskell</Link>
+								</h3>
+								<p className="speciality">Orthopedic</p>
+								<div className="available-info">
+									<p><i className="isax isax-location me-1"></i>Los Angeles, CA</p>
+									<span className="badge bg-success"><i className="fa-solid fa-circle fs-5 me-1"></i>Sẵn sàng</span>
+								</div>
+								<Link to="/booking" className="btn btn-md btn-light w-100"><i className="isax isax-calendar-1 me-2"></i>Đặt ngay</Link>
+							</div>
+						</div>
+						{/* Doctor Widget End */}
+
+					</div>
+
+					<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+						
+						{/* Doctor Widget */}
+						<div className="doctor-item-two">
+							<div className="doctor-image">
+								<Link to="/doctor-profile">
+									<img className="img-fluid" alt="doctor" src="assets/img/doctors/general-02.jpg" />
+								</Link>
+							</div>
+							<div className="doctor-content">
+								<h3 className="custom-title">
+									<Link to="/doctor-profile">Dr. Calvin Haley</Link>
+								</h3>
+								<p className="speciality">Dentist</p>
+								<div className="available-info">
+									<p><i className="isax isax-location me-1"></i>Austin, TX</p>
+									<span className="badge bg-success"><i className="fa-solid fa-circle fs-5 me-1"></i>Sẵn sàng</span>
+								</div>
+								<Link to="/booking" className="btn btn-md btn-light w-100"><i className="isax isax-calendar-1 me-2"></i>Đặt ngay</Link>
+							</div>
+						</div>
+						{/* Doctor Widget End */}
+
+					</div>
+
+					<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+						
+						{/* Doctor Widget */}
+						<div className="doctor-item-two">
+							<div className="doctor-image">
+								<Link to="/doctor-profile">
+									<img className="img-fluid" alt="doctor" src="assets/img/doctors/general-03.jpg" />
+								</Link>
+							</div>
+							<div className="doctor-content">
+								<h3 className="custom-title">
+									<Link to="/doctor-profile">Dr. Lisa Labonte</Link>
+								</h3>
+								<p className="speciality">Neurologist</p>
+								<div className="available-info">
+									<p><i className="isax isax-location me-1"></i>Newyork, USA</p>
+									<span className="badge bg-success"><i className="fa-solid fa-circle fs-5 me-1"></i>Sẵn sàng</span>
+								</div>
+								<Link to="/booking" className="btn btn-md btn-light w-100"><i className="isax isax-calendar-1 me-2"></i>Đặt ngay</Link>
+							</div>
+						</div>
+						{/* Doctor Widget End */}
+
+					</div>
+
+					<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+						
+						{/* Doctor Widget */}
+						<div className="doctor-item-two">
+							<div className="doctor-image">
+								<Link to="/doctor-profile">
+									<img className="img-fluid" alt="doctor" src="assets/img/doctors/general-04.jpg" />
+								</Link>
+							</div>
+							<div className="doctor-content">
+								<h3 className="custom-title">
+									<Link to="/doctor-profile">Dr. James Davidson</Link>
+								</h3>
+								<p className="speciality">Immunologist</p>
+								<div className="available-info">
+									<p><i className="isax isax-location me-1"></i>Waipahu, HI</p>
+									<span className="badge bg-success"><i className="fa-solid fa-circle fs-5 me-1"></i>Sẵn sàng</span>
+								</div>
+								<Link to="/booking" className="btn btn-md btn-light w-100"><i className="isax isax-calendar-1 me-2"></i>Đặt ngay</Link>
+							</div>
+						</div>
+						{/* Doctor Widget End */}
+
+					</div>
+
+				</div>
+			</div>
+			<img src="assets/img/bg/doctor-bg-01.png" alt="bg" className="img-fluid doctor-bg-01" />
+			<img src="assets/img/bg/about-bg.png" alt="bg" className="img-fluid doctor-bg-02" />
+		</section>
+		{/* Doctor Section End */}
+		 
+		{/* Speciality Section */}
+		<section className="section speciality-section-two">
+			<div className="container">
+				<div className="section-header section-header-two">
+					<div className="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon" />Bảng giá dịch vụ</div>
+					<h2 className="section-title mb-0">Lựa chọn <span>Gói dịch vụ phù hợp</span></h2>
+				</div>
+
+				<div className="row align-items-end g-4">
+
+					{/* Price Item */}
+					<div className="col-xl-3 col-md-6 d-flex">
+						<div className="price-item flex-fill wow fadeInUp" data-wow-duration="1s">
+							<div className="price-header">
+								<p className="sub-title">Free</p>
+								<div className="price">$0<span>/monthly</span></div>
+								<Link to="/login" className="btn btn-md btn-dark">Bắt đầu ngay</Link>
+							</div>
+							<div className="price-body">
+								<h3>Bao gồm những gì</h3>
+								<ul>
+									<li>1 Người dùng</li>
+									<li>Hồ sơ bệnh án điện tử</li>
+									<li>Lập hóa đơn & Thanh toán</li>
+									<li>Quản lý tài khoản gia đình</li>
+									<li>Đặt xét nghiệm & Theo dõi mẫu</li>
+									<li>Tạo báo cáo tự động</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					{/* Price Item End */}
+
+					{/* Price Item */}
+					<div className="col-xl-3 col-md-6 d-flex">
+						<div className="price-item flex-fill wow fadeInUp" data-wow-duration="1s">
+							<div className="price-header">
+								<p className="sub-title">Basic</p>
+								<div className="price">$39<span>/monthly</span></div>
+								<Link to="/login" className="btn btn-md btn-dark">Bắt đầu ngay</Link>
+							</div>
+							<div className="price-body">
+								<h3>Bao gồm những gì</h3>
+								<ul>
+									<li>10 Người dùng</li>
+									<li>Truy cập kho dược</li>
+									<li>Tự động hóa hóa đơn</li>
+									<li>Quản lý tài khoản gia đình</li>
+									<li>Đặt xét nghiệm & Theo dõi mẫu</li>
+									<li>Phân tích & Báo cáo</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					{/* Price Item End */}
+
+					{/* Price Item */}
+					<div className="col-xl-3 col-md-6 d-flex">
+						<div className="price-item active flex-fill wow fadeInUp" data-wow-duration="1s">
+							<span className="recommend">Khuyên dùng</span>
+							<div className="price-header">
+								<p className="sub-title">Premium</p>
+								<div className="price">$99<span>/monthly</span></div>
+								<Link to="/login" className="btn btn-md btn-dark">Bắt đầu ngay</Link>
+							</div>
+							<div className="price-body">
+								<h3>Bao gồm những gì</h3>
+								<ul>
+									<li>100 Người dùng</li>
+									<li>Hóa đơn & Chứng từ</li>
+									<li>Hỗ trợ chuyên biệt</li>
+									<li>Quản lý tài khoản gia đình</li>
+									<li>Đặt xét nghiệm & Theo dõi mẫu</li>
+									<li>Phân tích & Báo cáo</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					{/* Price Item End */}
+
+					{/* Price Item */}
+					<div className="col-xl-3 col-md-6 d-flex">
+						<div className="price-item flex-fill wow fadeInUp" data-wow-duration="1s">
+							<div className="price-header">
+								<p className="sub-title">Enterprise</p>
+								<div className="price">$129<span>/monthly</span></div>
+								<Link to="/login" className="btn btn-md btn-dark">Bắt đầu ngay</Link>
+							</div>
+							<div className="price-body">
+								<h3>Bao gồm những gì</h3>
+								<ul>
+									<li>Không giới hạn người dùng</li>
+									<li>Truy cập kho dược</li>
+									<li>Hỗ trợ chuyên biệt</li>
+									<li>Quản lý tài khoản gia đình</li>
+									<li>Đặt xét nghiệm & Theo dõi mẫu</li>
+									<li>Phân tích & Báo cáo</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					{/* Price Item End */}
+
+				</div>
+			</div>
+		</section>
+		{/* Speciality Section End */}
+
+		{/* Work Section */}
+		<section className="section work-section-two">
+			<div className="container">
+
+				<div className="row">
+					<div className="col-xl-5">
+						<div className="work-img-two">
+							<img src="assets/img/about/about-01.png" alt="work" className="img-fluid" />
+						</div>
+					</div>
+
+					<div className="col-xl-7 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+						<div className="section-header section-header-two text-start">
+							<div className="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon" />Quy trình hoạt động</div>
+							<h2 className="section-title mb-0">4 Bước đơn giản để <span>Nhận kết quả</span></h2>
+						</div>
+						<div className="row g-4">
+
+							{/* Work Item */}
+							<div className="col-md-6 d-flex">
+								<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+									<div className="work-icon">
+										<img src="assets/img/icons/search.svg" alt="search doctor" />	
+									</div>
+									<div>
+										<h3 className="custom-title">Tìm kiếm Bác sĩ</h3>
+										<p>Tìm kiếm bác sĩ dựa trên chuyên khoa, địa điểm hoặc thời gian rảnh. </p>
+									</div>
+								</div>
+							</div>
+							{/* Work Item End */}
+
+							{/* Work Item */}
+							<div className="col-md-6 d-flex">
+								<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+									<div className="work-icon">
+										<img src="assets/img/icons/profile.svg" alt="profile" />	
+									</div>
+									<div>
+										<h3 className="custom-title">Xem Hồ sơ</h3>
+										<p>Khám phá hồ sơ bác sĩ chi tiết để đưa ra lựa chọn chăm sóc sức khỏe tốt nhất. </p>
+									</div>
+								</div>
+							</div>
+							{/* Work Item End */}
+
+							{/* Work Item */}
+							<div className="col-md-6 d-flex">
+								<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+									<div className="work-icon">
+										<img src="assets/img/icons/schedule.svg" alt="booking" />	
+									</div>
+									<div>
+										<h3 className="custom-title">Đặt Lịch hẹn</h3>
+										<p>Sau khi chọn bác sĩ yêu thích, hãy chọn khung giờ thuận tiện và xác nhận. </p>
+									</div>
+								</div>
+							</div>
+							{/* Work Item End */}
+
+							{/* Work Item */}
+							<div className="col-md-6 d-flex">
+								<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+									<div className="work-icon">
+										<img src="assets/img/icons/solution.svg" alt="your solution" />	
+									</div>
+									<div>
+										<h3 className="custom-title">Nhận Kết quả</h3>
+										<p>Tìm kiếm bác sĩ dựa trên chuyên khoa, địa điểm hoặc thời gian rảnh. </p>
+									</div>
+								</div>
+							</div>
+							{/* Work Item End */}
+
+						</div>
+					</div>
+				</div>
+			</div>
+			<img src="assets/img/bg/about-bg.png" alt="bg" className="img-fluid work-bg-01" />
+			<img src="assets/img/bg/work-bg.png" alt="bg" className="work-bg-02" />
+			<img src="assets/img/bg/work-bg-01.png" alt="bg" className="work-bg-03" />
+			<img src="assets/img/bg/work-bg-02.png" alt="bg" className="work-bg-04" />
+		</section>
+		{/* Work Section End */}
+
+		{/* Testimonial Section */}
+		<section className="section testimonial-section-two">
+			<div className="container-fluid">
+
+				{/* Section Header */}
+				<div className="section-header section-header-two">
+					<div className="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon" />Đánh giá từ khách hàng</div>
+					<h2 className="section-title mb-0">What Our Patients <span>Say Về chúng tôi</span></h2>
+				</div>
+				{/* Section Header End */}
+
+				<div className="testimonial-slider-two">
+
+					{/* Testimonial Item */}
+					<div className="testimonial-item-two">
+						<div className="testimonial-author-img">
+							<img src="assets/img/patients/patient22.jpg" className="rounded-circle" alt="patient" />
+						</div>
+						<div className="quote-icon">
+							<img src="assets/img/icons/quote-icon-01.svg" alt="quote" />
+						</div>
+						<div className="testimonial-content">
+							<p className="description">The emergency department responded promptly and efficiently when I arrived with severe pain. The doctors didn’t rush and made sure I understood. Best healthcare experiences</p>
+						</div>
+						<div className="testimonial-author-info">
+							<div>
+								<h3 className="custom-title">Daniel Carter</h3>
+								<p className="author-location">Dallas, CA</p>
+							</div>
+							<div className="rating">
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled"></i>
+							</div>
+						</div>
+					</div>
+					{/* Testimonial Item End */}
+
+					{/* Testimonial Item */}
+					<div className="testimonial-item-two">
+						<div className="testimonial-author-img">
+							<img src="assets/img/patients/patient25.jpg" className="rounded-circle" alt="patient" />
+						</div>
+						<div className="quote-icon">
+							<img src="assets/img/icons/quote-icon-01.svg" alt="quote" />
+						</div>
+						<div className="testimonial-content">
+							<p className="description">Sự chăm sóc tôi nhận được tại bệnh viện này thật tuyệt vời. The doctors explained everything clearly, the nurses were incredibly kind, and the facilities were spotless. I felt safe, supported, and genuinely cared for throughout my stay. Thật sự là một trong những trải nghiệm chăm sóc sức khỏe tốt nhất.</p>
+						</div>
+						<div className="testimonial-author-info">
+							<div>
+								<h3 className="custom-title">Jeni Adams</h3>
+								<p className="author-location">Los Boston, USA</p>
+							</div>
+							<div className="rating">
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled"></i>
+							</div>
+						</div>
+					</div>
+					{/* Testimonial Item End */}
+
+					{/* Testimonial Item */}
+					<div className="testimonial-item-two">
+						<div className="testimonial-author-img">
+							<img src="assets/img/patients/patient24.jpg" className="rounded-circle" alt="patient" />
+						</div>
+						<div className="quote-icon">
+							<img src="assets/img/icons/quote-icon-01.svg" alt="quote" />
+						</div>
+						<div className="testimonial-content">
+							<p className="description">Dịch vụ xuất sắc và bầu không khí thân thiện. The staff is knowledgeable and truly cares about their patients health, ensuring every visit is enjoyable.</p>
+						</div>
+						<div className="testimonial-author-info">
+							<div>
+								<h3 className="custom-title">Mike Smith</h3>
+								<p className="author-location">San Francisco, CA</p>
+							</div>
+							<div className="rating">
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled"></i>
+							</div>
+						</div>
+					</div>
+					{/* Testimonial Item End */}
+
+					{/* Testimonial Item */}
+					<div className="testimonial-item-two">
+						<div className="testimonial-author-img">
+							<img src="assets/img/patients/patient27.jpg" className="rounded-circle" alt="patient" />
+						</div>
+						<div className="quote-icon">
+							<img src="assets/img/icons/quote-icon-01.svg" alt="quote" />
+						</div>
+						<div className="testimonial-content">
+							<p className="description">The staff is knowledgeable and truly cares about their patients health, ensuring every visit is enjoyable. Dịch vụ xuất sắc và bầu không khí thân thiện.</p>
+						</div>
+						<div className="testimonial-author-info">
+							<div>
+								<h3 className="custom-title">Mark Andrew</h3>
+								<p className="author-location">San Francisco, CA</p>
+							</div>
+							<div className="rating">
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled me-1"></i>
+								<i className="fa-solid fa-star filled"></i>
+							</div>
+						</div>
+					</div>
+					{/* Testimonial Item End */}
+
+				</div>
+
+			</div>
+		</section>
+		{/* Testimonial Section End */}
+
+		{/* App Section */}
+		<section className="app-section-two">
+			<div className="container">
+				<div className="company-slider-two">
+					<div className="slide-item">
+						<img src="assets/img/company/company-09.svg" alt="client logo" />
+					</div>
+					<div className="slide-item">
+						<img src="assets/img/company/company-10.svg" alt="client logo" />
+					</div>
+					<div className="slide-item">
+						<img src="assets/img/company/company-11.svg" alt="client logo" />
+					</div>
+					<div className="slide-item">
+						<img src="assets/img/company/company-12.svg" alt="client logo" />
+					</div>
+					<div className="slide-item">
+						<img src="assets/img/company/company-13.svg" alt="client logo" />
+					</div>
+					<div className="slide-item">
+						<img src="assets/img/company/company-14.svg" alt="client logo" />
+					</div>
+					<div className="slide-item">
+						<img src="assets/img/company/company-11.svg" alt="client logo" />
+					</div>
+				</div>
+				<div className="app-sec">
+					<div className="row align-items-end">
+						<div className="col-lg-6">
+							<div className="app-content d-flex flex-column justify-content-center">
+
+								<div className="section-header sec-header-one wow fadeInUp" data-wow-duration="1s">
+									<p className="sub-title">Working for Your Better Health.</p>
+									<h2 className="section-title">Download the Doccure App today!</h2>
+								</div>
+								<div className="app-imgs wow fadeInUp" data-wow-duration="1s">
+									<a href="#" aria-label="Download on App Store"><img src="assets/img/icons/app-store.svg" alt="apple-icon" /></a>
+									<a href="#" aria-label="Get it on Google Play"><img src="assets/img/icons/google-play.svg" alt="google-play" /></a>
+								</div>
+							</div>
+						</div>
+						<div className="col-lg-6 wow fadeInUp" data-wow-duration="1s">
+							<div className="app-img">
+								<img src="assets/img/about/app-01.png" className="img-fluid" alt="app" />
+							</div>
+						</div>
+					</div>
+					<img src="assets/img/bg/app-bg-05.png" alt="img" className="app-bg-01" />
+				</div>
+			</div>
+		</section>
+		{/* App Section End */}	
+
+		{/* Blog Section */}
+		<section className="section blog-section">
+			<div className="container">
+
+				{/* Section Header */}
+				<div className="section-header section-header-two">
+					<div className="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon" />Blogs & Articles</div>
+					<h2 className="section-title mb-0">Latest News & Stories</h2>
+				</div>
+				{/* Section Header End */}
+
+				<div className="row justify-content-center g-4">
+					<div className="col-lg-4 col-md-6 d-flex">
+
+						{/* Blog Post */}
+						<div className="blog-item-two w-100 wow fadeInUp" data-wow-duration="1s">
+							<div className="blog-img">
+								<Link to="/blog-details">
+									<img className="img-fluid" src="assets/img/blog/general-blog-01.jpg" alt="blog" />
+								</Link>
+								<Link to="/blog-grid" className="badge">Health Awareness</Link>
+							</div>
+							<div className="blog-content">
+								<div className="blog-user-info">
+									<div className="blog-user">
+										<a href="#" className="avatar avatar-md">
+											<img src="assets/img/patients/patient12.jpg" className="img-fluid rounded-circle" alt="user" />
+										</a>
+										<a href="#">Grace Morgan</a>
+									</div>
+									<p className="date">10, Sep 2026</p>
+								</div>
+								<h3 className="custom-title"><Link to="/blog-details">The Importance of Early Diagnosis: Why Timing Matters...</Link></h3>
+								<p className="mb-0">Early diagnosis can dramatically improve treatment success. Detecting conditions in their earliest...</p>
+							</div>
+						</div>
+						{/* Blog Post End */}
+
+					</div>
+					<div className="col-lg-4 col-md-6 d-flex">
+
+
+						{/* Blog Post */}
+						<div className="blog-item-two w-100 wow fadeInUp" data-wow-duration="1s">
+							<div className="blog-img">
+								<Link to="/blog-details">
+									<img className="img-fluid" src="assets/img/blog/general-blog-02.jpg" alt="blog" />
+								</Link>
+								<Link to="/blog-grid" className="badge">Công nghệ Y tế</Link>
+							</div>
+							<div className="blog-content">
+								<div className="blog-user-info">
+									<div className="blog-user">
+										<a href="#" className="avatar avatar-md">
+											<img src="assets/img/patients/patient20.jpg" className="img-fluid rounded-circle" alt="user" />
+										</a>
+										<a href="#">Daniel Scott</a>
+									</div>
+									<p className="date">15, Sep 2026</p>
+								</div>
+								<h3 className="custom-title"><Link to="/blog-details">Công nghệ đang thay đổi các bệnh viện hiện đại như thế nào</Link></h3>
+								<p className="mb-0">Các bệnh viện ngày nay sử dụng chẩn đoán tiên tiến, công cụ AI, phẫu thuật robot và bệnh án điện tử...</p>
+							</div>
+						</div>
+						{/* Blog Post End */}
+
+					</div>
+					<div className="col-lg-4 col-md-6 d-flex">
+
+						{/* Blog Post */}
+						<div className="blog-item-two w-100 wow fadeInUp" data-wow-duration="1s">
+							<div className="blog-img">
+								<Link to="/blog-details">
+									<img className="img-fluid" src="assets/img/blog/general-blog-03.jpg" alt="blog" />
+								</Link>
+								<Link to="/blog-grid" className="badge">Nha khoa Tổng quát</Link>
+							</div>
+							<div className="blog-content">
+								<div className="blog-user-info">
+									<div className="blog-user">
+										<a href="#" className="avatar avatar-md">
+											<img src="assets/img/patients/patient21.jpg" className="img-fluid rounded-circle" alt="user" />
+										</a>
+										<a href="#">Jacob Allen</a>
+									</div>
+									<p className="date">25, Sep 2026</p>
+								</div>
+								<h3 className="custom-title"><Link to="/blog-details">Công nghệ đang thay đổi các bệnh viện hiện đại như thế nào</Link></h3>
+								<p className="mb-0">Các bệnh viện ngày nay sử dụng chẩn đoán tiên tiến, công cụ AI, phẫu thuật robot và bệnh án điện tử...</p>
+							</div>
+						</div>
+						{/* Blog Post End */}
+
+					</div>
+				</div>
+				<div className="view-all text-center wow fadeInUp" data-wow-duration="1s">
+					<Link to="/blog-list" className="btn btn-md btn-dark">Xem tất cả tin tức</Link>
+				</div>
+			</div>
+		</section>
+		{/* Blog Section End */}
+
+		{/* Health Section */}
+		<section className="section health-section trail-content">
+			<div className="container">
+				<div className="row">
+					<div className="col-lg-10 mx-auto">
+						<div className="content-img">
+							<div className="content-img-single">
+								<img src="assets/img/about/health-03.jpg" className="img-fluid" alt="health" />
+							</div>
+						</div>
+						<div className="content-img">
+							<div className="content-img-single">
+								<img src="assets/img/about/health-04.jpg" className="img-fluid" alt="health" />
+							</div>
+						</div>
+						<div className="content-img">
+							<div className="content-img-single">
+								<img src="assets/img/about/health-05.jpg" className="img-fluid" alt="health" />
+							</div>
+						</div>
+						<div className="health-content">
+							<h2><span className="health-img"><img src="assets/img/about/health-01.jpg" alt="health" className="img-fluid" /></span> From common illnesses to chronic disease management, we deliver <span className="avatar-list-stacked avatar-group-lg"><span className="avatar"><img src="assets/img/patients/patient24.jpg" alt="patient" className="img-fluid rounded-circle" /></span><span className="avatar"><img src="assets/img/patients/patient25.jpg" alt="patient" className="img-fluid rounded-circle" /></span><span className="avatar"><img src="assets/img/patients/patient26.jpg" alt="patient" className="img-fluid rounded-circle" /></span><span className="avatar"><img src="assets/img/patients/patient27.jpg" alt="patient" className="img-fluid rounded-circle" /></span></span> personalized care designed to improve your long-term health. <span className="health-img"><img src="assets/img/about/health-02.jpg" alt="health" className="img-fluid" /></span></h2>
+						</div>
+					</div>
+				</div>
+			</div>
+			<img src="assets/img/bg/doctor-bg-01.png" alt="bg" className="img-fluid health-bg-01" />
+			<img src="assets/img/bg/banner-05.png" alt="bg" className="img-fluid health-bg-02" />
+		</section>
+		{/* Health Section End */}
+
+		{/* Footer */}
+		<footer className="footer-two">
+
+			{/* Footer Top */}
+			<div className="footer-top">
+				<div className="container">
+					<div className="row g-4">
+						<div className="col-xl-4 col-lg-3 col-md-6">
+
+							{/* Footer Widget */}
+							<div className="footer-widget footer-about">
+								<div className="footer-logo">
+									<img src="assets/img/logo-02.svg" alt="logo" />
+								</div>
+								<div className="footer-about-content">
+									<p>We are a dedicated Eye Care and Vision Health Center committed to providing advanced, Diagnostic Treatments.</p>
+									<div className="social-icon">
+										<ul>
+											<li>
+												<a href="#" aria-label="Facebook">FB</a>
+											</li>
+											<li>
+												<a href="#" aria-label="Twitter">TW</a>
+											</li>
+											<li>
+												<a href="#" aria-label="LinkedIn">LN</a>
+											</li>
+											<li>
+												<a href="#" aria-label="YouTube">YT</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+							{/* Footer Widget End */}
+
+						</div>
+
+						<div className="col-lg-2 col-md-6">
+
+							{/* Footer Widget */}
+							<div className="footer-widget">
+								<h3 className="footer-title">Công ty</h3>
+								<ul className="footer-menu">
+									<li><Link to="/about-us">Giới thiệu</Link></li>
+									<li><Link to="/clinic">Phòng khám</Link></li>
+									<li><Link to="/hospitals">Bệnh viện</Link></li>
+									<li><Link to="/speciality">Chuyên khoa</Link></li>
+									<li><Link to="/contact-us">Liên hệ</Link></li>
+								</ul>
+							</div>
+							{/* Footer Widget End */}
+
+						</div>
+
+						<div className="col-xl-2 col-lg-3 col-md-6">
+
+							{/* Footer Widget */}
+							<div className="footer-widget footer-contact">
+								<h3 className="footer-title">Bạn cần hỗ trợ?</h3>
+								<div className="contact-info">
+									<span>Ghé thăm phòng khám</span>
+									<p>1250 Sunset Boulevard</p>
+								</div>
+								<div className="contact-info">
+									<span>Yêu cầu chung</span>
+									<p><a href="mailto:info@example.com">info@example.com</a></p>
+								</div>
+								<div className="contact-info">
+									<span>Gọi cho chúng tôi</span>
+									<p><a href="tel:5456564578">+1 54565 64578</a></p>
+								</div>
+							</div>
+							{/* Footer Widget End */}
+
+						</div>
+
+						<div className="col-lg-4 col-md-6">
+
+							{/* Footer Widget */}
+							<div className="footer-widget">
+								<h3 className="footer-title">Giữ liên lạc với chúng tôi</h3>
+								<div className="footer-subscribe">
+									<p>Đăng ký nhận bản tin để cập nhật tin tức mới nhất từ hệ thống!</p>
+									<div className="subscribe-input">
+										<form action="#">
+											<input type="email" className="form-control" placeholder="Nhập địa chỉ email" aria-label="Email address" />
+											<button type="submit" className="btn-icon btn btn-primary-gradient" aria-label="Subscribe"><i className="isax isax-arrow-right-1"></i></button>
+										</form>
+									</div>
+								</div>
+							</div>
+							{/* Footer Widget End */}
+
+						</div>
+
+					</div>
+				</div>
+				<img src="assets/img/bg/footer-bg-06.png" alt="bg" className="footer-bg-01" />
+				<img src="assets/img/bg/footer-bg-07.png" alt="bg" className="footer-bg-02" />
+			</div>
+			{/* /Footer Top */}
+
+			{/* Footer Bottom */}
+			<div className="footer-bottom">
+				<div className="container">
+
+					{/* Copyright */}
+					<div className="copyright">
+						<div className="copyright-text">
+							<p className="mb-0">Bản quyền &copy; 2026 The Clinical Curator. Bảo lưu mọi quyền.</p>
+						</div>
+						<div className="copyright-menu">
+							<ul>
+								<li><a href="#">Thông báo pháp lý</a></li>
+								<li><Link to="/privacy-policy">Chính sách bảo mật</Link></li>
+								<li><a href="#">Chính sách hoàn tiền</a></li>
+							</ul>
+						</div>
+					</div>
+					{/* Copyright End */}
+
+				</div>
+			</div>
+			{/* Footer Bottom End */}
+
+		</footer>
+		{/* Footer End */}
+
+		{/* Cursor */}
+		<div className="mouse-cursor cursor-outer"></div>
+		<div className="mouse-cursor cursor-inner"></div>
+		{/* /Cursor */}
+
+	</div>
+	{/* Main Wrapper End */}
+    </>
   );
 };
 

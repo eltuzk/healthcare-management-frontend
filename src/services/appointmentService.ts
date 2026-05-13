@@ -2,6 +2,7 @@ import api from "./api";
 
 export const getAppointments = async (params?: {
   patientId?: any;
+  doctorId?: any;
   doctorScheduleId?: any;
   status?: string;
 }): Promise<any> => {

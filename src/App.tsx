@@ -17,21 +17,29 @@ import LabResultEntryPage from './pages/LabResultEntryPage';
 import PharmacyInventoryPage from './pages/PharmacyInventoryPage';
 import PrescriptionDispensingPage from './pages/PrescriptionDispensingPage';
 import InpatientBedMapPage from './pages/InpatientBedMapPage';
+import RoomManagementPage from './pages/RoomManagementPage';
 import HospitalFeeCollectionPage from './pages/HospitalFeeCollectionPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
+import DoctorSchedulePagePersonal from './pages/doctor/DoctorSchedulePage';
+import AppointmentSelectionPage from './pages/doctor/AppointmentSelectionPage';
+import ExaminationPage from './pages/doctor/ExaminationPage';
+import ProfilePage from './pages/ProfilePage';
 import MainLayout from './components/common/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <Router>
+      <Toaster position="top-right" />
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        {/* Public Routes - No authentication required */}
+        <Route index element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         
-        {/* Protected Routes wrapped in MainLayout */}
+        {/* Protected Routes - Authentication and Layout required */}
         <Route element={
           <ProtectedRoute>
             <MainLayout />
@@ -77,6 +85,22 @@ function App() {
               <ExaminationScreenPage />
             </ProtectedRoute>
           } />
+          {/* New Doctor Routes */}
+          <Route path="/doctor/schedule" element={
+            <ProtectedRoute allowedRoles={['DOCTOR']}>
+              <DoctorSchedulePagePersonal />
+            </ProtectedRoute>
+          } />
+          <Route path="/doctor/appointments" element={
+            <ProtectedRoute allowedRoles={['DOCTOR']}>
+              <AppointmentSelectionPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/doctor/examination" element={
+            <ProtectedRoute allowedRoles={['DOCTOR']}>
+              <ExaminationPage />
+            </ProtectedRoute>
+          } />
           <Route path="/medical-history" element={
             <ProtectedRoute allowedRoles={['DOCTOR', 'RECEPTIONIST', 'ADMIN']}>
               <MedicalHistoryPage />
@@ -112,11 +136,17 @@ function App() {
               <InpatientBedMapPage />
             </ProtectedRoute>
           } />
+          <Route path="/rooms" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST', 'DOCTOR']}>
+              <RoomManagementPage />
+            </ProtectedRoute>
+          } />
           <Route path="/billing" element={
             <ProtectedRoute allowedRoles={['ACCOUNTANT', 'ADMIN']}>
               <HospitalFeeCollectionPage />
             </ProtectedRoute>
           } />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Routes>
     </Router>

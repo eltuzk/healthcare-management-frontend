@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from '../services/authService';
+import { GoogleLogin } from '@react-oauth/google';
+import { login, loginWithGoogle } from '../services/authService';
 
 const LoginPage: React.FC = () => {
 	const [email, setEmail] = useState('');
@@ -60,26 +61,44 @@ const LoginPage: React.FC = () => {
 		};
 	}, []);
 
+	const handleLoginSuccess = (response: any) => {
+		localStorage.setItem('token', response.accessToken);
+		localStorage.setItem('role', response.role);
+		
+		switch (response.role) {
+			case 'ADMIN': navigate('/dashboard'); break;
+			case 'DOCTOR': navigate('/daily-patients'); break;
+			case 'PATIENT': navigate('/'); break;
+			case 'RECEPTIONIST': navigate('/patients'); break;
+			case 'TECHNICIAN': navigate('/lab-tests'); break;
+			case 'PHARMACIST': navigate('/pharmacy-inventory'); break;
+			case 'ACCOUNTANT': navigate('/billing'); break;
+			default: navigate('/dashboard');
+		}
+	};
+
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setLoading(true);
 		setError(null);
 		try {
 			const response = await login({ email, password });
-			localStorage.setItem('token', response.accessToken);
-			localStorage.setItem('role', response.role);
-			
-			switch (response.role) {
-				case 'ADMIN': navigate('/dashboard'); break;
-				case 'DOCTOR': navigate('/daily-patients'); break;
-				case 'RECEPTIONIST': navigate('/patients'); break;
-				case 'TECHNICIAN': navigate('/lab-tests'); break;
-				case 'PHARMACIST': navigate('/pharmacy-inventory'); break;
-				case 'ACCOUNTANT': navigate('/billing'); break;
-				default: navigate('/dashboard');
-			}
+			handleLoginSuccess(response);
 		} catch (err: any) {
 			setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleGoogleSuccess = async (credentialResponse: any) => {
+		setLoading(true);
+		setError(null);
+		try {
+			const response = await loginWithGoogle(credentialResponse.credential);
+			handleLoginSuccess(response);
+		} catch (err: any) {
+			setError(err.response?.data?.message || 'Đăng nhập bằng Google thất bại.');
 		} finally {
 			setLoading(false);
 		}
@@ -99,28 +118,11 @@ const LoginPage: React.FC = () => {
 								<img src="/assets/img/logo.svg" className="img-fluid" alt="Logo" />
 							</Link>
 						</div>
-						<div className="header-menu">
-							<div className="main-menu-wrapper">
-								<div className="menu-header">
-									<Link to="/" className="menu-logo">
-										<img src="/assets/img/logo.svg" className="img-fluid" alt="Logo" />
-									</Link>
-									<Link id="menu_close" className="menu-close" to="#">
-										<i className="fas fa-times"></i>
-									</Link>
-								</div>
-								<ul className="main-nav">
-									<li><Link to="/">Trang chủ</Link></li>
-									<li><Link to="/doctors">Bác sĩ</Link></li>
-									<li><Link to="/patients">Bệnh nhân</Link></li>
-									<li><Link to="/pharmacy">Nhà thuốc</Link></li>
-								</ul>
-							</div>
-						</div>
+						{/* Removed header-menu to move Trang chủ to the right */}
 						<ul className="nav header-navbar-rht">
 							<li>
-								<Link to="/login" className="btn btn-md btn-primary-gradient">
-									<i className="isax isax-lock-1 me-2"></i><span>Đăng nhập</span> 
+								<Link to="/" className="btn btn-md btn-outline-primary shadow-sm" style={{ borderRadius: '10px', fontWeight: '600' }}>
+									<i className="isax isax-home me-2"></i>Trang chủ
 								</Link>
 							</li>
 							<li>
@@ -182,10 +184,15 @@ const LoginPage: React.FC = () => {
 												<span className="or-line"></span>
 												<span className="span-or">hoặc</span>
 											</div>
-											<div className="social-login-btn">
-												<Link to="#" className="btn w-100">
-													<img src="/assets/img/icons/google-icon.svg" alt="google" /> Đăng nhập với Google
-												</Link>
+											<div className="social-login-btn d-flex justify-content-center">
+												<GoogleLogin
+													onSuccess={handleGoogleSuccess}
+													onError={() => setError('Đăng nhập bằng Google thất bại.')}
+													useOneTap
+													theme="filled_blue"
+													shape="rectangular"
+													width="100%"
+												/>
 											</div>
 											<div className="account-signup">
 												<p>Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></p>
@@ -206,7 +213,9 @@ const LoginPage: React.FC = () => {
 							<div className="col-lg-3 col-md-6">
 								<div className="footer-widget footer-about">
 									<div className="footer-logo">
-										<img src="/assets/img/logo.svg" alt="logo" />
+										<Link to="/">
+											<img src="/assets/img/logo.svg" alt="logo" />
+										</Link>
 									</div>
 									<div className="footer-about-content">
 										<p>The Clinical Curator - Hệ thống quản lý y tế thông minh, kết nối bác sĩ và bệnh nhân một cách hiệu quả nhất.</p>

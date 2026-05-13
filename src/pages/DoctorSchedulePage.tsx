@@ -1,238 +1,472 @@
-import React, { useState, useEffect } from 'react';
-import { getDoctorSchedules } from '../services/scheduleService';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Search, Calendar as CalendarIcon, 
+  User as UserIcon, MapPin, 
+  Clock, Plus, X,
+  ChevronRight, ChevronLeft,
+  Save
+} from 'lucide-react';
+import { 
+  getDoctorSchedules, 
+  createDoctorSchedule, 
+  deleteDoctorSchedule 
+} from '../services/scheduleService';
+import { getRooms } from '../services/roomService';
+import { getDoctors } from '../services/staffService';
+import { getAccounts } from '../services/accountService';
+import { toast } from 'react-hot-toast';
 
-// Format Date helper
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-};
+interface Doctor {
+  doctorId: number;
+  fullName: string;
+  specialtyName: string;
+  specialtyId: number;
+}
 
-const getDayOfWeek = (dateString: string) => {
-  const date = new Date(dateString);
-  const days = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-  return days[date.getDay()];
-};
+interface Room {
+  roomId: number;
+  roomCode: string;
+  specialtyId: number;
+  specialtyName: string;
+}
+
+interface Schedule {
+  scheduleId?: number;
+  doctorId: number;
+  doctorName: string;
+  roomId: number;
+  roomCode: string;
+  scheduleDate: string;
+  shift: 'MORNING' | 'AFTERNOON';
+  isNew?: boolean;
+}
 
 const DoctorSchedulePage: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'Tuần' | 'Ngày'>('Tuần');
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [schedules, setSchedules] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Data State
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [pendingSchedules, setPendingSchedules] = useState<Schedule[]>([]);
+  
+  // UI State
+  const [searchDoctor, setSearchDoctor] = useState('');
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Start on Monday
+    const start = new Date(d.setDate(diff));
+    start.setHours(0, 0, 0, 0);
+    return start;
+  });
+  
+  // Drag & Drop State
+  const [draggingDoctor, setDraggingDoctor] = useState<Doctor | null>(null);
+
+  // Scroll Ref
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchSchedules();
+    fetchData();
+  }, [currentWeekStart]);
+
+  // Horizontal scroll with mouse wheel
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (el) {
+      const onWheel = (e: WheelEvent) => {
+        if (e.deltaY !== 0) {
+          el.scrollLeft += e.deltaY;
+          e.preventDefault();
+        }
+      };
+      el.addEventListener('wheel', onWheel, { passive: false });
+      return () => el.removeEventListener('wheel', onWheel);
+    }
   }, []);
 
-  const fetchSchedules = async () => {
-    setLoading(true);
-    setError(null);
+  const fetchData = async () => {
     try {
-      // Gọi API lấy lịch trực
-      const data = await getDoctorSchedules();
-      // Data đã được unwrapped từ ApiResponse.result thông qua axios interceptor
-      setSchedules(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      console.error("Lỗi khi lấy lịch trực:", err);
-      setError(err.message || 'Không thể tải lịch làm việc');
-    } finally {
-      setLoading(false);
+      const startDate = currentWeekStart.toISOString().split('T')[0];
+      const endDate = new Date(currentWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      const [docsRes, roomsRes, schedRes, accountsRes] = await Promise.allSettled([
+        getDoctors(0, 1000),
+        getRooms(),
+        getDoctorSchedules({ startDate, endDate }),
+        getAccounts(0, 1000)
+      ]);
+
+      // 1. Process Doctors (Entity Source)
+      let docs: Doctor[] = [];
+      if (docsRes.status === 'fulfilled') {
+        const val = docsRes.value;
+        docs = val?.content || val?.data?.content || (Array.isArray(val) ? val : []);
+      }
+
+      // 2. Fallback to Accounts if Doctors is empty (Role-based Source)
+      if (docs.length === 0 && accountsRes.status === 'fulfilled') {
+        const val: any = accountsRes.value;
+        const accounts = val?.content || val?.data?.content || (Array.isArray(val) ? val : []);
+        docs = accounts
+          .filter((acc: any) => acc.roleName !== 'PATIENT' && acc.roleName !== 'ROLE_PATIENT')
+          .map((acc: any) => ({
+            doctorId: acc.accountId, // Use accountId as doctorId fallback
+            fullName: acc.fullName,
+            specialtyName: acc.specialtyName || 'Chưa xác định',
+            specialtyId: acc.specialtyId || 0
+          }));
+      }
+
+      // 3. Process Rooms
+      let rms: Room[] = [];
+      if (roomsRes.status === 'fulfilled') {
+        const val = roomsRes.value;
+        rms = val?.data || val || [];
+      }
+
+      // 4. Process Schedules
+      let scs: Schedule[] = [];
+      if (schedRes.status === 'fulfilled') {
+        const val = schedRes.value;
+        scs = val?.data || val || [];
+      }
+
+      setDoctors(docs);
+      setRooms(rms);
+      setSchedules(scs);
+      setPendingSchedules([]);
+    } catch (error) {
+      toast.error('Lỗi hệ thống khi tải dữ liệu');
+      console.error('Data Load Error:', error);
     }
   };
 
-  // Tạo mảng 7 ngày cho giao diện (tạm thời lấy 7 ngày gần nhất từ lịch lấy được, hoặc render tuần hiện tại)
-  // Để đơn giản, ta sẽ gom nhóm schedules theo ngày.
-  const groupedSchedules: Record<string, any[]> = {};
-  schedules.forEach(schedule => {
-    const dateStr = schedule.scheduleDate; // e.g., '2026-05-11'
-    if (!groupedSchedules[dateStr]) {
-      groupedSchedules[dateStr] = [];
-    }
-    groupedSchedules[dateStr].push(schedule);
-  });
-
-  // Tạo danh sách 7 ngày hiển thị (Bắt đầu từ hôm nay cho demo)
-  const displayDays = [];
-  const today = new Date();
-  for (let i = 0; i < 7; i++) {
-    const current = new Date(today);
-    current.setDate(today.getDate() + i);
-    const dateKey = current.toISOString().split('T')[0];
-
-    displayDays.push({
-      dateKey,
-      day: getDayOfWeek(dateKey),
-      date: formatDate(dateKey),
-      shifts: groupedSchedules[dateKey] || []
+  // Helpers
+  const weekDays = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(currentWeekStart);
+      d.setDate(d.getDate() + i);
+      const dayName = d.toLocaleDateString('vi-VN', { weekday: 'short' });
+      const dateNum = d.getDate();
+      const monthNum = d.getMonth() + 1;
+      return {
+        dateStr: d.toISOString().split('T')[0],
+        dayName: dayName.toUpperCase(),
+        dateLabel: `${dateNum}/${monthNum < 10 ? '0' + monthNum : monthNum}`
+      };
     });
-  }
+  }, [currentWeekStart]);
+
+  const roomsBySpecialty = useMemo(() => {
+    const groups: Record<string, Room[]> = {};
+    rooms.forEach(r => {
+      const key = r.specialtyName || 'Khác';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(r);
+    });
+    return groups;
+  }, [rooms]);
+
+  const filteredDoctors = doctors.filter(d => 
+    (d.fullName || '').toLowerCase().includes(searchDoctor.toLowerCase()) ||
+    (d.specialtyName || '').toLowerCase().includes(searchDoctor.toLowerCase())
+  );
+
+  // Drag & Drop Handlers
+  const handleDragStart = (e: React.DragEvent, doctor: Doctor) => {
+    setDraggingDoctor(doctor);
+    e.dataTransfer.setData('doctorId', doctor.doctorId.toString());
+  };
+
+  const handleDragEnd = () => {
+    setDraggingDoctor(null);
+  };
+
+  const handleDrop = (date: string, shift: 'MORNING' | 'AFTERNOON', roomId: number) => {
+    if (!draggingDoctor) return;
+    
+    const isAssigned = [...schedules, ...pendingSchedules].find(s => 
+      s.scheduleDate === date && s.shift === shift && s.doctorId === draggingDoctor.doctorId
+    );
+
+    if (isAssigned) {
+      toast.error(`${draggingDoctor.fullName} đã có lịch trong ca này`);
+      return;
+    }
+
+    const newAssignment: Schedule = {
+      doctorId: draggingDoctor.doctorId,
+      doctorName: draggingDoctor.fullName,
+      roomId: roomId,
+      roomCode: rooms.find(r => r.roomId === roomId)?.roomCode || '',
+      scheduleDate: date,
+      shift: shift,
+      isNew: true
+    };
+
+    setPendingSchedules(prev => [...prev, newAssignment]);
+  };
+
+  const handleSaveAll = async () => {
+    if (pendingSchedules.length === 0) return;
+    
+    const loadingToast = toast.loading('Đang lưu lịch trực...');
+    try {
+      await Promise.all(pendingSchedules.map(s => 
+        createDoctorSchedule({
+          doctorId: s.doctorId,
+          roomId: s.roomId,
+          scheduleDate: s.scheduleDate,
+          shift: s.shift,
+          maxCapacity: 20
+        })
+      ));
+      toast.success('Đã lưu tất cả lịch trực!', { id: loadingToast });
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.message || 'Lỗi khi lưu lịch trực', { id: loadingToast });
+    }
+  };
+
+  const handleDeleteAssignment = async (schedule: Schedule) => {
+    if (schedule.isNew) {
+      setPendingSchedules(prev => prev.filter(s => s !== schedule));
+      return;
+    }
+
+    if (!confirm('Bạn có chắc chắn muốn xóa lịch trực này?')) return;
+    try {
+      if (schedule.scheduleId) {
+        await deleteDoctorSchedule(schedule.scheduleId);
+        toast.success('Đã xóa lịch trực');
+        fetchData();
+      }
+    } catch (error) {
+      toast.error('Không thể xóa lịch trực');
+    }
+  };
+
+  const allVisibleSchedules = [...schedules, ...pendingSchedules];
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12 h-full flex flex-col">
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="h-screen bg-slate-50 flex flex-col overflow-hidden font-body">
+      {/* Header Section */}
+      <div className="flex-none p-6 lg:px-10 lg:pt-8 lg:pb-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
-          <h1 className="font-display text-[2rem] font-bold text-on-surface tracking-tight leading-tight">Quản lý lịch trực</h1>
-          <p className="font-body text-sm text-on-surface-variant mt-2 font-medium">
-            <span className="text-primary font-bold">Tuần này</span>
-          </p>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            <CalendarIcon className="text-blue-600 w-8 h-8" />
+            Điều phối <span className="text-blue-600 font-light italic">Lịch trực</span>
+          </h1>
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={fetchSchedules}
-            className="bg-surface-container-low text-on-surface-variant hover:text-on-surface font-body font-bold text-sm px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-            Làm mới
-          </button>
-          <div className="flex bg-surface-container-low rounded-xl p-1">
-            <button
-              onClick={() => setViewMode('Tuần')}
-              className={`px-4 py-2 text-sm font-bold font-body rounded-lg transition-all ${viewMode === 'Tuần' ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'}`}
+
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+            <button 
+              onClick={() => setCurrentWeekStart(new Date(currentWeekStart.getTime() - 7 * 24 * 60 * 60 * 1000))}
+              className="p-2 hover:bg-slate-100 rounded-xl transition-all"
             >
-              Theo tuần
+              <ChevronLeft className="w-5 h-5" />
             </button>
-            <button
-              onClick={() => setViewMode('Ngày')}
-              className={`px-4 py-2 text-sm font-bold font-body rounded-lg transition-all ${viewMode === 'Ngày' ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'}`}
+            <div className="px-6 font-bold text-sm text-slate-700 min-w-[150px] text-center">
+              {weekDays[0].dateLabel} — {weekDays[6].dateLabel}
+            </div>
+            <button 
+              onClick={() => setCurrentWeekStart(new Date(currentWeekStart.getTime() + 7 * 24 * 60 * 60 * 1000))}
+              className="p-2 hover:bg-slate-100 rounded-xl transition-all"
             >
-              Theo ngày
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-          <button
-            onClick={() => setIsImportModalOpen(true)}
-            className="bg-primary text-white font-body font-bold text-sm px-4 py-2 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-            Nhập lịch (Excel)
-          </button>
+
+          {pendingSchedules.length > 0 && (
+            <motion.button 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              onClick={handleSaveAll}
+              className="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 shadow-[0_10px_30px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95 transition-all"
+            >
+              <Save size={18} />
+              LƯU THAY ĐỔI ({pendingSchedules.length})
+            </motion.button>
+          )}
         </div>
       </div>
 
-      {error && (
-        <div className="p-4 bg-error-container/10 border border-error/20 rounded-xl text-error font-medium">
-          {error}
-        </div>
-      )}
-
-      {/* Calendar Grid */}
-      <div className="bg-surface-container-lowest rounded-[24px] shadow-ambient flex-1 overflow-hidden flex flex-col border border-surface-container-low relative">
-        {loading && (
-          <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex justify-center items-center z-10">
-            <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-          </div>
-        )}
-        <div className="grid grid-cols-7 border-b border-surface-container-low bg-surface-container-lowest">
-          {displayDays.map((day, idx) => (
-            <div key={idx} className={`p-4 text-center border-r border-surface-container-low last:border-r-0 ${idx === 0 ? 'bg-primary/5' : ''}`}>
-              <p className={`font-body text-xs font-bold uppercase tracking-widest ${idx === 0 ? 'text-primary' : 'text-on-surface-variant'}`}>{day.day}</p>
-              <p className={`font-display text-xl font-bold mt-1 ${idx === 0 ? 'text-primary' : 'text-on-surface'}`}>{day.date}</p>
+      <div className="flex-1 flex overflow-hidden p-6 lg:px-10 lg:pb-10 gap-8">
+        
+        {/* Left Sidebar: Doctors */}
+        <div className="w-[300px] flex-none flex flex-col gap-6 h-full">
+          <div className="glass-panel p-6 rounded-[32px] flex flex-col h-full overflow-hidden border border-white shadow-xl bg-white">
+            <div className="flex items-center justify-between mb-6 flex-none">
+               <h3 className="font-black text-slate-900 uppercase tracking-widest text-[10px] flex items-center gap-2">
+                 <UserIcon size={14} className="text-blue-600" />
+                 Nhân sự ({filteredDoctors.length})
+               </h3>
             </div>
-          ))}
+
+            <div className="relative mb-6 flex-none">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <input 
+                type="text" 
+                placeholder="Tìm tên..." 
+                className="w-full bg-slate-100 border-none rounded-xl py-3.5 pl-11 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                value={searchDoctor}
+                onChange={(e) => setSearchDoctor(e.target.value)}
+              />
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+              {filteredDoctors.length > 0 ? (
+                filteredDoctors.map(doctor => (
+                  <motion.div 
+                    key={doctor.doctorId}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e as any, doctor)}
+                    onDragEnd={handleDragEnd}
+                    whileHover={{ scale: 1.02 }}
+                    className={`p-4 rounded-2xl border border-slate-100 bg-white shadow-sm cursor-grab active:cursor-grabbing group hover:border-blue-200 transition-all ${
+                      draggingDoctor?.doctorId === doctor.doctorId ? 'opacity-50 border-blue-500 border-dashed bg-blue-50' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100 group-hover:border-blue-200">
+                        <UserIcon className="text-slate-400 group-hover:text-blue-500 w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-black text-slate-900 leading-tight truncate">{doctor.fullName}</p>
+                        <p className="text-[9px] font-bold text-blue-600/70 uppercase tracking-widest mt-1">{doctor.specialtyName}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center py-10 opacity-50">
+                  <UserIcon className="mx-auto mb-3 text-slate-300" size={32} />
+                  <p className="text-xs font-bold uppercase tracking-widest">Không có dữ liệu</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-7 flex-1 min-h-[500px]">
-          {displayDays.map((day, idx) => (
-            <div key={idx} className={`border-r border-surface-container-low last:border-r-0 p-3 flex flex-col gap-3 ${idx === 0 ? 'bg-primary/5' : ''}`}>
-              {day.shifts.map((shift, sIdx) => (
-                <div key={sIdx} className={`p-3 rounded-xl border ${shift.shift === 'MORNING' ? 'bg-emerald-50 border-emerald-200' :
-                    shift.shift === 'AFTERNOON' ? 'bg-blue-50 border-blue-200' :
-                      'bg-purple-50 border-purple-200'
-                  } hover:shadow-md transition-shadow cursor-pointer`}>
-                  <p className="font-body text-xs font-bold text-on-surface mb-1 truncate">{shift.doctorName}</p>
-                  <p className="font-body text-[10px] text-on-surface-variant flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {shift.shiftStartTime || shift.shift}
-                  </p>
-                  <p className="font-body text-[10px] text-on-surface-variant flex items-center gap-1 mt-0.5">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                    {shift.roomCode}
-                  </p>
-                  <div className="mt-2 pt-2 border-t border-black/5 flex justify-between items-center">
-                    <span className="text-[9px] font-bold text-on-surface-variant">KHÁM: {shift.currentBookingCount}/{shift.maxCapacity}</span>
+        {/* Main Grid: Weekly Schedule */}
+        <div className="flex-1 flex flex-col min-w-0 h-full">
+          <div className="glass-panel rounded-[40px] overflow-hidden flex flex-col h-full border border-white shadow-xl relative bg-white">
+            
+            {/* Calendar Container with Single Scroll Axis */}
+            <div 
+              ref={scrollContainerRef}
+              className="flex-1 overflow-auto custom-scrollbar scroll-smooth relative"
+            >
+              <div className="min-w-[1200px] flex flex-col">
+                
+                {/* Grid Header */}
+                <div className="grid grid-cols-[160px_repeat(7,1fr)] border-b border-slate-100 bg-white sticky top-0 z-40 shadow-sm">
+                  <div className="p-6 border-r border-slate-100 flex items-center bg-white sticky left-0 z-50">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Không gian</span>
                   </div>
+                  {weekDays.map(day => (
+                    <div key={day.dateStr} className="p-6 text-center border-r border-slate-100 last:border-none bg-white">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{day.dayName}</p>
+                      <p className="text-xl font-black text-slate-900 tracking-tighter italic">{day.dateLabel}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
 
-              {/* Add Shift Placeholder */}
-              <button className="mt-auto w-full py-2 rounded-lg border border-dashed border-outline-variant text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 hover:opacity-100 focus:opacity-100">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
+                {/* Grid Body */}
+                <div className="bg-slate-50/20">
+                  {Object.entries(roomsBySpecialty).map(([specialty, specialtyRooms]) => (
+                    <div key={specialty} className="contents">
+                      <div className="col-span-full bg-blue-50/40 px-8 py-3 border-y border-slate-100/50 flex justify-between items-center sticky left-0 z-30">
+                        <h4 className="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em]">{specialty}</h4>
+                      </div>
+                      
+                      {specialtyRooms.map(room => (
+                        <div key={room.roomId} className="grid grid-cols-[160px_repeat(7,1fr)] min-h-[160px] border-b border-slate-100/50 bg-white">
+                          {/* Room Column */}
+                          <div className="p-6 border-r border-slate-100 bg-white flex flex-col justify-center sticky left-0 z-20 shadow-[2px_0_10px_rgba(0,0,0,0.02)]">
+                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Mã phòng</span>
+                            <h5 className="text-2xl font-black text-slate-900 italic tracking-tighter leading-none">{room.roomCode}</h5>
+                          </div>
 
-      {/* Import Excel Modal */}
-      {isImportModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-          <div className="absolute inset-0 bg-surface-container-highest/80 backdrop-blur-sm" onClick={() => setIsImportModalOpen(false)}></div>
+                          {/* Day Columns */}
+                          {weekDays.map(day => (
+                            <div key={`${room.roomId}-${day.dateStr}`} className="border-r border-slate-100 last:border-none flex flex-col p-2 gap-2 bg-white/50">
+                              {['MORNING', 'AFTERNOON'].map((shift: any) => {
+                                const assignment = allVisibleSchedules.find(s => s.scheduleDate === day.dateStr && s.shift === shift && s.roomId === room.roomId);
+                                const isCompatible = draggingDoctor?.specialtyId === room.specialtyId || draggingDoctor?.specialtyId === 0;
+                                const isDimmed = draggingDoctor && !isCompatible;
 
-          <div className="relative w-full max-w-3xl bg-surface-container-lowest rounded-[24px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-fade-in">
-            <div className="flex justify-between items-center p-6 border-b border-surface-container-low">
-              <h2 className="font-display text-xl font-bold text-on-surface">Nhập lịch từ Excel</h2>
-              <button onClick={() => setIsImportModalOpen(false)} className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low hover:text-error transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            </div>
-
-            <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-8">
-              {/* Drag & Drop Area */}
-              <div className="w-full border-2 border-dashed border-primary/40 rounded-[20px] bg-primary/5 flex flex-col items-center justify-center py-10 hover:bg-primary/10 transition-colors cursor-pointer group">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 text-primary group-hover:scale-110 transition-transform">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                </div>
-                <h3 className="font-display text-lg font-bold text-on-surface mb-2">Kéo và thả tệp Excel của bạn ở đây</h3>
-                <p className="font-body text-sm text-on-surface-variant mb-6">Hỗ trợ định dạng .xls, .xlsx tối đa 5MB</p>
-                <button className="px-6 py-2.5 bg-white border border-outline-variant/30 text-on-surface font-body font-bold text-sm rounded-xl hover:bg-surface-container-low shadow-sm transition-colors">
-                  Chọn tệp tin
-                </button>
-              </div>
-
-              {/* Preview Table */}
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h4 className="font-body text-[10px] font-bold tracking-widest uppercase text-on-surface-variant">Xem trước dữ liệu (4 ca trực mới)</h4>
-                  <button className="font-body text-xs font-bold text-error hover:underline">Hủy tất cả</button>
-                </div>
-                <div className="border border-surface-container-low rounded-xl overflow-hidden">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="bg-surface-container-low/50 border-b border-surface-container-low">
-                        <th className="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Tên bác sĩ</th>
-                        <th className="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Ngày trực</th>
-                        <th className="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Thời gian</th>
-                        <th className="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Phòng</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-surface-container-low/50">
-                      {mockPreviewData.map((row) => (
-                        <tr key={row.id} className="hover:bg-surface-container-low/30">
-                          <td className="py-3 px-4 font-body text-sm font-bold text-on-surface">{row.doctor}</td>
-                          <td className="py-3 px-4 font-body text-sm text-on-surface-variant">{row.date}</td>
-                          <td className="py-3 px-4 font-body text-sm text-on-surface-variant">{row.time}</td>
-                          <td className="py-3 px-4 font-body text-sm font-semibold text-on-surface">{row.room}</td>
-                        </tr>
+                                return (
+                                  <div 
+                                    key={shift}
+                                    onDragOver={(e) => { if (isCompatible) e.preventDefault(); }}
+                                    onDrop={() => handleDrop(day.dateStr, shift, room.roomId)}
+                                    className={`flex-1 rounded-2xl border-2 transition-all duration-300 relative group/cell flex flex-col p-1 ${
+                                      assignment 
+                                        ? (assignment.isNew ? 'border-emerald-200 bg-emerald-50/30' : 'border-blue-100 bg-blue-50/20')
+                                        : 'border-transparent'
+                                    } ${isDimmed ? 'opacity-10 grayscale pointer-events-none' : ''} ${
+                                      draggingDoctor && isCompatible ? 'border-dashed border-blue-400 bg-blue-50/50 cursor-copy' : ''
+                                    }`}
+                                  >
+                                    <span className="absolute top-1 right-2 text-[6px] font-black text-slate-300 uppercase z-0">{shift === 'MORNING' ? 'AM' : 'PM'}</span>
+                                    
+                                    {assignment ? (
+                                      <motion.div 
+                                        initial={{ opacity: 0, scale: 0.95 }} 
+                                        animate={{ opacity: 1, scale: 1 }} 
+                                        className={`flex-1 rounded-xl p-3 shadow-md relative group/assign flex flex-col justify-center z-10 ${
+                                          assignment.isNew ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white'
+                                        }`}
+                                      >
+                                        <p className="text-[10px] font-black uppercase leading-tight text-center">{assignment.doctorName}</p>
+                                        {assignment.isNew && <p className="text-[7px] font-bold text-emerald-100 uppercase mt-1 text-center">Chờ lưu</p>}
+                                        <button 
+                                          onClick={() => handleDeleteAssignment(assignment)} 
+                                          className="absolute -top-1 -right-1 w-6 h-6 bg-slate-900/40 hover:bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover/assign:opacity-100 transition-all shadow-lg"
+                                        >
+                                          <X size={12} className="text-white" />
+                                        </button>
+                                      </motion.div>
+                                    ) : (
+                                      <div className="flex-1 flex items-center justify-center">
+                                        {draggingDoctor && isCompatible && <Plus className="text-blue-500 w-5 h-5 animate-pulse" />}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-
-            <div className="p-6 border-t border-surface-container-low bg-surface-container-lowest flex justify-end gap-3">
-              <button onClick={() => setIsImportModalOpen(false)} className="px-6 py-3 rounded-xl font-body text-sm font-bold text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
-                Hủy bỏ
-              </button>
-              <button onClick={() => setIsImportModalOpen(false)} className="px-6 py-3 rounded-xl font-body text-sm font-bold bg-primary text-white shadow-sm hover:opacity-90 transition-opacity">
-                Xác nhận nhập dữ liệu
-              </button>
             </div>
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Drag Overlay */}
+      <AnimatePresence>
+        {draggingDoctor && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-10 py-5 rounded-full shadow-2xl z-[100] flex items-center gap-5 border border-white/10">
+            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-lg"><UserIcon size={20} /></div>
+            <div className="text-center">
+              <p className="text-sm font-black uppercase">{draggingDoctor.fullName}</p>
+              <p className="text-[9px] font-bold text-blue-400 uppercase tracking-widest mt-1 italic">Kéo vào: {draggingDoctor.specialtyName}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
 export default DoctorSchedulePage;
+
+

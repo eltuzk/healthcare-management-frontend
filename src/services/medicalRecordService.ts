@@ -1,21 +1,15 @@
 import api from "./api";
 
-export const createMedicalRecordFromAppointment = async (
-  appointmentId: any,
-  data: any,
-): Promise<any> => {
-  return api.post(
-    `/api/medical-records/from-appointment/${appointmentId}`,
-    data,
-  );
+export const getMedicalRecords = async (params?: any): Promise<any> => {
+  return api.get("/api/medical-records", { params });
 };
 
 export const getMedicalRecordById = async (id: any): Promise<any> => {
   return api.get(`/api/medical-records/${id}`);
 };
 
-export const getMedicalRecords = async (params?: any): Promise<any> => {
-  return api.get("/api/medical-records", { params });
+export const createMedicalRecordFromAppointment = async (appointmentId: any, data: any): Promise<any> => {
+  return api.post(`/api/medical-records/from-appointment/${appointmentId}`, data);
 };
 
 export const updateMedicalRecord = async (id: any, data: any): Promise<any> => {

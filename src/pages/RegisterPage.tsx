@@ -96,33 +96,16 @@ const RegisterPage: React.FC = () => {
 								<img src="/assets/img/logo.svg" className="img-fluid" alt="Logo" />
 							</Link>
 						</div>
-						<div className="header-menu">
-							<div className="main-menu-wrapper">
-								<div className="menu-header">
-									<Link to="/" className="menu-logo">
-										<img src="/assets/img/logo.svg" className="img-fluid" alt="Logo" />
-									</Link>
-									<Link id="menu_close" className="menu-close" to="#">
-										<i className="fas fa-times"></i>
-									</Link>
-								</div>
-								<ul className="main-nav">
-									<li><Link to="/">Trang chủ</Link></li>
-									<li><Link to="/doctors">Bác sĩ</Link></li>
-									<li><Link to="/patients">Bệnh nhân</Link></li>
-									<li><Link to="/pharmacy">Nhà thuốc</Link></li>
-								</ul>
-							</div>
-						</div>
+						{/* Removed header-menu to move Trang chủ to the right */}
 						<ul className="nav header-navbar-rht">
 							<li>
-								<Link to="/login" className="btn btn-md btn-primary-gradient">
-									<i className="isax isax-lock-1 me-2"></i><span>Đăng nhập</span> 
+								<Link to="/" className="btn btn-md btn-outline-primary shadow-sm" style={{ borderRadius: '10px', fontWeight: '600' }}>
+									<i className="isax isax-home me-2"></i>Trang chủ
 								</Link>
 							</li>
 							<li>
-								<Link to="/register" className="btn btn-md btn-dark">
-									<i className="isax isax-user-tick me-2"></i><span>Đăng ký</span> 
+								<Link to="/login" className="btn btn-md btn-primary-gradient">
+									<i className="isax isax-lock-1 me-2"></i><span>Đăng nhập</span> 
 								</Link>
 							</li>
 						</ul>
@@ -215,7 +198,9 @@ const RegisterPage: React.FC = () => {
 							<div className="col-lg-3 col-md-6">
 								<div className="footer-widget footer-about">
 									<div className="footer-logo">
-										<img src="/assets/img/logo.svg" alt="logo" />
+										<Link to="/">
+											<img src="/assets/img/logo.svg" alt="logo" />
+										</Link>
 									</div>
 									<div className="footer-about-content">
 										<p>The Clinical Curator - Hệ thống quản lý y tế thông minh, kết nối bác sĩ và bệnh nhân một cách hiệu quả nhất.</p>

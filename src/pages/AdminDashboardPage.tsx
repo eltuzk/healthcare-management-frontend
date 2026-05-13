@@ -24,7 +24,7 @@ const recentActivities = [
 
 const AdminDashboardPage: React.FC = () => {
   return (
-    <div className="space-y-8 animate-fade-in pb-12">
+    <div className="pt-10 space-y-8 animate-fade-in pb-12">
       {/* Top Header Placeholder (Header.tsx already handles the main header, 
           but we might add secondary breadcrumbs or actions here if needed) */}
 

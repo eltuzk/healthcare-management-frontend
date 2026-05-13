@@ -24,52 +24,32 @@ const LandingPage: React.FC = () => {
 	};
 
 	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const [specRes, feeRes] = await Promise.all([
-					getSpecialties(),
-					getConsultationFees()
-				]);
+		const fetchData = () => {
+			setSpecialties([
+				{ specialtyCode: 'INT', specialtyName: 'Nội tổng quát' },
+				{ specialtyCode: 'SUR', specialtyName: 'Ngoại tổng quát' },
+				{ specialtyCode: 'PED', specialtyName: 'Nhi khoa' },
+				{ specialtyCode: 'OBG', specialtyName: 'Sản phụ khoa' },
+				{ specialtyCode: 'CAR', specialtyName: 'Tim mạch' },
+				{ specialtyCode: 'DER', specialtyName: 'Da liễu' },
+				{ specialtyCode: 'ENT', specialtyName: 'Tai Mũi Họng' },
+				{ specialtyCode: 'DEN', specialtyName: 'Răng Hàm Mặt' },
+				{ specialtyCode: 'OPH', specialtyName: 'Mắt' },
+				{ specialtyCode: 'IMA', specialtyName: 'Chẩn đoán hình ảnh' },
+			]);
 
-				const fetchedSpecialties = specRes.data || [];
-				if (fetchedSpecialties.length === 0) {
-					setSpecialties([
-						{ specialtyCode: 'INT', specialtyName: 'Nội tổng quát' },
-						{ specialtyCode: 'SUR', specialtyName: 'Ngoại tổng quát' },
-						{ specialtyCode: 'PED', specialtyName: 'Nhi khoa' },
-						{ specialtyCode: 'OBG', specialtyName: 'Sản phụ khoa' },
-						{ specialtyCode: 'CAR', specialtyName: 'Tim mạch' },
-						{ specialtyCode: 'DER', specialtyName: 'Da liễu' },
-						{ specialtyCode: 'ENT', specialtyName: 'Tai Mũi Họng' },
-						{ specialtyCode: 'DEN', specialtyName: 'Răng Hàm Mặt' },
-						{ specialtyCode: 'OPH', specialtyName: 'Mắt' },
-						{ specialtyCode: 'IMA', specialtyName: 'Chẩn đoán hình ảnh' },
-					]);
-				} else {
-					setSpecialties(fetchedSpecialties);
-				}
-
-				const fetchedFees = feeRes.data || [];
-				if (fetchedFees.length === 0) {
-					setConsultationFees([
-						{ feeName: 'Nội khoa tổng quát', price: 150000, feeCode: 'INT', specialty: { specialtyName: 'Nội khoa' } },
-						{ feeName: 'Ngoại khoa', price: 200000, feeCode: 'SUR', specialty: { specialtyName: 'Ngoại khoa' } },
-						{ feeName: 'Nhi khoa (Tư vấn dinh dưỡng)', price: 250000, feeCode: 'PED', specialty: { specialtyName: 'Nhi khoa' } },
-						{ feeName: 'Sản phụ khoa định kỳ', price: 300000, feeCode: 'OBG', specialty: { specialtyName: 'Sản phụ khoa' } },
-						{ feeName: 'Da liễu (Soi da)', price: 180000, feeCode: 'DER', specialty: { specialtyName: 'Da liễu' } },
-						{ feeName: 'Tim mạch chuyên sâu', price: 500000, feeCode: 'CAR', specialty: { specialtyName: 'Tim mạch' } },
-						{ feeName: 'Mắt (Đo thị lực)', price: 120000, feeCode: 'OPH', specialty: { specialtyName: 'Mắt' } },
-						{ feeName: 'Tư vấn Tâm lý/Tâm thần', price: 450000, feeCode: 'PSY', specialty: { specialtyName: 'Tâm thần' } },
-						{ feeName: 'Phí khám ban đầu tai mũi họng', price: 50000, feeCode: 'ENT', specialty: { specialtyName: 'Tai Mũi Họng' } },
-					]);
-				} else {
-					setConsultationFees(fetchedFees);
-				}
-			} catch (error) {
-				console.error("Error fetching landing page data:", error);
-			} finally {
-				setLoading(false);
-			}
+			setConsultationFees([
+				{ feeName: 'Nội khoa tổng quát', price: 150000, feeCode: 'INT', specialty: { specialtyName: 'Nội khoa' } },
+				{ feeName: 'Ngoại khoa', price: 200000, feeCode: 'SUR', specialty: { specialtyName: 'Ngoại khoa' } },
+				{ feeName: 'Nhi khoa (Tư vấn dinh dưỡng)', price: 250000, feeCode: 'PED', specialty: { specialtyName: 'Nhi khoa' } },
+				{ feeName: 'Sản phụ khoa định kỳ', price: 300000, feeCode: 'OBG', specialty: { specialtyName: 'Sản phụ khoa' } },
+				{ feeName: 'Da liễu (Soi da)', price: 180000, feeCode: 'DER', specialty: { specialtyName: 'Da liễu' } },
+				{ feeName: 'Tim mạch chuyên sâu', price: 500000, feeCode: 'CAR', specialty: { specialtyName: 'Tim mạch' } },
+				{ feeName: 'Mắt (Đo thị lực)', price: 120000, feeCode: 'OPH', specialty: { specialtyName: 'Mắt' } },
+				{ feeName: 'Tư vấn Tâm lý/Tâm thần', price: 450000, feeCode: 'PSY', specialty: { specialtyName: 'Tâm thần' } },
+				{ feeName: 'Phí khám ban đầu tai mũi họng', price: 50000, feeCode: 'ENT', specialty: { specialtyName: 'Tai Mũi Họng' } },
+			]);
+			setLoading(false);
 		};
 		fetchData();
 	}, []);
@@ -96,6 +76,7 @@ const LandingPage: React.FC = () => {
 			'/assets/plugins/fancybox/jquery.fancybox.min.js',
 			'/assets/plugins/wow/js/wow.min.js',
 			'/assets/plugins/gsap/gsap.min.js',
+			'https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js',
 			'/assets/js/script.min.js'
 		];
 
@@ -123,6 +104,33 @@ const LandingPage: React.FC = () => {
 					injectedScripts.push(script);
 				});
 			}
+
+			// Initialize Lenis Smooth Scroll
+			if ((window as any).Lenis) {
+				const lenis = new (window as any).Lenis({
+					duration: 1.2,
+					easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+					orientation: 'vertical',
+					gestureOrientation: 'vertical',
+					smoothWheel: true,
+					wheelMultiplier: 1,
+					smoothTouch: false,
+					touchMultiplier: 2,
+					infinite: false,
+				});
+
+				function raf(time: number) {
+					lenis.raf(time);
+					requestAnimationFrame(raf);
+				}
+
+				requestAnimationFrame(raf);
+			}
+
+			// Initialize WOW.js
+			if ((window as any).WOW) {
+				new (window as any).WOW().init();
+			}
 		};
 		loadScriptsSequentially();
 
@@ -142,19 +150,19 @@ const LandingPage: React.FC = () => {
 			<div className="main-wrapper">
 
 				<div className="header-theme header-theme-two">
-					<button 
-						type="button" 
-						id="dark-mode-toggle" 
-						className={`theme-toggle moon ${isDarkMode ? '' : 'activate'}`} 
+					<button
+						type="button"
+						id="dark-mode-toggle"
+						className={`theme-toggle moon ${isDarkMode ? '' : 'activate'}`}
 						aria-label="dark mode"
 						onClick={() => toggleTheme(true)}
 					>
 						<i className="isax isax-moon5"></i>
 					</button>
-					<button 
-						type="button" 
-						id="light-mode-toggle" 
-						className={`theme-toggle sun ${isDarkMode ? 'activate' : ''}`} 
+					<button
+						type="button"
+						id="light-mode-toggle"
+						className={`theme-toggle sun ${isDarkMode ? 'activate' : ''}`}
 						aria-label="light mode"
 						onClick={() => toggleTheme(false)}
 					>
@@ -254,7 +262,7 @@ const LandingPage: React.FC = () => {
 					<div className="container">
 						<div className="row align-items-end">
 							<div className="col-xl-6">
-								<div className="banner-content wow fadeInUp" data-wow-duration="1s">
+								<div className="banner-content wow fadeInUp" data-wow-duration="1.5s">
 									<h1>Tư vấn <span>Bác sĩ chuyên khoa</span> hàng đầu tại cơ sở gần bạn.</h1>
 									<p>Bắt đầu hành trình chăm sóc sức khỏe của bạn với The Clinical Curator, nơi bạn có thể dễ dàng quản lý lịch hẹn và hồ sơ y tế.</p>
 
@@ -290,7 +298,7 @@ const LandingPage: React.FC = () => {
 				{/* Banner End */}
 
 				{/* Slider Section */}
-				<section className="slider-section wow fadeInUp" data-wow-duration="1s">
+				<section className="slider-section wow fadeInUp" data-wow-duration="1.5s">
 					<div className="horizontal-slide slide-one bg-primary d-flex" data-direction="left" data-speed="slow">
 						<div className="slide-list d-flex gap-4">
 							<div className="services-slide">
@@ -328,13 +336,13 @@ const LandingPage: React.FC = () => {
 
 
 				{/* About Section */}
-				<section className="section about-section-two">
+				<section className="section about-section-two wow fadeInUp" data-wow-duration="1.5s">
 					<div className="container">
 						<div className="row align-items-center">
 
 							{/* About Img */}
 							<div className="col-lg-6">
-								<div className="about-img-two wow fadeInUp" data-wow-duration="2s">
+								<div className="about-img-two wow fadeInUp" data-wow-duration="2.5s">
 									<img src="assets/img/about/about.png" alt="about" className="img-fluid" />
 									<a href="https://youtu.be/MyQxnFgPgQU?si=Z9y2WdynImbFnqL2" data-fancybox>
 										<button className="animate-button" data-text="Play Video · Play Video ·" aria-label="Play video">
@@ -358,7 +366,7 @@ const LandingPage: React.FC = () => {
 									</div>
 									<div className="row g-4">
 										<div className="col-md-6">
-											<div className="mission-item wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+											<div className="mission-item wow fadeInUp" data-wow-delay="0.3s" data-wow-duration="1.2s">
 												<div className="mission-inner">
 													<div className="mission-info">
 														<div className="mission-icon bg-primary">
@@ -396,9 +404,9 @@ const LandingPage: React.FC = () => {
 				{/* About Section End */}
 
 				{/* Speciality Section */}
-				<section className="section speciality-section-two">
+				<section className="section speciality-section-two wow fadeInUp" data-wow-duration="1.5s">
 					<div className="container">
-						<div className="section-header section-header-two">
+						<div className="section-header section-header-two wow fadeInUp" data-wow-duration="1.2s">
 							<div className="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon" />Chuyên khoa</div>
 							<h2 className="section-title mb-0">Hỗ trợ y tế cho <span>Mọi nhu cầu.</span></h2>
 						</div>
@@ -514,7 +522,7 @@ const LandingPage: React.FC = () => {
 							}
 						`}</style>
 						<div className="row g-4">
-							<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+							<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s" data-wow-duration="1.2s">
 
 								{/* Doctor Widget */}
 								<div className="doctor-item-two">
@@ -538,7 +546,7 @@ const LandingPage: React.FC = () => {
 
 							</div>
 
-							<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+							<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1.2s">
 
 								{/* Doctor Widget */}
 								<div className="doctor-item-two">
@@ -562,7 +570,7 @@ const LandingPage: React.FC = () => {
 
 							</div>
 
-							<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+							<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.3s" data-wow-duration="1.2s">
 
 								{/* Doctor Widget */}
 								<div className="doctor-item-two">
@@ -586,7 +594,7 @@ const LandingPage: React.FC = () => {
 
 							</div>
 
-							<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+							<div className="col-xl-3 col-md-6 wow fadeInUp" data-wow-delay="0.4s" data-wow-duration="1.2s">
 
 								{/* Doctor Widget */}
 								<div className="doctor-item-two">
@@ -620,7 +628,7 @@ const LandingPage: React.FC = () => {
 				{/* Speciality Section */}
 				<section className="section speciality-section-two">
 					<div className="container">
-						<div className="section-header section-header-two">
+						<div className="section-header section-header-two wow fadeInUp" data-wow-duration="1.2s">
 							<div className="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon" />Bảng giá dịch vụ</div>
 							<h2 className="section-title mb-0">Danh mục <span>Phí khám bệnh</span></h2>
 						</div>
@@ -725,8 +733,8 @@ const LandingPage: React.FC = () => {
 								</div>
 							</div>
 
-							<div className="col-xl-7 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
-								<div className="section-header section-header-two text-start">
+							<div className="col-xl-7">
+								<div className="section-header section-header-two text-start wow fadeInUp" data-wow-duration="1.2s">
 									<div className="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon" />Quy trình hoạt động</div>
 									<h2 className="section-title mb-0">4 Bước đơn giản để <span>Nhận kết quả</span></h2>
 								</div>
@@ -734,7 +742,7 @@ const LandingPage: React.FC = () => {
 
 									{/* Work Item */}
 									<div className="col-md-6 d-flex">
-										<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+										<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.1s" data-wow-duration="1.2s">
 											<div className="work-icon">
 												<img src="assets/img/icons/search.svg" alt="search doctor" />
 											</div>
@@ -748,7 +756,7 @@ const LandingPage: React.FC = () => {
 
 									{/* Work Item */}
 									<div className="col-md-6 d-flex">
-										<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+										<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1.2s">
 											<div className="work-icon">
 												<img src="assets/img/icons/profile.svg" alt="profile" />
 											</div>
@@ -762,7 +770,7 @@ const LandingPage: React.FC = () => {
 
 									{/* Work Item */}
 									<div className="col-md-6 d-flex">
-										<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+										<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.3s" data-wow-duration="1.2s">
 											<div className="work-icon">
 												<img src="assets/img/icons/schedule.svg" alt="booking" />
 											</div>
@@ -776,7 +784,7 @@ const LandingPage: React.FC = () => {
 
 									{/* Work Item */}
 									<div className="col-md-6 d-flex">
-										<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1s">
+										<div className="work-item w-100 wow fadeInUp" data-wow-delay="0.4s" data-wow-duration="1.2s">
 											<div className="work-icon">
 												<img src="assets/img/icons/solution.svg" alt="your solution" />
 											</div>
@@ -804,7 +812,7 @@ const LandingPage: React.FC = () => {
 					<div className="container">
 
 						{/* Section Header */}
-						<div className="section-header section-header-two text-center">
+						<div className="section-header section-header-two text-center wow fadeInUp" data-wow-duration="1.2s">
 							<div className="section-sub-title justify-content-center"><img src="assets/img/icons/section-icon.svg" alt="icon" />Đánh giá từ khách hàng</div>
 							<h2 className="section-title mb-0">Bệnh nhân <span>Nói về chúng tôi</span></h2>
 						</div>
@@ -960,7 +968,7 @@ const LandingPage: React.FC = () => {
 					<div className="container">
 
 						{/* Section Header */}
-						<div className="section-header section-header-two">
+						<div className="section-header section-header-two wow fadeInUp" data-wow-duration="1.2s">
 							<div className="section-sub-title"><img src="assets/img/icons/section-icon.svg" alt="icon" />Tin tức & Bài viết</div>
 							<h2 className="section-title mb-0">Tin tức & Câu chuyện Mới nhất</h2>
 						</div>
@@ -970,7 +978,7 @@ const LandingPage: React.FC = () => {
 							<div className="col-lg-4 col-md-6 d-flex">
 
 								{/* Blog Post */}
-								<div className="blog-item-two w-100 wow fadeInUp" data-wow-duration="1s">
+								<div className="blog-item-two w-100 wow fadeInUp" data-wow-delay="0.1s" data-wow-duration="1.2s">
 									<div className="blog-img">
 										<Link to="/blog-details">
 											<img className="img-fluid" src="assets/img/blog/general-blog-01.jpg" alt="blog" />
@@ -998,7 +1006,7 @@ const LandingPage: React.FC = () => {
 
 
 								{/* Blog Post */}
-								<div className="blog-item-two w-100 wow fadeInUp" data-wow-duration="1s">
+								<div className="blog-item-two w-100 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="1.2s">
 									<div className="blog-img">
 										<Link to="/blog-details">
 											<img className="img-fluid" src="assets/img/blog/general-blog-02.jpg" alt="blog" />
@@ -1025,7 +1033,7 @@ const LandingPage: React.FC = () => {
 							<div className="col-lg-4 col-md-6 d-flex">
 
 								{/* Blog Post */}
-								<div className="blog-item-two w-100 wow fadeInUp" data-wow-duration="1s">
+								<div className="blog-item-two w-100 wow fadeInUp" data-wow-delay="0.3s" data-wow-duration="1.2s">
 									<div className="blog-img">
 										<Link to="/blog-details">
 											<img className="img-fluid" src="assets/img/blog/general-blog-03.jpg" alt="blog" />
@@ -1058,7 +1066,7 @@ const LandingPage: React.FC = () => {
 				{/* Blog Section End */}
 
 				{/* Health Section */}
-				<section className="section health-section trail-content" style={{ background: '#ffffff' }}>
+				<section className="section health-section trail-content wow fadeInUp" data-wow-duration="1.5s" style={{ background: '#ffffff' }}>
 					<div className="container">
 						<div className="row">
 							<div className="col-lg-10 mx-auto">
@@ -1132,7 +1140,9 @@ const LandingPage: React.FC = () => {
 									{/* Footer Widget */}
 									<div className="footer-widget footer-about">
 										<div className="footer-logo">
-											<img src="assets/img/logo-02.svg" alt="logo" />
+											<Link to="/">
+												<img src="assets/img/logo-02.svg" alt="logo" />
+											</Link>
 										</div>
 										<div className="footer-about-content">
 											<p>Chúng tôi là Trung tâm Chăm sóc Mắt và Sức khỏe Thị lực chuyên nghiệp, cam kết cung cấp các dịch vụ chẩn đoán và điều trị tiên tiến.</p>

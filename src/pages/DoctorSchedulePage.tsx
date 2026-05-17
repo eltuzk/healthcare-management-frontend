@@ -1,21 +1,23 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Search, Calendar as CalendarIcon, 
-  User as UserIcon, MapPin, 
-  Clock, Plus, X,
-  ChevronRight, ChevronLeft,
-  Save
+  Calendar as CalendarIcon, 
+  ChevronLeft, 
+  ChevronRight, 
+  Plus, 
+  Search, 
+  User, 
+  X, 
+  Save, 
+  Clock, 
+  MapPin,
+  Trash2,
+  Filter,
+  UserCheck
 } from 'lucide-react';
-import { 
-  getDoctorSchedules, 
-  createDoctorSchedule, 
-  deleteDoctorSchedule 
-} from '../services/scheduleService';
+import { getDoctors, getAccounts } from '../services/staffService';
 import { getRooms } from '../services/roomService';
-import { getDoctors } from '../services/staffService';
-import { getAccounts } from '../services/accountService';
-import { toast } from 'react-hot-toast';
+import { getDoctorSchedules, createDoctorSchedule, deleteDoctorSchedule } from '../services/scheduleService';
+import toast from 'react-hot-toast';
 
 interface Doctor {
   doctorId: number;
@@ -27,69 +29,62 @@ interface Doctor {
 interface Room {
   roomId: number;
   roomCode: string;
+  roomName: string;
   specialtyId: number;
   specialtyName: string;
 }
 
-interface Schedule {
-  scheduleId?: number;
+interface Assignment {
+  doctorScheduleId?: number;
   doctorId: number;
   doctorName: string;
   roomId: number;
-  roomCode: string;
   scheduleDate: string;
   shift: 'MORNING' | 'AFTERNOON';
-  isNew?: boolean;
+  isPending?: boolean;
 }
 
+const formatLocalISO = (date: Date) => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 const DoctorSchedulePage: React.FC = () => {
-  // Data State
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [pendingSchedules, setPendingSchedules] = useState<Schedule[]>([]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   
-  // UI State
-  const [searchDoctor, setSearchDoctor] = useState('');
-  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
-    const d = new Date();
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Start on Monday
-    const start = new Date(d.setDate(diff));
-    start.setHours(0, 0, 0, 0);
-    return start;
-  });
-  
-  // Drag & Drop State
-  const [draggingDoctor, setDraggingDoctor] = useState<Doctor | null>(null);
+  // Selection Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<{ date: string; shift: 'MORNING' | 'AFTERNOON'; roomId: number } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [specialtyFilter, setSpecialtyFilter] = useState<number | null>(null);
 
-  // Scroll Ref
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const userRole = localStorage.getItem('role') || '';
+  const isAdmin = userRole.includes('ADMIN');
 
   useEffect(() => {
     fetchData();
-  }, [currentWeekStart]);
-
-  // Horizontal scroll with mouse wheel
-  useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (el) {
-      const onWheel = (e: WheelEvent) => {
-        if (e.deltaY !== 0) {
-          el.scrollLeft += e.deltaY;
-          e.preventDefault();
-        }
-      };
-      el.addEventListener('wheel', onWheel, { passive: false });
-      return () => el.removeEventListener('wheel', onWheel);
-    }
-  }, []);
+  }, [currentDate]);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
-      const startDate = currentWeekStart.toISOString().split('T')[0];
-      const endDate = new Date(currentWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      
+      const startOfWeek = new Date(currentDate);
+      const dayOfWeek = currentDate.getDay();
+      const diff = currentDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+      startOfWeek.setDate(diff);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+      const startDate = formatLocalISO(startOfWeek);
+      const endDate = formatLocalISO(endOfWeek);
+
       const [docsRes, roomsRes, schedRes, accountsRes] = await Promise.allSettled([
         getDoctors(0, 1000),
         getRooms(),
@@ -97,376 +92,521 @@ const DoctorSchedulePage: React.FC = () => {
         getAccounts(0, 1000)
       ]);
 
-      // 1. Process Doctors (Entity Source)
       let docs: Doctor[] = [];
       if (docsRes.status === 'fulfilled') {
-        const val = docsRes.value;
+        const val: any = docsRes.value;
         docs = val?.content || val?.data?.content || (Array.isArray(val) ? val : []);
       }
 
-      // 2. Fallback to Accounts if Doctors is empty (Role-based Source)
+      // Fallback to accounts if doctors list is empty
       if (docs.length === 0 && accountsRes.status === 'fulfilled') {
         const val: any = accountsRes.value;
         const accounts = val?.content || val?.data?.content || (Array.isArray(val) ? val : []);
         docs = accounts
-          .filter((acc: any) => acc.roleName !== 'PATIENT' && acc.roleName !== 'ROLE_PATIENT')
+          .filter((acc: any) => (acc.roleName || '').includes('DOCTOR') && acc.actorId)
           .map((acc: any) => ({
-            doctorId: acc.accountId, // Use accountId as doctorId fallback
+            doctorId: acc.actorId,
             fullName: acc.fullName,
             specialtyName: acc.specialtyName || 'Chưa xác định',
             specialtyId: acc.specialtyId || 0
           }));
       }
-
-      // 3. Process Rooms
-      let rms: Room[] = [];
-      if (roomsRes.status === 'fulfilled') {
-        const val = roomsRes.value;
-        rms = val?.data || val || [];
-      }
-
-      // 4. Process Schedules
-      let scs: Schedule[] = [];
-      if (schedRes.status === 'fulfilled') {
-        const val = schedRes.value;
-        scs = val?.data || val || [];
-      }
-
       setDoctors(docs);
-      setRooms(rms);
-      setSchedules(scs);
-      setPendingSchedules([]);
+
+      if (roomsRes.status === 'fulfilled') {
+        setRooms(roomsRes.value as Room[]);
+      }
+
+      if (schedRes.status === 'fulfilled') {
+        setAssignments((schedRes.value as any[]).map(s => ({
+          doctorScheduleId: s.doctorScheduleId,
+          doctorId: s.doctorId,
+          doctorName: s.doctorName,
+          roomId: s.roomId,
+          scheduleDate: s.scheduleDate,
+          shift: s.shift
+        })));
+      }
     } catch (error) {
-      toast.error('Lỗi hệ thống khi tải dữ liệu');
-      console.error('Data Load Error:', error);
+      console.error('Fetch error:', error);
+      toast.error('Không thể tải dữ liệu');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Helpers
   const weekDays = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(currentWeekStart);
-      d.setDate(d.getDate() + i);
-      const dayName = d.toLocaleDateString('vi-VN', { weekday: 'short' });
-      const dateNum = d.getDate();
-      const monthNum = d.getMonth() + 1;
-      return {
-        dateStr: d.toISOString().split('T')[0],
-        dayName: dayName.toUpperCase(),
-        dateLabel: `${dateNum}/${monthNum < 10 ? '0' + monthNum : monthNum}`
-      };
-    });
-  }, [currentWeekStart]);
-
-  const roomsBySpecialty = useMemo(() => {
-    const groups: Record<string, Room[]> = {};
-    rooms.forEach(r => {
-      const key = r.specialtyName || 'Khác';
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(r);
-    });
-    return groups;
-  }, [rooms]);
-
-  const filteredDoctors = doctors.filter(d => 
-    (d.fullName || '').toLowerCase().includes(searchDoctor.toLowerCase()) ||
-    (d.specialtyName || '').toLowerCase().includes(searchDoctor.toLowerCase())
-  );
-
-  // Drag & Drop Handlers
-  const handleDragStart = (e: React.DragEvent, doctor: Doctor) => {
-    setDraggingDoctor(doctor);
-    e.dataTransfer.setData('doctorId', doctor.doctorId.toString());
-  };
-
-  const handleDragEnd = () => {
-    setDraggingDoctor(null);
-  };
-
-  const handleDrop = (date: string, shift: 'MORNING' | 'AFTERNOON', roomId: number) => {
-    if (!draggingDoctor) return;
+    const days = [];
+    const startOfWeek = new Date(currentDate);
+    const dayOfWeek = currentDate.getDay();
+    const diff = currentDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
     
-    const isAssigned = [...schedules, ...pendingSchedules].find(s => 
-      s.scheduleDate === date && s.shift === shift && s.doctorId === draggingDoctor.doctorId
-    );
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      days.push({
+        date: day,
+        dateStr: formatLocalISO(day),
+        label: day.toLocaleDateString('vi-VN', { weekday: 'short' }),
+        dayNum: day.getDate()
+      });
+    }
+    return days;
+  }, [currentDate]);
 
-    if (isAssigned) {
-      toast.error(`${draggingDoctor.fullName} đã có lịch trong ca này`);
+  const handleOpenModal = (date: string, shift: 'MORNING' | 'AFTERNOON', roomId: number) => {
+    if (isAdmin) return;
+    setSelectedSlot({ date, shift, roomId });
+    setIsModalOpen(true);
+  };
+
+  const handleAssignDoctor = (doctor: Doctor) => {
+    if (!selectedSlot) return;
+
+    const room = rooms.find(r => r.roomId === selectedSlot.roomId);
+    const isCompatible = doctor.specialtyId === room?.specialtyId || doctor.specialtyId === 0 || !room?.specialtyId;
+
+    if (!isCompatible && !window.confirm(`Bác sĩ này có chuyên khoa (${doctor.specialtyName}) khác với chuyên khoa của phòng (${room?.specialtyName}). Bạn vẫn muốn phân công?`)) {
       return;
     }
 
-    const newAssignment: Schedule = {
-      doctorId: draggingDoctor.doctorId,
-      doctorName: draggingDoctor.fullName,
-      roomId: roomId,
-      roomCode: rooms.find(r => r.roomId === roomId)?.roomCode || '',
-      scheduleDate: date,
-      shift: shift,
-      isNew: true
+    // Check if doctor already has a shift on this day
+    const existing = assignments.find(a => a.scheduleDate === selectedSlot.date && a.shift === selectedSlot.shift && a.doctorId === doctor.doctorId);
+    if (existing) {
+      toast.error('Bác sĩ này đã có lịch trực trong ca này!');
+      return;
+    }
+
+    const newAssignment: Assignment = {
+      doctorId: doctor.doctorId,
+      doctorName: doctor.fullName,
+      roomId: selectedSlot.roomId,
+      scheduleDate: selectedSlot.date,
+      shift: selectedSlot.shift,
+      isPending: true
     };
 
-    setPendingSchedules(prev => [...prev, newAssignment]);
+    setAssignments(prev => [...prev, newAssignment]);
+    setIsModalOpen(false);
+    toast.success(`Đã thêm tạm thời: ${doctor.fullName}`);
+  };
+
+  const handleRemoveAssignment = async (assignment: Assignment) => {
+    if (isAdmin) return;
+
+    if (assignment.isPending) {
+      setAssignments(prev => prev.filter(a => a !== assignment));
+      return;
+    }
+
+    if (window.confirm(`Xóa lịch trực của bác sĩ ${assignment.doctorName}?`)) {
+      try {
+        await deleteDoctorSchedule(assignment.doctorScheduleId!);
+        setAssignments(prev => prev.filter(a => a.doctorScheduleId !== assignment.doctorScheduleId));
+        toast.success('Đã xóa lịch trực');
+      } catch (error) {
+        toast.error('Lỗi khi xóa lịch trực');
+      }
+    }
   };
 
   const handleSaveAll = async () => {
-    if (pendingSchedules.length === 0) return;
-    
-    const loadingToast = toast.loading('Đang lưu lịch trực...');
-    try {
-      await Promise.all(pendingSchedules.map(s => 
-        createDoctorSchedule({
-          doctorId: s.doctorId,
-          roomId: s.roomId,
-          scheduleDate: s.scheduleDate,
-          shift: s.shift,
-          maxCapacity: 20
-        })
-      ));
-      toast.success('Đã lưu tất cả lịch trực!', { id: loadingToast });
-      fetchData();
-    } catch (error: any) {
-      toast.error(error.message || 'Lỗi khi lưu lịch trực', { id: loadingToast });
-    }
-  };
-
-  const handleDeleteAssignment = async (schedule: Schedule) => {
-    if (schedule.isNew) {
-      setPendingSchedules(prev => prev.filter(s => s !== schedule));
+    const pending = assignments.filter(a => a.isPending);
+    if (pending.length === 0) {
+      toast.success('Không có thay đổi nào cần lưu');
       return;
     }
 
-    if (!confirm('Bạn có chắc chắn muốn xóa lịch trực này?')) return;
+    setIsSaving(true);
     try {
-      if (schedule.scheduleId) {
-        await deleteDoctorSchedule(schedule.scheduleId);
-        toast.success('Đã xóa lịch trực');
-        fetchData();
-      }
+      await Promise.all(pending.map(a => createDoctorSchedule({
+        doctorId: a.doctorId,
+        roomId: a.roomId,
+        scheduleDate: a.scheduleDate,
+        shift: a.shift,
+        maxCapacity: 20
+      })));
+      toast.success('Đã lưu tất cả thay đổi');
+      fetchData();
     } catch (error) {
-      toast.error('Không thể xóa lịch trực');
+      toast.error('Có lỗi xảy ra khi lưu một số lịch trực');
+      fetchData();
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const allVisibleSchedules = [...schedules, ...pendingSchedules];
+  const filteredDoctors = doctors.filter(d => 
+    (d.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     d.doctorId.toString() === searchQuery) &&
+    (!specialtyFilter || d.specialtyId === specialtyFilter)
+  );
+
+  const [gridSpecialtyFilter, setGridSpecialtyFilter] = useState<string>('ALL');
+
+  const groupedRooms = useMemo(() => {
+    const filtered = rooms.filter(r => 
+      gridSpecialtyFilter === 'ALL' || r.specialtyName === gridSpecialtyFilter
+    );
+    const groups: { [key: string]: Room[] } = {};
+    filtered.forEach(room => {
+      const spec = room.specialtyName || 'Khác';
+      if (!groups[spec]) groups[spec] = [];
+      groups[spec].push(room);
+    });
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [rooms, gridSpecialtyFilter]);
+
+  const allGridSpecialties = useMemo(() => {
+    const specs = new Set<string>();
+    rooms.forEach(r => { if (r.specialtyName) specs.add(r.specialtyName); });
+    return Array.from(specs).sort();
+  }, [rooms]);
+
+  const doctorSpecialties = useMemo(() => {
+    const map = new Map();
+    doctors.forEach(d => map.set(d.specialtyId, d.specialtyName));
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [doctors]);
+
+  if (loading && doctors.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-screen bg-slate-50 flex flex-col overflow-hidden font-body">
-      {/* Header Section */}
-      <div className="flex-none p-6 lg:px-10 lg:pt-8 lg:pb-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <CalendarIcon className="text-blue-600 w-8 h-8" />
-            Điều phối <span className="text-blue-600 font-light italic">Lịch trực</span>
-          </h1>
+    <div className="flex-1 flex flex-col bg-slate-50 overflow-hidden font-body">
+      {/* Top Header */}
+      <div className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm z-10">
+        <div className="flex items-center gap-4">
+          <div className="bg-indigo-600 p-2 rounded-xl text-white">
+            <CalendarIcon size={24} />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-800">Điều phối Lịch trực</h1>
+            <p className="text-sm text-slate-500">Quản lý ca trực và phân công bác sĩ vào phòng khám</p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-            <button 
-              onClick={() => setCurrentWeekStart(new Date(currentWeekStart.getTime() - 7 * 24 * 60 * 60 * 1000))}
-              className="p-2 hover:bg-slate-100 rounded-xl transition-all"
+        <div className="flex items-center gap-4">
+          {/* Specialty Filter */}
+          <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-full border border-slate-200">
+            <Filter size={16} className="text-slate-400" />
+            <select 
+              value={gridSpecialtyFilter}
+              onChange={(e) => setGridSpecialtyFilter(e.target.value)}
+              className="bg-transparent border-none text-sm font-bold text-slate-700 outline-none focus:ring-0 cursor-pointer"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <option value="ALL">Tất cả Chuyên khoa</option>
+              {allGridSpecialties.map(spec => (
+                <option key={spec} value={spec}>{spec}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Week Selector */}
+          <div className="flex items-center bg-slate-100 rounded-full p-1 border border-slate-200">
+            <button 
+              onClick={() => {
+                const d = new Date(currentDate);
+                d.setDate(d.getDate() - 7);
+                setCurrentDate(d);
+              }}
+              className="p-2 hover:bg-white rounded-full transition-all text-slate-600"
+            >
+              <ChevronLeft size={20} />
             </button>
-            <div className="px-6 font-bold text-sm text-slate-700 min-w-[150px] text-center">
-              {weekDays[0].dateLabel} — {weekDays[6].dateLabel}
-            </div>
+            <span className="px-4 font-semibold text-slate-700 min-w-[180px] text-center text-sm">
+              Tuần {weekDays[0].dayNum} - {weekDays[6].dayNum} Tháng {(currentDate.getMonth() + 1)}
+            </span>
             <button 
-              onClick={() => setCurrentWeekStart(new Date(currentWeekStart.getTime() + 7 * 24 * 60 * 60 * 1000))}
-              className="p-2 hover:bg-slate-100 rounded-xl transition-all"
+              onClick={() => {
+                const d = new Date(currentDate);
+                d.setDate(d.getDate() + 7);
+                setCurrentDate(d);
+              }}
+              className="p-2 hover:bg-white rounded-full transition-all text-slate-600"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight size={20} />
             </button>
           </div>
 
-          {pendingSchedules.length > 0 && (
-            <motion.button 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+          {!isAdmin && (
+            <button
               onClick={handleSaveAll}
-              className="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 shadow-[0_10px_30px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95 transition-all"
+              disabled={isSaving || assignments.filter(a => a.isPending).length === 0}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95 text-sm"
             >
-              <Save size={18} />
-              LƯU THAY ĐỔI ({pendingSchedules.length})
-            </motion.button>
+              {isSaving ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+              ) : (
+                <Save size={20} />
+              )}
+              LƯU THAY ĐỔI
+              {assignments.filter(a => a.isPending).length > 0 && (
+                <span className="ml-1 bg-white text-indigo-600 px-2 py-0.5 rounded-full text-[10px] font-bold animate-pulse">
+                  {assignments.filter(a => a.isPending).length}
+                </span>
+              )}
+            </button>
+          )}
+
+          {isAdmin && (
+            <div className="bg-amber-50 text-amber-600 px-4 py-2 rounded-full border border-amber-100 flex items-center gap-2 font-medium text-sm">
+              <Clock size={16} />
+              Chế độ xem
+            </div>
           )}
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden p-6 lg:px-10 lg:pb-10 gap-8">
-        
-        {/* Left Sidebar: Doctors */}
-        <div className="w-[300px] flex-none flex flex-col gap-6 h-full">
-          <div className="glass-panel p-6 rounded-[32px] flex flex-col h-full overflow-hidden border border-white shadow-xl bg-white">
-            <div className="flex items-center justify-between mb-6 flex-none">
-               <h3 className="font-black text-slate-900 uppercase tracking-widest text-[10px] flex items-center gap-2">
-                 <UserIcon size={14} className="text-blue-600" />
-                 Nhân sự ({filteredDoctors.length})
-               </h3>
-            </div>
-
-            <div className="relative mb-6 flex-none">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <input 
-                type="text" 
-                placeholder="Tìm tên..." 
-                className="w-full bg-slate-100 border-none rounded-xl py-3.5 pl-11 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                value={searchDoctor}
-                onChange={(e) => setSearchDoctor(e.target.value)}
-              />
-            </div>
-
-            <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-              {filteredDoctors.length > 0 ? (
-                filteredDoctors.map(doctor => (
-                  <motion.div 
-                    key={doctor.doctorId}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e as any, doctor)}
-                    onDragEnd={handleDragEnd}
-                    whileHover={{ scale: 1.02 }}
-                    className={`p-4 rounded-2xl border border-slate-100 bg-white shadow-sm cursor-grab active:cursor-grabbing group hover:border-blue-200 transition-all ${
-                      draggingDoctor?.doctorId === doctor.doctorId ? 'opacity-50 border-blue-500 border-dashed bg-blue-50' : ''
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100 group-hover:border-blue-200">
-                        <UserIcon className="text-slate-400 group-hover:text-blue-500 w-5 h-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-black text-slate-900 leading-tight truncate">{doctor.fullName}</p>
-                        <p className="text-[9px] font-bold text-blue-600/70 uppercase tracking-widest mt-1">{doctor.specialtyName}</p>
-                      </div>
+      {/* Main Grid Area */}
+      <div className="flex-1 overflow-auto p-8">
+        <div className="min-w-[1200px] bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="sticky left-0 bg-slate-50 z-20 w-64 p-6 text-left font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">
+                  Chuyên khoa / Phòng
+                </th>
+                {weekDays.map(day => (
+                  <th key={day.dateStr} className="p-4 border-r border-slate-200 last:border-r-0">
+                    <div className={`flex flex-col items-center py-2 rounded-2xl ${day.dateStr === new Date().toISOString().split('T')[0] ? 'bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200' : ''}`}>
+                      <span className="text-xs font-bold uppercase opacity-60">{day.label}</span>
+                      <span className="text-2xl font-black">{day.dayNum}</span>
                     </div>
-                  </motion.div>
-                ))
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {groupedRooms.map(([specialtyName, roomList]) => (
+                <React.Fragment key={specialtyName}>
+                  {/* Specialty Header Row */}
+                  <tr className="bg-slate-100/80 border-y border-slate-200">
+                    <td colSpan={8} className="p-3 px-6">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-6 bg-indigo-600 rounded-full"></div>
+                        <span className="font-black text-slate-700 uppercase tracking-widest text-sm">{specialtyName}</span>
+                        <span className="bg-white/50 px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-400 border border-slate-200">
+                          {roomList.length} PHÒNG
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  {roomList.map((room, idx) => (
+                    <tr key={room.roomId} className={`group ${idx % 2 === 1 ? 'bg-slate-50/30' : ''}`}>
+                      <td className="sticky left-0 bg-white group-hover:bg-indigo-50 transition-colors z-20 p-6 border-r border-slate-200 border-b border-slate-100 last:border-b-0 shadow-[2px_0_10px_rgba(0,0,0,0.02)]">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-indigo-100 p-2.5 rounded-2xl text-indigo-600">
+                            <MapPin size={20} />
+                          </div>
+                          <div>
+                            <div className="font-black text-slate-800 text-lg leading-tight">{room.roomCode}</div>
+                            <div className="text-xs font-bold text-slate-400 uppercase tracking-tighter truncate w-32">{room.roomName}</div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {weekDays.map(day => (
+                        <td key={`${room.roomId}-${day.dateStr}`} className="p-3 border-r border-slate-200 border-b border-slate-100 last:border-r-0 group-hover:bg-slate-50/50 transition-colors">
+                          <div className="flex flex-col gap-3">
+                            <ShiftSlot 
+                              shift="MORNING"
+                              day={day}
+                              room={room}
+                              assignment={assignments.find(a => a.scheduleDate === day.dateStr && a.shift === 'MORNING' && a.roomId === room.roomId)}
+                              onAssign={() => handleOpenModal(day.dateStr, 'MORNING', room.roomId)}
+                              onRemove={handleRemoveAssignment}
+                              isAdmin={isAdmin}
+                            />
+                            
+                            <ShiftSlot 
+                              shift="AFTERNOON"
+                              day={day}
+                              room={room}
+                              assignment={assignments.find(a => a.scheduleDate === day.dateStr && a.shift === 'AFTERNOON' && a.roomId === room.roomId)}
+                              onAssign={() => handleOpenModal(day.dateStr, 'AFTERNOON', room.roomId)}
+                              onRemove={handleRemoveAssignment}
+                              isAdmin={isAdmin}
+                            />
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Doctor Selection Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-in fade-in zoom-in duration-200">
+          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-white/20">
+            {/* Modal Header */}
+            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-4">
+                <div className="bg-indigo-600 p-3 rounded-2xl text-white shadow-lg shadow-indigo-100">
+                  <UserCheck size={28} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-slate-800">Phân công Bác sĩ</h2>
+                  <p className="text-slate-500 font-medium">Chọn một bác sĩ cho ca {selectedSlot?.shift === 'MORNING' ? 'Sáng' : 'Chiều'} tại {rooms.find(r => r.roomId === selectedSlot?.roomId)?.roomCode}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="p-3 hover:bg-slate-200 rounded-2xl transition-all text-slate-400 hover:text-slate-600"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Modal Filters */}
+            <div className="p-6 bg-white flex items-center gap-4 border-b border-slate-50">
+              <div className="flex-1 relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={20} />
+                <input 
+                  type="text"
+                  placeholder="Tìm kiếm bác sĩ..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 bg-slate-100 border-none rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-indigo-600/20 focus:bg-white transition-all outline-none"
+                />
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-hide">
+                <button
+                  onClick={() => setSpecialtyFilter(null)}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${!specialtyFilter ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                >
+                  Tất cả
+                </button>
+                {doctorSpecialties.map(spec => (
+                  <button
+                    key={spec.id}
+                    onClick={() => setSpecialtyFilter(spec.id)}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${specialtyFilter === spec.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                  >
+                    {spec.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Modal Body - Doctor List */}
+            <div className="flex-1 overflow-y-auto p-8 grid grid-cols-2 gap-6 bg-slate-50/30">
+              {filteredDoctors.length > 0 ? (
+                filteredDoctors.map(doc => {
+                  const room = rooms.find(r => r.roomId === selectedSlot?.roomId);
+                  const isCompatible = doc.specialtyId === room?.specialtyId || doc.specialtyId === 0 || !room?.specialtyId;
+
+                  return (
+                    <button
+                      key={doc.doctorId}
+                      onClick={() => handleAssignDoctor(doc)}
+                      className={`flex items-center gap-4 p-5 rounded-[28px] border-2 transition-all text-left group relative ${
+                        isCompatible 
+                          ? 'bg-white border-slate-100 hover:border-indigo-600 hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1' 
+                          : 'bg-white border-amber-200 hover:border-amber-500 hover:shadow-xl hover:shadow-amber-500/10 hover:-translate-y-1'
+                      }`}
+                    >
+                      <div className={`p-3 rounded-2xl transition-colors ${
+                        isCompatible 
+                          ? 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white' 
+                          : 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white'
+                      }`}>
+                        <User size={32} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-black text-slate-800 text-lg truncate">{doc.fullName}</div>
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{doc.specialtyName}</div>
+                      </div>
+                      {!isCompatible && (
+                        <div className="absolute top-2 right-2 px-2 py-1 bg-amber-100 text-amber-600 text-[10px] font-black rounded-lg uppercase">Sai chuyên khoa</div>
+                      )}
+                    </button>
+                  );
+                })
               ) : (
-                <div className="text-center py-10 opacity-50">
-                  <UserIcon className="mx-auto mb-3 text-slate-300" size={32} />
-                  <p className="text-xs font-bold uppercase tracking-widest">Không có dữ liệu</p>
+                <div className="col-span-2 py-20 text-center">
+                  <User size={64} className="mx-auto text-slate-200 mb-4" />
+                  <p className="text-xl font-bold text-slate-400">Không tìm thấy bác sĩ phù hợp</p>
                 </div>
               )}
             </div>
           </div>
         </div>
+      )}
+    </div>
+  );
+};
 
-        {/* Main Grid: Weekly Schedule */}
-        <div className="flex-1 flex flex-col min-w-0 h-full">
-          <div className="glass-panel rounded-[40px] overflow-hidden flex flex-col h-full border border-white shadow-xl relative bg-white">
-            
-            {/* Calendar Container with Single Scroll Axis */}
-            <div 
-              ref={scrollContainerRef}
-              className="flex-1 overflow-auto custom-scrollbar scroll-smooth relative"
-            >
-              <div className="min-w-[1200px] flex flex-col">
-                
-                {/* Grid Header */}
-                <div className="grid grid-cols-[160px_repeat(7,1fr)] border-b border-slate-100 bg-white sticky top-0 z-40 shadow-sm">
-                  <div className="p-6 border-r border-slate-100 flex items-center bg-white sticky left-0 z-50">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Không gian</span>
-                  </div>
-                  {weekDays.map(day => (
-                    <div key={day.dateStr} className="p-6 text-center border-r border-slate-100 last:border-none bg-white">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{day.dayName}</p>
-                      <p className="text-xl font-black text-slate-900 tracking-tighter italic">{day.dateLabel}</p>
-                    </div>
-                  ))}
-                </div>
+interface ShiftSlotProps {
+  shift: 'MORNING' | 'AFTERNOON';
+  day: any;
+  room: Room;
+  assignment?: Assignment;
+  onAssign: () => void;
+  onRemove: (a: Assignment) => void;
+  isAdmin: boolean;
+}
 
-                {/* Grid Body */}
-                <div className="bg-slate-50/20">
-                  {Object.entries(roomsBySpecialty).map(([specialty, specialtyRooms]) => (
-                    <div key={specialty} className="contents">
-                      <div className="col-span-full bg-blue-50/40 px-8 py-3 border-y border-slate-100/50 flex justify-between items-center sticky left-0 z-30">
-                        <h4 className="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em]">{specialty}</h4>
-                      </div>
-                      
-                      {specialtyRooms.map(room => (
-                        <div key={room.roomId} className="grid grid-cols-[160px_repeat(7,1fr)] min-h-[160px] border-b border-slate-100/50 bg-white">
-                          {/* Room Column */}
-                          <div className="p-6 border-r border-slate-100 bg-white flex flex-col justify-center sticky left-0 z-20 shadow-[2px_0_10px_rgba(0,0,0,0.02)]">
-                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Mã phòng</span>
-                            <h5 className="text-2xl font-black text-slate-900 italic tracking-tighter leading-none">{room.roomCode}</h5>
-                          </div>
-
-                          {/* Day Columns */}
-                          {weekDays.map(day => (
-                            <div key={`${room.roomId}-${day.dateStr}`} className="border-r border-slate-100 last:border-none flex flex-col p-2 gap-2 bg-white/50">
-                              {['MORNING', 'AFTERNOON'].map((shift: any) => {
-                                const assignment = allVisibleSchedules.find(s => s.scheduleDate === day.dateStr && s.shift === shift && s.roomId === room.roomId);
-                                const isCompatible = draggingDoctor?.specialtyId === room.specialtyId || draggingDoctor?.specialtyId === 0;
-                                const isDimmed = draggingDoctor && !isCompatible;
-
-                                return (
-                                  <div 
-                                    key={shift}
-                                    onDragOver={(e) => { if (isCompatible) e.preventDefault(); }}
-                                    onDrop={() => handleDrop(day.dateStr, shift, room.roomId)}
-                                    className={`flex-1 rounded-2xl border-2 transition-all duration-300 relative group/cell flex flex-col p-1 ${
-                                      assignment 
-                                        ? (assignment.isNew ? 'border-emerald-200 bg-emerald-50/30' : 'border-blue-100 bg-blue-50/20')
-                                        : 'border-transparent'
-                                    } ${isDimmed ? 'opacity-10 grayscale pointer-events-none' : ''} ${
-                                      draggingDoctor && isCompatible ? 'border-dashed border-blue-400 bg-blue-50/50 cursor-copy' : ''
-                                    }`}
-                                  >
-                                    <span className="absolute top-1 right-2 text-[6px] font-black text-slate-300 uppercase z-0">{shift === 'MORNING' ? 'AM' : 'PM'}</span>
-                                    
-                                    {assignment ? (
-                                      <motion.div 
-                                        initial={{ opacity: 0, scale: 0.95 }} 
-                                        animate={{ opacity: 1, scale: 1 }} 
-                                        className={`flex-1 rounded-xl p-3 shadow-md relative group/assign flex flex-col justify-center z-10 ${
-                                          assignment.isNew ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white'
-                                        }`}
-                                      >
-                                        <p className="text-[10px] font-black uppercase leading-tight text-center">{assignment.doctorName}</p>
-                                        {assignment.isNew && <p className="text-[7px] font-bold text-emerald-100 uppercase mt-1 text-center">Chờ lưu</p>}
-                                        <button 
-                                          onClick={() => handleDeleteAssignment(assignment)} 
-                                          className="absolute -top-1 -right-1 w-6 h-6 bg-slate-900/40 hover:bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover/assign:opacity-100 transition-all shadow-lg"
-                                        >
-                                          <X size={12} className="text-white" />
-                                        </button>
-                                      </motion.div>
-                                    ) : (
-                                      <div className="flex-1 flex items-center justify-center">
-                                        {draggingDoctor && isCompatible && <Plus className="text-blue-500 w-5 h-5 animate-pulse" />}
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+const ShiftSlot: React.FC<ShiftSlotProps> = ({ shift, assignment, onAssign, onRemove, isAdmin }) => {
+  return (
+    <div className={`relative min-h-[50px] rounded-2xl border-2 border-dashed transition-all ${
+      assignment 
+        ? (assignment.isPending ? 'bg-indigo-50/50 border-indigo-200 ring-1 ring-indigo-200' : 'bg-emerald-50/30 border-emerald-100') 
+        : 'bg-slate-50 border-slate-100 hover:border-indigo-300 hover:bg-white cursor-pointer'
+    }`}
+    onClick={() => !assignment && !isAdmin && onAssign()}
+    >
+      <div className="absolute -top-2 -left-2 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter bg-white border border-slate-200 text-slate-400 shadow-sm">
+        {shift === 'MORNING' ? 'Sáng' : 'Chiều'}
       </div>
 
-      {/* Drag Overlay */}
-      <AnimatePresence>
-        {draggingDoctor && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-10 py-5 rounded-full shadow-2xl z-[100] flex items-center gap-5 border border-white/10">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-lg"><UserIcon size={20} /></div>
-            <div className="text-center">
-              <p className="text-sm font-black uppercase">{draggingDoctor.fullName}</p>
-              <p className="text-[9px] font-bold text-blue-400 uppercase tracking-widest mt-1 italic">Kéo vào: {draggingDoctor.specialtyName}</p>
+      {assignment ? (
+        <div className="p-2 flex items-center justify-between gap-2 h-full">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className={`p-1.5 rounded-xl ${assignment.isPending ? 'bg-indigo-600 text-white' : 'bg-emerald-500 text-white'}`}>
+              <User size={14} />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <div className="truncate">
+              <div className="text-[11px] font-black text-slate-800 leading-tight truncate">{assignment.doctorName}</div>
+              {assignment.isPending && (
+                <span className="text-[9px] font-bold text-indigo-500 uppercase flex items-center gap-1">
+                  <Clock size={8} /> Chờ lưu
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {!isAdmin && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove(assignment);
+              }}
+              className="p-1.5 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded-lg transition-colors group-hover:opacity-100"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="h-[46px] flex items-center justify-center transition-all group/plus">
+          {!isAdmin && <Plus size={24} className="text-slate-200 group-hover/plus:text-indigo-400 group-hover/plus:scale-125 transition-all" />}
+        </div>
+      )}
     </div>
   );
 };
 
 export default DoctorSchedulePage;
-
-

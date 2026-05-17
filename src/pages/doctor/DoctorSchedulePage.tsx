@@ -3,6 +3,13 @@ import { getDoctorSchedules } from '../../services/scheduleService';
 import { getDoctorMe } from '../../services/doctorService';
 import { toast } from 'react-hot-toast';
 
+const formatLocalISO = (date: Date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+};
+
 const DoctorSchedulePage: React.FC = () => {
     const [schedules, setSchedules] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -12,13 +19,13 @@ const DoctorSchedulePage: React.FC = () => {
     const [startDate, setStartDate] = useState(() => {
         const d = new Date();
         d.setDate(1); // Start of month
-        return d.toISOString().split('T')[0];
+        return formatLocalISO(d);
     });
     const [endDate, setEndDate] = useState(() => {
         const d = new Date();
         d.setMonth(d.getMonth() + 1);
         d.setDate(0); // End of month
-        return d.toISOString().split('T')[0];
+        return formatLocalISO(d);
     });
 
     const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -60,22 +67,22 @@ const DoctorSchedulePage: React.FC = () => {
     for (let i = 1; i <= days; i++) calendarDays.push(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i));
 
     const getSchedulesForDate = (date: Date) => {
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = formatLocalISO(date);
         return schedules.filter(s => s.scheduleDate === dateStr);
     };
 
     const nextMonth = () => {
         const next = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
         setCurrentMonth(next);
-        setStartDate(new Date(next.getFullYear(), next.getMonth(), 1).toISOString().split('T')[0]);
-        setEndDate(new Date(next.getFullYear(), next.getMonth() + 1, 0).toISOString().split('T')[0]);
+        setStartDate(formatLocalISO(new Date(next.getFullYear(), next.getMonth(), 1)));
+        setEndDate(formatLocalISO(new Date(next.getFullYear(), next.getMonth() + 1, 0)));
     };
 
     const prevMonth = () => {
         const prev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
         setCurrentMonth(prev);
-        setStartDate(new Date(prev.getFullYear(), prev.getMonth(), 1).toISOString().split('T')[0]);
-        setEndDate(new Date(prev.getFullYear(), prev.getMonth() + 1, 0).toISOString().split('T')[0]);
+        setStartDate(formatLocalISO(new Date(prev.getFullYear(), prev.getMonth(), 1)));
+        setEndDate(formatLocalISO(new Date(prev.getFullYear(), prev.getMonth() + 1, 0)));
     };
 
     return (
@@ -116,6 +123,12 @@ const DoctorSchedulePage: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+            {loading && (
+                <div className="w-full bg-slate-100 h-1 overflow-hidden relative mb-4 rounded-full">
+                    <div className="bg-primary h-full rounded-full w-1/3 absolute bg-indigo-600 animate-pulse"></div>
+                </div>
+            )}
 
             {/* Calendar Controls */}
             <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">

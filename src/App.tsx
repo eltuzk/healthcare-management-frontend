@@ -1,28 +1,31 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
-import StaffListPage from './pages/StaffListPage';
-import StaffPermissionsPage from './pages/StaffPermissionsPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import StaffListPage from './pages/admin/StaffListPage';
+import StaffPermissionsPage from './pages/admin/StaffPermissionsPage';
 import DoctorSchedulePage from './pages/DoctorSchedulePage';
-import RevenueReportsPage from './pages/RevenueReportsPage';
-import PatientReceptionPage from './pages/PatientReceptionPage';
+import RevenueReportsPage from './pages/accountant/RevenueReportsPage';
+import PatientReceptionPage from './pages/receptionist/PatientReceptionPage';
 import DailyPatientListPage from './pages/DailyPatientListPage';
-import ExaminationScreenPage from './pages/ExaminationScreenPage';
+import ExaminationScreenPage from './pages/doctor/ExaminationScreenPage';
 import MedicalHistoryPage from './pages/MedicalHistoryPage';
 import AppointmentBookingPage from './pages/AppointmentBookingPage';
-import LabTestRequestsPage from './pages/LabTestRequestsPage';
-import LabResultEntryPage from './pages/LabResultEntryPage';
-import PharmacyInventoryPage from './pages/PharmacyInventoryPage';
-import PrescriptionDispensingPage from './pages/PrescriptionDispensingPage';
+import LabTestRequestsPage from './pages/technician/LabTestRequestsPage';
+import LabResultEntryPage from './pages/technician/LabResultEntryPage';
+import PharmacyInventoryPage from './pages/pharmacist/PharmacyInventoryPage';
+import PrescriptionDispensingPage from './pages/pharmacist/PrescriptionDispensingPage';
 import InpatientBedMapPage from './pages/InpatientBedMapPage';
 import RoomManagementPage from './pages/RoomManagementPage';
-import HospitalFeeCollectionPage from './pages/HospitalFeeCollectionPage';
+import HospitalFeeCollectionPage from './pages/accountant/HospitalFeeCollectionPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import DoctorSchedulePagePersonal from './pages/doctor/DoctorSchedulePage';
 import AppointmentSelectionPage from './pages/doctor/AppointmentSelectionPage';
 import ExaminationPage from './pages/doctor/ExaminationPage';
+import ExaminationStatusPage from './pages/doctor/ExaminationStatusPage';
+import PrescriptionPage from './pages/doctor/PrescriptionPage';
+import InpatientAdmissionPage from './pages/doctor/InpatientAdmissionPage';
 import ProfilePage from './pages/ProfilePage';
 import MainLayout from './components/common/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -101,6 +104,21 @@ function App() {
               <ExaminationPage />
             </ProtectedRoute>
           } />
+          <Route path="/doctor/status" element={
+            <ProtectedRoute allowedRoles={['DOCTOR']}>
+              <ExaminationStatusPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/doctor/prescription" element={
+            <ProtectedRoute allowedRoles={['DOCTOR']}>
+              <PrescriptionPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/doctor/admission" element={
+            <ProtectedRoute allowedRoles={['DOCTOR']}>
+              <InpatientAdmissionPage />
+            </ProtectedRoute>
+          } />
           <Route path="/medical-history" element={
             <ProtectedRoute allowedRoles={['DOCTOR', 'RECEPTIONIST', 'ADMIN']}>
               <MedicalHistoryPage />
@@ -132,7 +150,7 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/bed-map" element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST', 'DOCTOR']}>
+            <ProtectedRoute allowedRoles={['ADMIN', 'DOCTOR']}>
               <InpatientBedMapPage />
             </ProtectedRoute>
           } />

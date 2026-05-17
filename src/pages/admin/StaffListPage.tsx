@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import StaffFormModal from '../components/staff/StaffFormModal';
-import { getAccounts, deleteAccount } from '../services/accountService';
+import StaffFormModal from '../../components/staff/StaffFormModal';
+import { getAccounts, deleteAccount } from '../../services/accountService';
 import { toast } from 'react-hot-toast';
 
 const StaffListPage: React.FC = () => {

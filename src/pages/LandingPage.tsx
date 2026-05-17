@@ -76,7 +76,6 @@ const LandingPage: React.FC = () => {
 			'/assets/plugins/fancybox/jquery.fancybox.min.js',
 			'/assets/plugins/wow/js/wow.min.js',
 			'/assets/plugins/gsap/gsap.min.js',
-			'https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js',
 			'/assets/js/script.min.js'
 		];
 
@@ -103,28 +102,6 @@ const LandingPage: React.FC = () => {
 					document.body.appendChild(script);
 					injectedScripts.push(script);
 				});
-			}
-
-			// Initialize Lenis Smooth Scroll
-			if ((window as any).Lenis) {
-				const lenis = new (window as any).Lenis({
-					duration: 1.2,
-					easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-					orientation: 'vertical',
-					gestureOrientation: 'vertical',
-					smoothWheel: true,
-					wheelMultiplier: 1,
-					smoothTouch: false,
-					touchMultiplier: 2,
-					infinite: false,
-				});
-
-				function raf(time: number) {
-					lenis.raf(time);
-					requestAnimationFrame(raf);
-				}
-
-				requestAnimationFrame(raf);
 			}
 
 			// Initialize WOW.js

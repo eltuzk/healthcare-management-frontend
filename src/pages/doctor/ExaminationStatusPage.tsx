@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMedicalRecords, updateMedicalRecord, completeMedicalRecord } from '../../services/medicalRecordService';
+import { getMedicalRecords, updateMedicalRecord, lockMedicalRecord } from '../../services/medicalRecordService';
 import { getMedicalServiceRequests, getMedicalServiceResultByRequestId } from '../../services/medicalServiceService';
 import { getLabTestRequestsByMedicalRecordId, getLabTestResultByRequestId } from '../../services/labService';
 import { toast } from 'react-hot-toast';
@@ -18,6 +18,7 @@ const ExaminationStatusPage: React.FC = () => {
     const [diagnosis, setDiagnosis] = useState('');
     const [clinicalNotes, setClinicalNotes] = useState('');
     const [treatmentPlan, setTreatmentPlan] = useState('');
+    const [conclusionType, setConclusionType] = useState('COMPLETED');
     const [submitting, setSubmitting] = useState(false);
 
     // Result modal state
@@ -52,6 +53,7 @@ const ExaminationStatusPage: React.FC = () => {
         setDiagnosis(record.initialDiagnosis || '');
         setClinicalNotes(record.clinicalNotes || '');
         setTreatmentPlan(record.treatmentPlan || '');
+        setConclusionType(record.conclusionType || 'COMPLETED');
         setLoadingRequests(true);
         try {
             // Fetch both technical services and laboratory tests
@@ -81,7 +83,7 @@ const ExaminationStatusPage: React.FC = () => {
                 version: selectedRecord.version,
                 initialDiagnosis: diagnosis,
                 clinicalConclusion: diagnosis,
-                conclusionType: 'COMPLETED',
+                conclusionType,
                 clinicalNotes,
                 treatmentPlan
             });
@@ -91,12 +93,44 @@ const ExaminationStatusPage: React.FC = () => {
             setDiagnosis(updated.initialDiagnosis || '');
             setClinicalNotes(updated.clinicalNotes || '');
             setTreatmentPlan(updated.treatmentPlan || '');
+            setConclusionType(updated.conclusionType || 'COMPLETED');
 
             toast.success("Lưu thông tin bệnh án thành công!");
             await fetchRecords();
+
+            // Redirect based on conclusionType
+            if (conclusionType === 'COMPLETED') {
+                navigate(`/doctor/prescription?medicalRecordId=${selectedRecord.medicalRecordId}`);
+            } else if (conclusionType === 'ADMISSION_REQUIRED') {
+                navigate(`/doctor/admission?medicalRecordId=${selectedRecord.medicalRecordId}`);
+            }
         } catch (error) {
             console.error("Error saving medical record:", error);
             toast.error("Lỗi khi lưu bệnh án");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleLockRecord = async () => {
+        if (!selectedRecord) return;
+        
+        const confirmLock = window.confirm("Bạn có chắc chắn muốn KHÓA bệnh án này không? Sau khi khóa, bệnh án sẽ hoàn toàn không thể sửa đổi.");
+        if (!confirmLock) return;
+
+        setSubmitting(true);
+        try {
+            const locked = await lockMedicalRecord(selectedRecord.medicalRecordId);
+            setSelectedRecord(locked);
+            setDiagnosis(locked.initialDiagnosis || '');
+            setClinicalNotes(locked.clinicalNotes || '');
+            setTreatmentPlan(locked.treatmentPlan || '');
+            setConclusionType(locked.conclusionType || 'COMPLETED');
+            toast.success("Bệnh án đã được KHÓA thành công!");
+            await fetchRecords();
+        } catch (error) {
+            console.error("Error locking medical record:", error);
+            toast.error("Lỗi khi khóa bệnh án");
         } finally {
             setSubmitting(false);
         }
@@ -136,7 +170,7 @@ const ExaminationStatusPage: React.FC = () => {
         <div className="p-6 max-w-7xl mx-auto animate-fade-in">
             {/* Page Title */}
             <div className="mb-8">
-                <h1 className="text-2xl font-black text-slate-800 tracking-tight">Trạng Thái Khám Bệnh & Cập Nhật Bệnh Án</h1>
+                <h1 className="text-2xl font-black text-slate-800 tracking-tight">Cập Nhật Bệnh Án</h1>
                 <p className="text-slate-500 font-medium">Theo dõi tiến độ cận lâm sàng, đọc kết quả kỹ thuật và cập nhật/hoàn tất bệnh án điện tử (EMR)</p>
             </div>
 
@@ -187,11 +221,13 @@ const ExaminationStatusPage: React.FC = () => {
                                             <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
                                                 isSelected 
                                                 ? 'bg-white/20 text-white' 
+                                                : rec.status === 'LOCKED'
+                                                ? 'bg-rose-100 text-rose-800 border border-rose-200/50'
                                                 : rec.status === 'COMPLETED' 
                                                 ? 'bg-emerald-100 text-emerald-800' 
                                                 : 'bg-amber-100 text-amber-800'
                                             }`}>
-                                                {rec.status === 'COMPLETED' ? 'Hoàn thành' : 'Đang khám'}
+                                                {rec.status === 'LOCKED' ? 'Đã khóa' : rec.status === 'COMPLETED' ? 'Hoàn thành' : 'Đang khám'}
                                             </span>
                                         </div>
                                         <div className={`text-xs ${isSelected ? 'text-white/80' : 'text-slate-400'} font-medium`}>
@@ -232,11 +268,18 @@ const ExaminationStatusPage: React.FC = () => {
                                                 </p>
                                             </div>
                                             <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-                                                selectedRecord.status === 'COMPLETED' 
+                                                selectedRecord.status === 'LOCKED'
+                                                ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                                                : selectedRecord.status === 'COMPLETED' 
                                                 ? 'bg-emerald-100 text-emerald-800' 
                                                 : 'bg-amber-50 text-amber-700 border border-amber-100'
                                             }`}>
-                                                {selectedRecord.status === 'COMPLETED' ? 'ĐÃ HOÀN THÀNH CA KHÁM' : 'ĐANG TRONG TIẾN TRÌNH KHÁM'}
+                                                {selectedRecord.status === 'LOCKED' 
+                                                    ? 'ĐÃ KHÓA BỆNH ÁN' 
+                                                    : selectedRecord.status === 'COMPLETED' 
+                                                    ? 'ĐÃ HOÀN THÀNH CA KHÁM' 
+                                                    : 'ĐANG TRONG TIẾN TRÌNH KHÁM'
+                                                }
                                             </span>
                                         </div>
 
@@ -377,16 +420,30 @@ const ExaminationStatusPage: React.FC = () => {
                                 </h4>
 
                                 <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Chẩn đoán sơ bộ / kết luận *</label>
-                                        <textarea
-                                            value={diagnosis}
-                                            onChange={(e) => setDiagnosis(e.target.value)}
-                                            disabled={selectedRecord.status === 'LOCKED' || submitting}
-                                            rows={2}
-                                            className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 outline-none font-semibold text-slate-800 transition-all disabled:bg-slate-50 disabled:text-slate-400"
-                                            placeholder="Nhập chẩn đoán lâm sàng..."
-                                        />
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Chẩn đoán sơ bộ / kết luận *</label>
+                                            <textarea
+                                                value={diagnosis}
+                                                onChange={(e) => setDiagnosis(e.target.value)}
+                                                disabled={selectedRecord.status === 'LOCKED' || submitting}
+                                                rows={2}
+                                                className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 outline-none font-semibold text-slate-800 transition-all disabled:bg-slate-50 disabled:text-slate-400"
+                                                placeholder="Nhập chẩn đoán lâm sàng..."
+                                            />
+                                        </div>
+                                        <div className="md:col-span-1">
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Kết luận điều trị *</label>
+                                            <select 
+                                                value={conclusionType}
+                                                onChange={(e) => setConclusionType(e.target.value)}
+                                                disabled={selectedRecord.status === 'LOCKED' || submitting}
+                                                className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 outline-none font-bold text-slate-800 transition-all bg-white disabled:bg-slate-50 disabled:text-slate-400"
+                                            >
+                                                <option value="COMPLETED">Điều trị ngoại trú (Kê đơn)</option>
+                                                <option value="ADMISSION_REQUIRED">Điều trị nội trú (Nhập viện)</option>
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -418,8 +475,22 @@ const ExaminationStatusPage: React.FC = () => {
 
                                 {/* Form Actions */}
                                 {selectedRecord.status !== 'LOCKED' && (
-                                    <div className="flex justify-end pt-4 border-t border-slate-100">
+                                    <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
+                                        {selectedRecord.status === 'COMPLETED' && (
+                                            <button
+                                                type="button"
+                                                onClick={handleLockRecord}
+                                                disabled={submitting}
+                                                className="px-6 py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold shadow-lg shadow-rose-600/15 active:scale-95 transition-all text-sm flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+                                            >
+                                                <span>Khóa bệnh án</span>
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                            </button>
+                                        )}
                                         <button
+                                            type="button"
                                             onClick={handleSaveRecord}
                                             disabled={submitting}
                                             className="px-8 py-3.5 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-600/10 hover:shadow-xl hover:shadow-indigo-600/20 active:scale-95 transition-all text-sm flex items-center gap-2.5 disabled:opacity-50 disabled:pointer-events-none"

@@ -179,7 +179,7 @@ const AppointmentSelectionPage: React.FC = () => {
             {/* Header */}
             <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-100 pb-5">
                 <div>
-                    <h1 className="text-2xl font-black text-slate-800 tracking-tight">Hàng Đợi Tiếp Nhận Khám Bệnh</h1>
+                    <h1 className="text-2xl font-black text-slate-800 tracking-tight">Tiếp Nhận Khám Bệnh</h1>
                     <p className="text-slate-500 font-medium">Danh sách bệnh nhân đang xếp hàng chờ và khu vực tạo bệnh án điện tử (EMR) trực tiếp</p>
                 </div>
                 <div className="text-left md:text-right bg-slate-50 border border-slate-200/50 px-5 py-3 rounded-2xl">

@@ -1,205 +1,565 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getAppointments } from '../../services/appointmentService';
+import { getRevenueReport } from '../../services/reportService';
+import {
+  Calendar,
+  Activity,
+  CheckCircle,
+  DollarSign,
+  RefreshCw,
+  Info
+} from 'lucide-react';
 
-// Mock Data based on Stitch Screen 3d234322aaa944e791bf2b5fe4ff4dd5
-const kpiData = [
-  { label: 'Tổng bệnh nhân', value: '1,284', change: '+12%', positive: true },
-  { label: 'Lịch hẹn chờ', value: '42', change: '-5%', positive: false },
-  { label: 'Doanh thu tháng', value: '4.28B VNĐ', change: '+24%', positive: true },
-  { label: 'Nhân sự đang trực', value: '156', status: 'Online', positive: true },
-];
-
-const todayAppointments = [
-  { id: 1, patient: 'Nguyễn Văn A', doctor: 'Bs. Lê Minh', time: '08:30 AM', status: 'Đã đến', statusColor: 'bg-emerald-100 text-emerald-700' },
-  { id: 2, patient: 'Trần Thị B', doctor: 'Bs. Robert Smith', time: '09:15 AM', status: 'Chờ khám', statusColor: 'bg-orange-100 text-orange-700' },
-  { id: 3, patient: 'Lê Hoàng C', doctor: 'Bs. Sarah J.', time: '10:00 AM', status: 'Chờ khám', statusColor: 'bg-orange-100 text-orange-700' },
-  { id: 4, patient: 'Phạm Minh D', doctor: 'Bs. Lê Minh', time: '10:45 AM', status: 'Hủy bỏ', statusColor: 'bg-red-100 text-red-700' },
-];
-
-const recentActivities = [
-  { id: 1, action: 'Lịch hẹn mới được tạo', user: 'Lễ tân', time: '10:45 AM', type: 'info' },
-  { id: 2, action: 'Thanh toán hoàn tất - INV-092', user: 'Thu ngân', time: '10:30 AM', type: 'success' },
-  { id: 3, action: 'Cảnh báo kho: Vắc-xin sắp hết', user: 'Hệ thống', time: '09:15 AM', type: 'warning' },
-  { id: 4, action: 'Đã tải lên kết quả XN BN #128', user: 'Khoa XN', time: '08:45 AM', type: 'info' },
-];
+// Pseudo-random hashing helper for realistic date-based mock data seeding
+const getPseudoRandom = (str: string, seed: number) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(Math.sin(hash + seed));
+};
 
 const AdminDashboardPage: React.FC = () => {
-  return (
-    <div className="pt-10 space-y-8 animate-fade-in pb-12">
-      {/* Top Header Placeholder (Header.tsx already handles the main header, 
-          but we might add secondary breadcrumbs or actions here if needed) */}
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    // Default to today's date in local time YYYY-MM-DD
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    const localToday = new Date(today.getTime() - offset * 60 * 1000);
+    return localToday.toISOString().split('T')[0];
+  });
 
-      {/* KPI Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpiData.map((kpi, index) => (
-          <div key={index} className="bg-surface-container-lowest rounded-[24px] shadow-ambient pt-8 px-8 pb-7 transition-all duration-300 hover:shadow-lg">
-            <p className="font-body text-[0.75rem] font-bold tracking-wider uppercase text-on-surface-variant mb-3">
-              {kpi.label}
-            </p>
-            <div className="flex items-baseline justify-between">
-              <h3 className="font-display text-4xl font-bold text-on-surface tracking-tight">
-                {kpi.value}
-              </h3>
-              {kpi.change && (
-                <span className={`font-body text-[0.8rem] font-bold px-2 py-0.5 rounded-full ${kpi.positive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                  {kpi.change}
-                </span>
-              )}
-              {kpi.status && (
-                <span className="flex items-center gap-1.5 font-body text-[0.8rem] font-bold text-primary">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                  {kpi.status}
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+  const [loading, setLoading] = useState(true);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [kpi, setKpi] = useState({
+    scheduled: 142,
+    examining: 24,
+    completed: 96,
+    revenueToday: 18450000,
+  });
+  const [dailyRevenue, setDailyRevenue] = useState([
+    { date: 'T2', dateStr: '', amount: 12500000 },
+    { date: 'T3', dateStr: '', amount: 15200000 },
+    { date: 'T4', dateStr: '', amount: 9800000 },
+    { date: 'T5', dateStr: '', amount: 18450000 },
+    { date: 'T6', dateStr: '', amount: 14000000 },
+    { date: 'T7', dateStr: '', amount: 8500000 },
+    { date: 'CN', dateStr: '', amount: 6200000 },
+  ]);
+  const [monthlyRevenue, setMonthlyRevenue] = useState<Array<{ month: string; amount: number }>>([]);
+  
+  const [hoveredDailyIdx, setHoveredDailyIdx] = useState<number | null>(null);
+  const [hoveredMonthlyIdx, setHoveredMonthlyIdx] = useState<number | null>(null);
 
-      {/* Main Grid: Charts and Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+  const targetYear = selectedDate ? new Date(selectedDate).getFullYear() : new Date().getFullYear();
+
+  // Helper formatting functions
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+      .format(val)
+      .replace('₫', 'VNĐ');
+  };
+
+  const formatShortCurrency = (val: number) => {
+    if (val >= 1000000000) {
+      return (val / 1000000000).toFixed(1) + 'B';
+    }
+    if (val >= 1000000) {
+      return (val / 1000000).toFixed(1) + 'M';
+    }
+    if (val >= 1000) {
+      return (val / 1000).toFixed(0) + 'K';
+    }
+    return val.toString();
+  };
+
+  const fetchData = async (targetDateStr: string) => {
+    setLoading(true);
+    try {
+      // 1. Fetch appointments from API
+      const appointments = await getAppointments();
+      
+      let scheduled = 0;
+      let examining = 0;
+      let completed = 0;
+      
+      // Filter appointments on the selected scheduleDate
+      if (Array.isArray(appointments)) {
+        appointments.forEach((app: any) => {
+          if (app.scheduleDate === targetDateStr) {
+            const appStatus = app.status;
+            if (appStatus === 'CONFIRMED' || appStatus === 'PENDING') {
+              scheduled++;
+            } else if (appStatus === 'IN_PROGRESS' || appStatus === 'CHECKED_IN') {
+              examining++;
+            } else if (appStatus === 'COMPLETED') {
+              completed++;
+            }
+          }
+        });
+      }
+
+      // 2. Fetch daily revenue for 7 days leading up to selectedDate
+      const targetDate = new Date(targetDateStr);
+      const dailyList: Array<{ date: string; dateStr: string; amount: number }> = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(targetDate);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const dayNum = d.getDay();
+        const label = dayNum === 0 ? 'CN' : `T${dayNum + 1}`;
+        dailyList.push({ date: label, dateStr: dateStr, amount: 0 });
+      }
+      
+      const fromDateStr = dailyList[0].dateStr;
+      const dailyReport = await getRevenueReport({ fromDate: fromDateStr, toDate: targetDateStr });
+      
+      let revenueToday = 0;
+      if (dailyReport && Array.isArray(dailyReport.revenueByDate)) {
+        // Find targeted selectedDate's revenue specifically
+        const selectedDayBreakdown = dailyReport.revenueByDate.find((item: any) => item.key === targetDateStr);
+        if (selectedDayBreakdown) {
+          revenueToday = Number(selectedDayBreakdown.totalAmount) || 0;
+        }
         
-        {/* Revenue Bar Chart (6 months) */}
-        <div className="lg:col-span-8 bg-surface-container-lowest rounded-[24px] shadow-ambient p-8">
-          <div className="flex justify-between items-center mb-10">
-            <h2 className="font-display text-xl font-bold text-on-surface">Doanh thu 6 tháng gần nhất</h2>
-            <div className="flex gap-2">
-              <button className="px-4 py-2 text-xs font-bold rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container-highest transition-colors">Xuất file</button>
-              <button className="px-4 py-2 text-xs font-bold rounded-lg bg-primary text-white shadow-sm hover:opacity-90 transition-opacity">Chi tiết</button>
-            </div>
-          </div>
-          
-          <div className="h-[280px] flex items-end justify-between gap-4 border-b border-surface-container-low pb-6 relative group">
-             {/* Y-axis (mockup) */}
-             <div className="absolute -left-2 top-0 bottom-6 flex flex-col justify-between text-[10px] text-on-surface-variant/60 font-bold uppercase tracking-widest h-full">
-               <span>5B</span>
-               <span>2.5B</span>
-               <span>0</span>
-             </div>
-             
-             {/* Chart Bars (Months 5-10) */}
-             <div className="pl-12 flex w-full items-end justify-between h-full gap-6">
-               {[35, 52, 48, 70, 85, 95].map((val, idx) => (
-                 <div key={idx} className="flex-1 flex flex-col justify-end h-full">
-                   <div 
-                     className="w-full bg-primary rounded-t-xl transition-all duration-500 shadow-sm relative group-hover:opacity-40 hover:!opacity-100 cursor-pointer" 
-                     style={{ height: `${val}%` }}
-                   >
-                     {/* Tooltip on hover */}
-                     <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                       {(val / 20).toFixed(2)}B VNĐ
-                     </div>
-                   </div>
-                   <span className="text-center mt-4 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-tighter">Tháng {idx + 5}</span>
-                 </div>
-               ))}
-             </div>
-          </div>
-        </div>
+        // Map fetched daily revenue to standard week day labels using dateStr
+        dailyReport.revenueByDate.forEach((item: any) => {
+          const existing = dailyList.find(d => d.dateStr === item.key);
+          if (existing) {
+            existing.amount = Number(item.totalAmount) || 0;
+          }
+        });
+      }
 
-        {/* Patient Distribution Donut Chart (Mockup) */}
-        <div className="lg:col-span-4 bg-surface-container-lowest rounded-[24px] shadow-ambient p-8 flex flex-col">
-          <h2 className="font-display text-xl font-bold text-on-surface mb-8">Phân bổ bệnh nhân</h2>
-          
-          <div className="flex-1 flex flex-col items-center justify-center">
-            {/* CSS-only Donut Mockup */}
-            <div className="relative w-40 h-40 rounded-full border-[16px] border-surface-container-low flex items-center justify-center">
-               <div className="text-center">
-                 <p className="text-2xl font-bold text-on-surface">1,284</p>
-                 <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Tổng cộng</p>
-               </div>
-               {/* Decorative segments */}
-               <div className="absolute inset-[-16px] rounded-full border-[16px] border-transparent border-t-primary border-r-primary-container" style={{ transform: 'rotate(15deg)' }}></div>
-            </div>
-            
-            <div className="mt-10 w-full space-y-4">
-              {[
-                { label: 'Quận 1', value: '45%', color: 'bg-primary' },
-                { label: 'Quận 7', value: '30%', color: 'bg-primary-container' },
-                { label: 'Bình Thạnh', value: '25%', color: 'bg-surface-container-highest' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2.5 h-2.5 rounded-full ${item.color}`}></div>
-                    <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{item.label}</span>
-                  </div>
-                  <span className="text-xs font-bold text-on-surface">{item.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+      // 3. Fetch monthly revenue (year of selectedDate)
+      const targetYear = targetDate.getFullYear();
+      const firstDayOfYearStr = `${targetYear}-01-01`;
+      const lastDayOfYearStr = `${targetYear}-12-31`;
+      const monthlyReport = await getRevenueReport({ fromDate: firstDayOfYearStr, toDate: lastDayOfYearStr });
+      
+      const monthlyList = Array.from({ length: 12 }, (_, i) => ({
+        month: `Tháng ${i + 1}`,
+        amount: 0
+      }));
+      
+      if (monthlyReport && Array.isArray(monthlyReport.revenueByDate)) {
+        monthlyReport.revenueByDate.forEach((item: any) => {
+          const itemDate = new Date(item.key);
+          if (itemDate.getFullYear() === targetYear) {
+            const monthIdx = itemDate.getMonth();
+            monthlyList[monthIdx].amount += Number(item.totalAmount) || 0;
+          }
+        });
+      }
+      
+      // Check if we have real active data. If DB is fresh/empty, use mockup defaults for visual quality.
+      const hasRealAppointments = Array.isArray(appointments) && appointments.some((a: any) => a.scheduleDate === targetDateStr);
+      const hasRealRevenue = dailyList.some(d => d.amount > 0) || monthlyList.some(m => m.amount > 0);
+      
+      if (hasRealAppointments || hasRealRevenue) {
+        setKpi({
+          scheduled: scheduled,
+          examining: examining,
+          completed: completed,
+          revenueToday: revenueToday,
+        });
+        
+        setDailyRevenue(dailyList);
+        setMonthlyRevenue(monthlyList);
+        setIsDemoMode(false);
+      } else {
+        // Fallback to simulation mode if no records are found in database yet
+        triggerSimulationMode(targetDateStr);
+      }
+    } catch (error) {
+      console.warn('Backend API not accessible or empty, using rich simulation data fallback.', error);
+      triggerSimulationMode(targetDateStr);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        {/* Today's Appointments Table */}
-        <div className="lg:col-span-8 bg-surface-container-lowest rounded-[24px] shadow-ambient p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="font-display text-xl font-bold text-on-surface">Lịch hẹn hôm nay</h2>
-            <button className="text-sm font-bold text-primary hover:underline">Xem tất cả</button>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-surface-container-low">
-                  <th className="pb-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Bệnh nhân</th>
-                  <th className="pb-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Bác sĩ</th>
-                  <th className="pb-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Thời gian</th>
-                  <th className="pb-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-right">Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-surface-container-low/50">
-                {todayAppointments.map((app) => (
-                  <tr key={app.id} className="group hover:bg-surface-container-low/30 transition-colors">
-                    <td className="py-4 font-body text-sm font-bold text-on-surface">{app.patient}</td>
-                    <td className="py-4 font-body text-sm text-on-surface-variant">{app.doctor}</td>
-                    <td className="py-4 font-body text-sm text-on-surface-variant">{app.time}</td>
-                    <td className="py-4 text-right">
-                      <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${app.statusColor}`}>
-                        {app.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+  // Triggers realistic mock data seeded by the selected date string
+  const triggerSimulationMode = (targetDateStr: string) => {
+    setIsDemoMode(true);
+    
+    const seed = getPseudoRandom(targetDateStr, 100);
+    const mockScheduled = Math.floor(60 + seed * 100);
+    const mockExamining = Math.floor(10 + seed * 20);
+    const mockCompleted = Math.floor(40 + seed * 70);
+    const mockRevenueToday = Math.floor(8000000 + seed * 16000000);
+    
+    setKpi({
+      scheduled: mockScheduled,
+      examining: mockExamining,
+      completed: mockCompleted,
+      revenueToday: mockRevenueToday,
+    });
 
-        {/* Recent Activity Feed */}
-        <div className="lg:col-span-4 bg-surface-container-lowest rounded-[24px] shadow-ambient p-8">
-          <h2 className="font-display text-xl font-bold text-on-surface mb-8">Hoạt động hệ thống</h2>
-          <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-low">
-            {recentActivities.map((activity) => (
-              <div key={activity.id} className="flex gap-6 relative">
-                <div className={`z-10 w-6 h-6 rounded-full flex items-center justify-center shrink-0 shadow-sm ${
-                  activity.type === 'success' ? 'bg-emerald-500 text-white' : 
-                  activity.type === 'warning' ? 'bg-orange-500 text-white' : 
-                  'bg-primary text-white'
-                }`}>
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d={
-                      activity.type === 'success' ? 'M5 13l4 4L19 7' : 
-                      activity.type === 'warning' ? 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' : 
-                      'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-                    } />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-body text-sm font-bold text-on-surface leading-tight">{activity.action}</p>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">{activity.user}</span>
-                    <span className="w-1 h-1 rounded-full bg-on-surface-variant/30"></span>
-                    <span className="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">{activity.time}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+    // Generate daily list centered around targeted date
+    const targetDate = new Date(targetDateStr);
+    const mockDaily = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(targetDate);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const dayNum = d.getDay();
+      const label = dayNum === 0 ? 'CN' : `T${dayNum + 1}`;
+      
+      const daySeed = getPseudoRandom(dateStr, 200);
+      const amount = Math.floor(4000000 + daySeed * 18000000);
+      mockDaily.push({ date: label, dateStr: dateStr, amount });
+    }
+    setDailyRevenue(mockDaily);
+
+    // Generate monthly list for target date's year
+    const targetYear = targetDate.getFullYear();
+    const mockMonthly = Array.from({ length: 12 }, (_, i) => {
+      const monthSeed = getPseudoRandom(`${targetYear}-${i + 1}`, 300);
+      return {
+        month: `Tháng ${i + 1}`,
+        amount: Math.floor(120000000 + monthSeed * 380000000)
+      };
+    });
+    setMonthlyRevenue(mockMonthly);
+  };
+
+  useEffect(() => {
+    fetchData(selectedDate);
+  }, [selectedDate]);
+
+  // Compute maximums for chart scales
+  const maxDailyAmount = Math.max(...dailyRevenue.map(d => d.amount), 10000000);
+  const maxMonthlyAmount = Math.max(...monthlyRevenue.map(m => m.amount), 100000000);
+
+  // Format selected date for displaying nicely in text
+  const displaySelectedDate = () => {
+    try {
+      const parts = selectedDate.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return selectedDate;
+    } catch {
+      return selectedDate;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4 pt-20">
+        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+        <p className="font-body text-sm font-semibold text-on-surface-variant/80">Đang tải số liệu tổng quan...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pt-6 space-y-8 animate-fade-in pb-12 px-4 md:px-0 max-w-7xl mx-auto">
+      {/* Dashboard Top Header Bar */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-surface-container-lowest rounded-[24px] p-6 shadow-ambient">
+        <div>
+          <h1 className="font-display font-extrabold text-2xl md:text-3xl text-on-surface">Tổng Quan Quản Trị</h1>
+          <p className="font-body text-xs md:text-sm text-on-surface-variant/80 mt-1">
+            Báo cáo thống kê tình hình khám chữa bệnh và biểu đồ doanh thu ngày {displaySelectedDate()}.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-start lg:justify-end">
+          {/* Custom Date Filter */}
+          <div className="flex items-center gap-2.5 bg-surface-container-low px-4 py-2.5 rounded-xl border border-outline-variant/30 shadow-inner group hover:border-primary/50 transition-all">
+            <span className="font-body text-[10px] md:text-xs font-bold text-on-surface-variant uppercase tracking-wider">Xem báo cáo ngày:</span>
+            <input 
+              type="date" 
+              value={selectedDate} 
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="bg-transparent border-none text-on-surface font-body text-sm font-bold focus:outline-none cursor-pointer text-primary"
+            />
           </div>
-          <button className="w-full mt-10 py-4 rounded-xl border-2 border-surface-container-low text-on-surface-variant font-bold text-[10px] uppercase tracking-[0.15em] hover:bg-surface-container-low hover:text-on-surface transition-all">
-            Xem tất cả lịch sử
+
+          {/* Simulation mode indicator badge */}
+          <span className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold ${
+            isDemoMode 
+              ? 'bg-amber-50 text-amber-700 border border-amber-200' 
+              : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+          }`}>
+            <span className={`w-2 h-2 rounded-full ${isDemoMode ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+            {isDemoMode ? 'Chế độ mô phỏng' : 'Đang chạy thực tế'}
+          </span>
+          <button 
+            onClick={() => fetchData(selectedDate)}
+            className="flex items-center justify-center p-2.5 rounded-xl border border-outline-variant/50 hover:bg-surface-container-low text-on-surface-variant hover:text-on-surface transition-all active:scale-95 shadow-sm"
+            title="Tải lại dữ liệu"
+          >
+            <RefreshCw className="w-4 h-4" />
           </button>
         </div>
+      </div>
+
+      {/* 4 KPI Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Card 1: Số bệnh nhân đã đặt lịch */}
+        <div className="bg-surface-container-lowest rounded-[24px] shadow-ambient pt-8 px-8 pb-7 border-l-4 border-primary transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+          <div className="flex justify-between items-start mb-3">
+            <p className="font-body text-[0.75rem] font-bold tracking-wider uppercase text-on-surface-variant">
+              Bệnh nhân đã đặt lịch
+            </p>
+            <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+              <Calendar className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between mt-3">
+            <h3 className="font-display text-4xl font-extrabold text-on-surface tracking-tight">
+              {kpi.scheduled}
+            </h3>
+            <span className="font-body text-[0.8rem] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
+              Lịch hẹn
+            </span>
+          </div>
+          <p className="font-body text-[11px] font-semibold text-on-surface-variant/70 mt-3">Lịch hẹn chờ khám ngày {displaySelectedDate()}</p>
+        </div>
+
+        {/* Card 2: Số bệnh nhân đang khám */}
+        <div className="bg-surface-container-lowest rounded-[24px] shadow-ambient pt-8 px-8 pb-7 border-l-4 border-amber-500 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+          <div className="flex justify-between items-start mb-3">
+            <p className="font-body text-[0.75rem] font-bold tracking-wider uppercase text-on-surface-variant">
+              Bệnh nhân đang khám
+            </p>
+            <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 relative">
+              <Activity className="w-5 h-5 animate-pulse text-amber-500" />
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between mt-3">
+            <h3 className="font-display text-4xl font-extrabold text-on-surface tracking-tight">
+              {kpi.examining}
+            </h3>
+            <span className="font-body text-[0.8rem] font-extrabold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+              Đang khám
+            </span>
+          </div>
+          <p className="font-body text-[11px] font-semibold text-on-surface-variant/70 mt-3">Số ca chẩn đoán ngày {displaySelectedDate()}</p>
+        </div>
+
+        {/* Card 3: Số bệnh nhân đã hoàn thành */}
+        <div className="bg-surface-container-lowest rounded-[24px] shadow-ambient pt-8 px-8 pb-7 border-l-4 border-emerald-500 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+          <div className="flex justify-between items-start mb-3">
+            <p className="font-body text-[0.75rem] font-bold tracking-wider uppercase text-on-surface-variant">
+              Bệnh nhân đã hoàn thành
+            </p>
+            <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
+              <CheckCircle className="w-5 h-5 text-emerald-500" />
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between mt-3">
+            <h3 className="font-display text-4xl font-extrabold text-on-surface tracking-tight">
+              {kpi.completed}
+            </h3>
+            <span className="font-body text-[0.8rem] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
+              Hoàn thành
+            </span>
+          </div>
+          <p className="font-body text-[11px] font-semibold text-on-surface-variant/70 mt-3">Đã khám xong ngày {displaySelectedDate()}</p>
+        </div>
+
+        {/* Card 4: Doanh thu trong ngày */}
+        <div className="bg-surface-container-lowest rounded-[24px] shadow-ambient pt-8 px-8 pb-7 border-l-4 border-purple-500 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+          <div className="flex justify-between items-start mb-3">
+            <p className="font-body text-[0.75rem] font-bold tracking-wider uppercase text-on-surface-variant">
+              Doanh thu trong ngày
+            </p>
+            <div className="p-2.5 rounded-xl bg-purple-50 text-purple-600">
+              <DollarSign className="w-5 h-5 text-purple-500" />
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between mt-3">
+            <h3 className="font-display text-2xl xl:text-3xl font-extrabold text-on-surface tracking-tight">
+              {formatCurrency(kpi.revenueToday)}
+            </h3>
+            <span className="font-body text-[0.8rem] font-extrabold px-2 py-0.5 rounded-full bg-purple-50 text-purple-600">
+              Doanh thu
+            </span>
+          </div>
+          <p className="font-body text-[11px] font-semibold text-on-surface-variant/70 mt-3">Doanh số phát sinh ngày {displaySelectedDate()}</p>
+        </div>
+      </div>
+
+      {/* Side-by-Side Charts Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        {/* Daily Revenue Chart */}
+        <div className="bg-surface-container-lowest rounded-[24px] shadow-ambient p-8 flex flex-col h-[460px] border border-outline-variant/10">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="font-display text-lg font-bold text-on-surface">Doanh thu theo ngày</h2>
+              <p className="text-xs text-on-surface-variant/70 mt-0.5">Biến động doanh số trong 7 ngày tính đến {displaySelectedDate()}</p>
+            </div>
+            <span className="px-3 py-1.5 rounded-xl bg-primary/5 text-primary text-[10px] font-bold uppercase tracking-wider">
+              7 ngày qua
+            </span>
+          </div>
+
+          <div className="flex-1 flex flex-col justify-end relative mt-4">
+            {/* Y-axis values */}
+            <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-[10px] font-bold text-on-surface-variant/50 tracking-wider">
+              <span>{formatShortCurrency(maxDailyAmount)}</span>
+              <span>{formatShortCurrency(maxDailyAmount / 2)}</span>
+              <span>0 VNĐ</span>
+            </div>
+
+            {/* Bars container */}
+            <div className="pl-12 flex items-end justify-between h-full pb-8 border-b border-surface-container-low relative gap-4">
+              {/* Horizontal dashed grid lines */}
+              <div className="absolute inset-x-0 pl-12 top-0 bottom-8 flex flex-col justify-between pointer-events-none opacity-40">
+                <div className="w-full border-t border-dashed border-on-surface-variant/20"></div>
+                <div className="w-full border-t border-dashed border-on-surface-variant/20"></div>
+                <div className="w-full border-t border-dashed border-on-surface-variant/20"></div>
+              </div>
+
+              {dailyRevenue.map((item, idx) => {
+                const heightPct = maxDailyAmount > 0 ? (item.amount / maxDailyAmount) * 75 : 0;
+                const isHovered = hoveredDailyIdx === idx;
+                
+                // Extract DD/MM from YYYY-MM-DD for sublabel
+                let subLabel = '';
+                try {
+                  const parts = item.dateStr.split('-');
+                  if (parts.length === 3) {
+                    subLabel = `${parts[2]}/${parts[1]}`;
+                  }
+                } catch {}
+
+                return (
+                  <div 
+                    key={idx} 
+                    className="flex-1 flex flex-col justify-end items-center h-full group relative z-10"
+                    onMouseEnter={() => setHoveredDailyIdx(idx)}
+                    onMouseLeave={() => setHoveredDailyIdx(null)}
+                  >
+                    {/* Interactive Tooltip */}
+                    <div className={`absolute -top-14 bg-on-surface text-white text-[11px] font-semibold py-2 px-3 rounded-xl shadow-lg transition-all duration-200 whitespace-nowrap z-20 flex flex-col items-center ${
+                      isHovered ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
+                    }`}>
+                      <span className="text-[9px] uppercase tracking-wider opacity-70">Ngày {subLabel} ({item.date})</span>
+                      <span className="font-bold text-white mt-0.5">{formatCurrency(item.amount)}</span>
+                    </div>
+
+                    {/* Bar with gradient */}
+                    <div 
+                      className={`w-full max-w-[32px] bg-gradient-to-t from-primary to-primary-container rounded-t-xl transition-all duration-300 cursor-pointer shadow-sm relative ${
+                        isHovered ? 'shadow-md scale-x-105 -translate-y-0.5' : 'group-hover:opacity-85'
+                      }`}
+                      style={{ height: `${Math.max(heightPct, 5)}%` }}
+                    >
+                      {/* Glow overlay */}
+                      <div className={`absolute inset-0 bg-white/20 rounded-t-xl transition-opacity duration-300 ${
+                        isHovered ? 'opacity-100' : 'opacity-0'
+                      }`} />
+                    </div>
+                    
+                    <div className="flex flex-col items-center mt-3 gap-0.5">
+                      <span className="text-[10px] font-extrabold text-on-surface-variant/80 uppercase tracking-wide">
+                        {item.date}
+                      </span>
+                      {subLabel && (
+                        <span className="text-[8px] font-bold text-on-surface-variant/50">
+                          {subLabel}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Monthly Revenue Chart */}
+        <div className="bg-surface-container-lowest rounded-[24px] shadow-ambient p-8 flex flex-col h-[460px] border border-outline-variant/10">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="font-display text-lg font-bold text-on-surface">Doanh thu theo tháng</h2>
+              <p className="text-xs text-on-surface-variant/70 mt-0.5">Biểu đồ doanh số các tháng trong năm {targetYear}</p>
+            </div>
+            <span className="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-600 text-[10px] font-bold uppercase tracking-wider">
+              Cả năm {targetYear}
+            </span>
+          </div>
+
+          <div className="flex-1 flex flex-col justify-end relative mt-4">
+            {/* Y-axis values */}
+            <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-[10px] font-bold text-on-surface-variant/50 tracking-wider">
+              <span>{formatShortCurrency(maxMonthlyAmount)}</span>
+              <span>{formatShortCurrency(maxMonthlyAmount / 2)}</span>
+              <span>0 VNĐ</span>
+            </div>
+
+            {/* Bars container */}
+            <div className="pl-12 flex items-end justify-between h-full pb-8 border-b border-surface-container-low relative gap-2">
+              {/* Horizontal dashed grid lines */}
+              <div className="absolute inset-x-0 pl-12 top-0 bottom-8 flex flex-col justify-between pointer-events-none opacity-40">
+                <div className="w-full border-t border-dashed border-on-surface-variant/20"></div>
+                <div className="w-full border-t border-dashed border-on-surface-variant/20"></div>
+                <div className="w-full border-t border-dashed border-on-surface-variant/20"></div>
+              </div>
+
+              {monthlyRevenue.map((item, idx) => {
+                const heightPct = maxMonthlyAmount > 0 ? (item.amount / maxMonthlyAmount) * 75 : 0;
+                const isHovered = hoveredMonthlyIdx === idx;
+                const shortLabel = item.month.replace('Tháng ', 'T');
+                
+                return (
+                  <div 
+                    key={idx} 
+                    className="flex-1 flex flex-col justify-end items-center h-full group relative z-10"
+                    onMouseEnter={() => setHoveredMonthlyIdx(idx)}
+                    onMouseLeave={() => setHoveredMonthlyIdx(null)}
+                  >
+                    {/* Interactive Tooltip */}
+                    <div className={`absolute -top-12 bg-on-surface text-white text-[11px] font-semibold py-2 px-3 rounded-xl shadow-lg transition-all duration-200 whitespace-nowrap z-20 flex flex-col items-center ${
+                      isHovered ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
+                    }`}>
+                      <span className="text-[9px] uppercase tracking-wider opacity-70">{item.month} / {targetYear}</span>
+                      <span className="font-bold text-white mt-0.5">{formatCurrency(item.amount)}</span>
+                    </div>
+
+                    {/* Bar with gradient */}
+                    <div 
+                      className={`w-full max-w-[22px] bg-gradient-to-t from-purple-500 to-pink-500 rounded-t-xl transition-all duration-300 cursor-pointer shadow-sm relative ${
+                        isHovered ? 'shadow-md scale-x-110 -translate-y-0.5' : 'group-hover:opacity-85'
+                      }`}
+                      style={{ height: `${Math.max(heightPct, 5)}%` }}
+                    >
+                      {/* Glow overlay */}
+                      <div className={`absolute inset-0 bg-white/20 rounded-t-xl transition-opacity duration-300 ${
+                        isHovered ? 'opacity-100' : 'opacity-0'
+                      }`} />
+                    </div>
+                    
+                    <span className="text-[9px] font-extrabold text-on-surface-variant/80 uppercase mt-3 tracking-tighter">
+                      {shortLabel}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
       </div>
+
+      {/* Info Warning Bar in Demo Mode */}
+      {isDemoMode && (
+        <div className="bg-amber-50/50 border border-amber-200 rounded-[20px] p-5 flex gap-4 items-start shadow-sm">
+          <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-display font-bold text-sm text-amber-800">Lưu ý về Dữ liệu hiển thị ngày {displaySelectedDate()}</h4>
+            <p className="font-body text-xs text-amber-700/90 mt-1 leading-relaxed">
+              Hệ thống hiện đang hoạt động ở chế độ **Dữ liệu mô phỏng** do cơ sở dữ liệu thực tế tại ngày được chọn chưa ghi nhận lịch hẹn hoặc giao dịch thanh toán nào phát sinh. 
+              Các số liệu và biểu đồ sẽ tự động cập nhật ngay khi có dữ liệu thực tế từ phòng khám và cổng thanh toán!
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

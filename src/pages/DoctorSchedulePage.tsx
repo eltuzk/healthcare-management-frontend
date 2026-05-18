@@ -142,7 +142,7 @@ const DoctorSchedulePage: React.FC = () => {
     const diff = currentDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
     startOfWeek.setDate(diff);
     
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 6; i++) {
       const day = new Date(startOfWeek);
       day.setDate(startOfWeek.getDate() + i);
       days.push({
@@ -321,7 +321,7 @@ const DoctorSchedulePage: React.FC = () => {
               <ChevronLeft size={20} />
             </button>
             <span className="px-4 font-semibold text-slate-700 min-w-[180px] text-center text-sm">
-              Tuần {weekDays[0].dayNum} - {weekDays[6].dayNum} Tháng {(currentDate.getMonth() + 1)}
+              Tuần {weekDays[0].dayNum} - {weekDays[5].dayNum} Tháng {(currentDate.getMonth() + 1)}
             </span>
             <button 
               onClick={() => {
@@ -388,7 +388,7 @@ const DoctorSchedulePage: React.FC = () => {
                 <React.Fragment key={specialtyName}>
                   {/* Specialty Header Row */}
                   <tr className="bg-slate-100/80 border-y border-slate-200">
-                    <td colSpan={8} className="p-3 px-6">
+                    <td colSpan={7} className="p-3 px-6">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-6 bg-indigo-600 rounded-full"></div>
                         <span className="font-black text-slate-700 uppercase tracking-widest text-sm">{specialtyName}</span>

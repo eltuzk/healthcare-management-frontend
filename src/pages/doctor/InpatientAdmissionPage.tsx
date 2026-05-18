@@ -179,11 +179,13 @@ const InpatientAdmissionPage: React.FC = () => {
                                             <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
                                                 isSelected 
                                                 ? 'bg-white/20 text-white' 
+                                                : rec.status === 'LOCKED'
+                                                ? 'bg-rose-100 text-rose-800 border border-rose-200/50'
                                                 : rec.status === 'COMPLETED' 
                                                 ? 'bg-emerald-100 text-emerald-800' 
                                                 : 'bg-amber-100 text-amber-800'
                                             }`}>
-                                                {rec.status === 'COMPLETED' ? 'Hoàn thành' : 'Đang khám'}
+                                                {rec.status === 'LOCKED' ? 'Đã khóa' : rec.status === 'COMPLETED' ? 'Hoàn thành' : 'Đang khám'}
                                             </span>
                                         </div>
                                         <div className={`text-xs ${isSelected ? 'text-white/80' : 'text-slate-400'} font-medium`}>

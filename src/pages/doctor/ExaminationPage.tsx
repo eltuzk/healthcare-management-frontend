@@ -36,6 +36,7 @@ const ExaminationPage: React.FC = () => {
     const [initialDiagnosis, setInitialDiagnosis] = useState('');
     const [clinicalNotes, setClinicalNotes] = useState('');
     const [treatmentPlan, setTreatmentPlan] = useState('');
+    const [conclusionType, setConclusionType] = useState('COMPLETED');
     const [selectedServiceId, setSelectedServiceId] = useState('');
     const [selectedLabTestId, setSelectedLabTestId] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -88,6 +89,7 @@ const ExaminationPage: React.FC = () => {
                     setInitialDiagnosis(record.initialDiagnosis || '');
                     setClinicalNotes(record.clinicalNotes || '');
                     setTreatmentPlan(record.treatmentPlan || '');
+                    setConclusionType(record.conclusionType || 'COMPLETED');
                     
                     // Get prescribed services & lab tests
                     await fetchServiceRequests(record.medicalRecordId);
@@ -126,7 +128,9 @@ const ExaminationPage: React.FC = () => {
                     version: medicalRecord.version,
                     initialDiagnosis,
                     clinicalNotes,
-                    treatmentPlan
+                    treatmentPlan,
+                    clinicalConclusion: initialDiagnosis,
+                    conclusionType
                 });
                 setMedicalRecord(updated);
                 toast.success("Đã cập nhật bệnh án");
@@ -207,13 +211,35 @@ const ExaminationPage: React.FC = () => {
             toast.error("Vui lòng tạo bệnh án trước khi kết thúc ca khám");
             return;
         }
+        setSubmitting(true);
         try {
+            // First save (update) with the latest values
+            await updateMedicalRecord(medicalRecord.medicalRecordId, {
+                version: medicalRecord.version,
+                initialDiagnosis,
+                clinicalNotes,
+                treatmentPlan,
+                clinicalConclusion: initialDiagnosis,
+                conclusionType
+            });
+            
+            // Then call complete
             await completeMedicalRecord(medicalRecord.medicalRecordId);
+            
             toast.success("Đã hoàn tất ca khám bệnh");
-            navigate('/doctor/appointments');
-        } catch (error) {
+            
+            // Redirect based on conclusionType
+            if (conclusionType === 'COMPLETED') {
+                navigate(`/doctor/prescription?medicalRecordId=${medicalRecord.medicalRecordId}`);
+            } else if (conclusionType === 'ADMISSION_REQUIRED') {
+                navigate(`/doctor/admission?medicalRecordId=${medicalRecord.medicalRecordId}`);
+            }
+        } catch (error: any) {
             console.error("Error completing examination:", error);
-            toast.error("Lỗi khi hoàn tất ca khám");
+            const errMsg = error.response?.data?.message || "Lỗi khi hoàn tất ca khám";
+            toast.error(errMsg);
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -235,12 +261,12 @@ const ExaminationPage: React.FC = () => {
                     </svg>
                 </div>
                 <h3 className="text-lg font-bold text-slate-700 mb-1">Chưa chọn bệnh nhân</h3>
-                <p className="text-slate-500 text-sm max-w-md text-center">Vui lòng quay lại danh sách hàng đợi khám bệnh và chọn bệnh nhân để bắt đầu làm việc.</p>
+                <p className="text-slate-500 text-sm max-w-md text-center">Vui lòng quay lại danh sách tiếp nhận khám bệnh và chọn bệnh nhân để bắt đầu làm việc.</p>
                 <button 
                     onClick={() => navigate('/doctor/appointments')}
                     className="mt-6 px-6 py-2.5 bg-primary text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
                 >
-                    Đến hàng đợi khám
+                    Đến tiếp nhận khám bệnh
                 </button>
             </div>
         );
@@ -341,14 +367,27 @@ const ExaminationPage: React.FC = () => {
                             Hồ sơ bệnh án điện tử (EMR)
                         </h3>
                         <div className="space-y-6">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Chẩn đoán sơ bộ *</label>
-                                <textarea 
-                                    value={initialDiagnosis}
-                                    onChange={(e) => setInitialDiagnosis(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 outline-none font-semibold text-slate-800 transition-all min-h-[100px]"
-                                    placeholder="Nhập chẩn đoán lâm sàng sơ bộ..."
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Chẩn đoán sơ bộ *</label>
+                                    <textarea 
+                                        value={initialDiagnosis}
+                                        onChange={(e) => setInitialDiagnosis(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 outline-none font-semibold text-slate-800 transition-all min-h-[100px]"
+                                        placeholder="Nhập chẩn đoán lâm sàng sơ bộ..."
+                                    />
+                                </div>
+                                <div className="md:col-span-1">
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Kết luận điều trị *</label>
+                                    <select 
+                                        value={conclusionType}
+                                        onChange={(e) => setConclusionType(e.target.value)}
+                                        className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 outline-none font-bold text-slate-800 transition-all bg-white"
+                                    >
+                                        <option value="COMPLETED">Điều trị ngoại trú (Kê đơn)</option>
+                                        <option value="ADMISSION_REQUIRED">Điều trị nội trú (Nhập viện)</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

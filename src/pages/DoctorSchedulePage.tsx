@@ -1,234 +1,608 @@
-import React, { useState, useEffect } from 'react';
-import { getDoctorSchedules } from '../services/scheduleService';
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Calendar as CalendarIcon, 
+  ChevronLeft, 
+  ChevronRight, 
+  Plus, 
+  Search, 
+  User, 
+  X, 
+  Save, 
+  Clock, 
+  MapPin,
+  Trash2,
+  Filter,
+  UserCheck
+} from 'lucide-react';
+import { getDoctors, getAccounts } from '../services/staffService';
+import { getRooms } from '../services/roomService';
+import { getDoctorSchedules, createDoctorSchedule, deleteDoctorSchedule } from '../services/scheduleService';
+import toast from 'react-hot-toast';
 
-// Format Date helper
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-};
+interface Doctor {
+  doctorId: number;
+  fullName: string;
+  specialtyName: string;
+  specialtyId: number;
+}
 
-const getDayOfWeek = (dateString: string) => {
-  const date = new Date(dateString);
-  const days = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-  return days[date.getDay()];
+interface Room {
+  roomId: number;
+  roomCode: string;
+  roomName: string;
+  specialtyId: number;
+  specialtyName: string;
+}
+
+interface Assignment {
+  doctorScheduleId?: number;
+  doctorId: number;
+  doctorName: string;
+  roomId: number;
+  scheduleDate: string;
+  shift: 'MORNING' | 'AFTERNOON';
+  isPending?: boolean;
+}
+
+const formatLocalISO = (date: Date) => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 };
 
 const DoctorSchedulePage: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'Tuần' | 'Ngày'>('Tuần');
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [schedules, setSchedules] = useState<any[]>([]);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Selection Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<{ date: string; shift: 'MORNING' | 'AFTERNOON'; roomId: number } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [specialtyFilter, setSpecialtyFilter] = useState<number | null>(null);
+
+  const userRole = localStorage.getItem('role') || '';
+  const isAdmin = userRole.includes('ADMIN');
 
   useEffect(() => {
-    fetchSchedules();
-  }, []);
+    fetchData();
+  }, [currentDate]);
 
-  const fetchSchedules = async () => {
+  const fetchData = async () => {
     setLoading(true);
-    setError(null);
     try {
-      // Gọi API lấy lịch trực
-      const data = await getDoctorSchedules();
-      // Data đã được unwrapped từ ApiResponse.result thông qua axios interceptor
-      setSchedules(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      console.error("Lỗi khi lấy lịch trực:", err);
-      setError(err.message || 'Không thể tải lịch làm việc');
+      const startOfWeek = new Date(currentDate);
+      const dayOfWeek = currentDate.getDay();
+      const diff = currentDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+      startOfWeek.setDate(diff);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+      const startDate = formatLocalISO(startOfWeek);
+      const endDate = formatLocalISO(endOfWeek);
+
+      const [docsRes, roomsRes, schedRes, accountsRes] = await Promise.allSettled([
+        getDoctors(0, 1000),
+        getRooms(),
+        getDoctorSchedules({ startDate, endDate }),
+        getAccounts(0, 1000)
+      ]);
+
+      let docs: Doctor[] = [];
+      if (docsRes.status === 'fulfilled') {
+        const val: any = docsRes.value;
+        docs = val?.content || val?.data?.content || (Array.isArray(val) ? val : []);
+      }
+
+      // Fallback to accounts if doctors list is empty
+      if (docs.length === 0 && accountsRes.status === 'fulfilled') {
+        const val: any = accountsRes.value;
+        const accounts = val?.content || val?.data?.content || (Array.isArray(val) ? val : []);
+        docs = accounts
+          .filter((acc: any) => (acc.roleName || '').includes('DOCTOR') && acc.actorId)
+          .map((acc: any) => ({
+            doctorId: acc.actorId,
+            fullName: acc.fullName,
+            specialtyName: acc.specialtyName || 'Chưa xác định',
+            specialtyId: acc.specialtyId || 0
+          }));
+      }
+      setDoctors(docs);
+
+      if (roomsRes.status === 'fulfilled') {
+        setRooms(roomsRes.value as Room[]);
+      }
+
+      if (schedRes.status === 'fulfilled') {
+        setAssignments((schedRes.value as any[]).map(s => ({
+          doctorScheduleId: s.doctorScheduleId,
+          doctorId: s.doctorId,
+          doctorName: s.doctorName,
+          roomId: s.roomId,
+          scheduleDate: s.scheduleDate,
+          shift: s.shift
+        })));
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      toast.error('Không thể tải dữ liệu');
     } finally {
       setLoading(false);
     }
   };
 
-  // Tạo mảng 7 ngày cho giao diện (tạm thời lấy 7 ngày gần nhất từ lịch lấy được, hoặc render tuần hiện tại)
-  // Để đơn giản, ta sẽ gom nhóm schedules theo ngày.
-  const groupedSchedules: Record<string, any[]> = {};
-  schedules.forEach(schedule => {
-    const dateStr = schedule.scheduleDate; // e.g., '2026-05-11'
-    if (!groupedSchedules[dateStr]) {
-      groupedSchedules[dateStr] = [];
+  const weekDays = useMemo(() => {
+    const days = [];
+    const startOfWeek = new Date(currentDate);
+    const dayOfWeek = currentDate.getDay();
+    const diff = currentDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+    
+    for (let i = 0; i < 6; i++) {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      days.push({
+        date: day,
+        dateStr: formatLocalISO(day),
+        label: day.toLocaleDateString('vi-VN', { weekday: 'short' }),
+        dayNum: day.getDate()
+      });
     }
-    groupedSchedules[dateStr].push(schedule);
-  });
+    return days;
+  }, [currentDate]);
 
-  // Tạo danh sách 7 ngày hiển thị (Bắt đầu từ hôm nay cho demo)
-  const displayDays = [];
-  const today = new Date();
-  for (let i = 0; i < 7; i++) {
-    const current = new Date(today);
-    current.setDate(today.getDate() + i);
-    const dateKey = current.toISOString().split('T')[0];
+  const handleOpenModal = (date: string, shift: 'MORNING' | 'AFTERNOON', roomId: number) => {
+    if (isAdmin) return;
+    setSelectedSlot({ date, shift, roomId });
+    setIsModalOpen(true);
+  };
 
-    displayDays.push({
-      dateKey,
-      day: getDayOfWeek(dateKey),
-      date: formatDate(dateKey),
-      shifts: groupedSchedules[dateKey] || []
+  const handleAssignDoctor = (doctor: Doctor) => {
+    if (!selectedSlot) return;
+
+    const room = rooms.find(r => r.roomId === selectedSlot.roomId);
+    const isCompatible = doctor.specialtyId === room?.specialtyId || doctor.specialtyId === 0 || !room?.specialtyId;
+
+    if (!isCompatible && !window.confirm(`Bác sĩ này có chuyên khoa (${doctor.specialtyName}) khác với chuyên khoa của phòng (${room?.specialtyName}). Bạn vẫn muốn phân công?`)) {
+      return;
+    }
+
+    // Check if doctor already has a shift on this day
+    const existing = assignments.find(a => a.scheduleDate === selectedSlot.date && a.shift === selectedSlot.shift && a.doctorId === doctor.doctorId);
+    if (existing) {
+      toast.error('Bác sĩ này đã có lịch trực trong ca này!');
+      return;
+    }
+
+    const newAssignment: Assignment = {
+      doctorId: doctor.doctorId,
+      doctorName: doctor.fullName,
+      roomId: selectedSlot.roomId,
+      scheduleDate: selectedSlot.date,
+      shift: selectedSlot.shift,
+      isPending: true
+    };
+
+    setAssignments(prev => [...prev, newAssignment]);
+    setIsModalOpen(false);
+    toast.success(`Đã thêm tạm thời: ${doctor.fullName}`);
+  };
+
+  const handleRemoveAssignment = async (assignment: Assignment) => {
+    if (isAdmin) return;
+
+    if (assignment.isPending) {
+      setAssignments(prev => prev.filter(a => a !== assignment));
+      return;
+    }
+
+    if (window.confirm(`Xóa lịch trực của bác sĩ ${assignment.doctorName}?`)) {
+      try {
+        await deleteDoctorSchedule(assignment.doctorScheduleId!);
+        setAssignments(prev => prev.filter(a => a.doctorScheduleId !== assignment.doctorScheduleId));
+        toast.success('Đã xóa lịch trực');
+      } catch (error) {
+        toast.error('Lỗi khi xóa lịch trực');
+      }
+    }
+  };
+
+  const handleSaveAll = async () => {
+    const pending = assignments.filter(a => a.isPending);
+    if (pending.length === 0) {
+      toast.success('Không có thay đổi nào cần lưu');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await Promise.all(pending.map(a => createDoctorSchedule({
+        doctorId: a.doctorId,
+        roomId: a.roomId,
+        scheduleDate: a.scheduleDate,
+        shift: a.shift,
+        maxCapacity: 20
+      })));
+      toast.success('Đã lưu tất cả thay đổi');
+      fetchData();
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi lưu một số lịch trực');
+      fetchData();
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const filteredDoctors = doctors.filter(d => 
+    (d.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     d.doctorId.toString() === searchQuery) &&
+    (!specialtyFilter || d.specialtyId === specialtyFilter)
+  );
+
+  const [gridSpecialtyFilter, setGridSpecialtyFilter] = useState<string>('ALL');
+
+  const groupedRooms = useMemo(() => {
+    const filtered = rooms.filter(r => 
+      gridSpecialtyFilter === 'ALL' || r.specialtyName === gridSpecialtyFilter
+    );
+    const groups: { [key: string]: Room[] } = {};
+    filtered.forEach(room => {
+      const spec = room.specialtyName || 'Khác';
+      if (!groups[spec]) groups[spec] = [];
+      groups[spec].push(room);
     });
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [rooms, gridSpecialtyFilter]);
+
+  const allGridSpecialties = useMemo(() => {
+    const specs = new Set<string>();
+    rooms.forEach(r => { if (r.specialtyName) specs.add(r.specialtyName); });
+    return Array.from(specs).sort();
+  }, [rooms]);
+
+  const doctorSpecialties = useMemo(() => {
+    const map = new Map();
+    doctors.forEach(d => map.set(d.specialtyId, d.specialtyName));
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [doctors]);
+
+  if (loading && doctors.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12 h-full flex flex-col">
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="font-display text-[2rem] font-bold text-on-surface tracking-tight leading-tight">Quản lý lịch trực</h1>
-          <p className="font-body text-sm text-on-surface-variant mt-2 font-medium">
-            <span className="text-primary font-bold">Tuần này</span>
-          </p>
+    <div className="flex-1 flex flex-col bg-slate-50 overflow-hidden font-body">
+      {/* Top Header */}
+      <div className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm z-10">
+        <div className="flex items-center gap-4">
+          <div className="bg-indigo-600 p-2 rounded-xl text-white">
+            <CalendarIcon size={24} />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-800">Điều phối Lịch trực</h1>
+            <p className="text-sm text-slate-500">Quản lý ca trực và phân công bác sĩ vào phòng khám</p>
+          </div>
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={fetchSchedules}
-            className="bg-surface-container-low text-on-surface-variant hover:text-on-surface font-body font-bold text-sm px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-            Làm mới
-          </button>
-          <div className="flex bg-surface-container-low rounded-xl p-1">
-            <button
-              onClick={() => setViewMode('Tuần')}
-              className={`px-4 py-2 text-sm font-bold font-body rounded-lg transition-all ${viewMode === 'Tuần' ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'}`}
+
+        <div className="flex items-center gap-4">
+          {/* Specialty Filter */}
+          <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-full border border-slate-200">
+            <Filter size={16} className="text-slate-400" />
+            <select 
+              value={gridSpecialtyFilter}
+              onChange={(e) => setGridSpecialtyFilter(e.target.value)}
+              className="bg-transparent border-none text-sm font-bold text-slate-700 outline-none focus:ring-0 cursor-pointer"
             >
-              Theo tuần
+              <option value="ALL">Tất cả Chuyên khoa</option>
+              {allGridSpecialties.map(spec => (
+                <option key={spec} value={spec}>{spec}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Week Selector */}
+          <div className="flex items-center bg-slate-100 rounded-full p-1 border border-slate-200">
+            <button 
+              onClick={() => {
+                const d = new Date(currentDate);
+                d.setDate(d.getDate() - 7);
+                setCurrentDate(d);
+              }}
+              className="p-2 hover:bg-white rounded-full transition-all text-slate-600"
+            >
+              <ChevronLeft size={20} />
             </button>
-            <button
-              onClick={() => setViewMode('Ngày')}
-              className={`px-4 py-2 text-sm font-bold font-body rounded-lg transition-all ${viewMode === 'Ngày' ? 'bg-surface-container-lowest text-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'}`}
+            <span className="px-4 font-semibold text-slate-700 min-w-[180px] text-center text-sm">
+              Tuần {weekDays[0].dayNum} - {weekDays[5].dayNum} Tháng {(currentDate.getMonth() + 1)}
+            </span>
+            <button 
+              onClick={() => {
+                const d = new Date(currentDate);
+                d.setDate(d.getDate() + 7);
+                setCurrentDate(d);
+              }}
+              className="p-2 hover:bg-white rounded-full transition-all text-slate-600"
             >
-              Theo ngày
+              <ChevronRight size={20} />
             </button>
           </div>
-          <button
-            onClick={() => setIsImportModalOpen(true)}
-            className="bg-primary text-white font-body font-bold text-sm px-4 py-2 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-            Nhập lịch (Excel)
-          </button>
+
+          {!isAdmin && (
+            <button
+              onClick={handleSaveAll}
+              disabled={isSaving || assignments.filter(a => a.isPending).length === 0}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95 text-sm"
+            >
+              {isSaving ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+              ) : (
+                <Save size={20} />
+              )}
+              LƯU THAY ĐỔI
+              {assignments.filter(a => a.isPending).length > 0 && (
+                <span className="ml-1 bg-white text-indigo-600 px-2 py-0.5 rounded-full text-[10px] font-bold animate-pulse">
+                  {assignments.filter(a => a.isPending).length}
+                </span>
+              )}
+            </button>
+          )}
+
+          {isAdmin && (
+            <div className="bg-amber-50 text-amber-600 px-4 py-2 rounded-full border border-amber-100 flex items-center gap-2 font-medium text-sm">
+              <Clock size={16} />
+              Chế độ xem
+            </div>
+          )}
         </div>
       </div>
 
-      {error && (
-        <div className="p-4 bg-error-container/10 border border-error/20 rounded-xl text-error font-medium">
-          {error}
+      {/* Main Grid Area */}
+      <div className="flex-1 overflow-auto p-8">
+        <div className="min-w-[1200px] bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="sticky left-0 bg-slate-50 z-20 w-64 p-6 text-left font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">
+                  Chuyên khoa / Phòng
+                </th>
+                {weekDays.map(day => (
+                  <th key={day.dateStr} className="p-4 border-r border-slate-200 last:border-r-0">
+                    <div className={`flex flex-col items-center py-2 rounded-2xl ${day.dateStr === new Date().toISOString().split('T')[0] ? 'bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200' : ''}`}>
+                      <span className="text-xs font-bold uppercase opacity-60">{day.label}</span>
+                      <span className="text-2xl font-black">{day.dayNum}</span>
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {groupedRooms.map(([specialtyName, roomList]) => (
+                <React.Fragment key={specialtyName}>
+                  {/* Specialty Header Row */}
+                  <tr className="bg-slate-100/80 border-y border-slate-200">
+                    <td colSpan={7} className="p-3 px-6">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-6 bg-indigo-600 rounded-full"></div>
+                        <span className="font-black text-slate-700 uppercase tracking-widest text-sm">{specialtyName}</span>
+                        <span className="bg-white/50 px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-400 border border-slate-200">
+                          {roomList.length} PHÒNG
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  {roomList.map((room, idx) => (
+                    <tr key={room.roomId} className={`group ${idx % 2 === 1 ? 'bg-slate-50/30' : ''}`}>
+                      <td className="sticky left-0 bg-white group-hover:bg-indigo-50 transition-colors z-20 p-6 border-r border-slate-200 border-b border-slate-100 last:border-b-0 shadow-[2px_0_10px_rgba(0,0,0,0.02)]">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-indigo-100 p-2.5 rounded-2xl text-indigo-600">
+                            <MapPin size={20} />
+                          </div>
+                          <div>
+                            <div className="font-black text-slate-800 text-lg leading-tight">{room.roomCode}</div>
+                            <div className="text-xs font-bold text-slate-400 uppercase tracking-tighter truncate w-32">{room.roomName}</div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {weekDays.map(day => (
+                        <td key={`${room.roomId}-${day.dateStr}`} className="p-3 border-r border-slate-200 border-b border-slate-100 last:border-r-0 group-hover:bg-slate-50/50 transition-colors">
+                          <div className="flex flex-col gap-3">
+                            <ShiftSlot 
+                              shift="MORNING"
+                              day={day}
+                              room={room}
+                              assignment={assignments.find(a => a.scheduleDate === day.dateStr && a.shift === 'MORNING' && a.roomId === room.roomId)}
+                              onAssign={() => handleOpenModal(day.dateStr, 'MORNING', room.roomId)}
+                              onRemove={handleRemoveAssignment}
+                              isAdmin={isAdmin}
+                            />
+                            
+                            <ShiftSlot 
+                              shift="AFTERNOON"
+                              day={day}
+                              room={room}
+                              assignment={assignments.find(a => a.scheduleDate === day.dateStr && a.shift === 'AFTERNOON' && a.roomId === room.roomId)}
+                              onAssign={() => handleOpenModal(day.dateStr, 'AFTERNOON', room.roomId)}
+                              onRemove={handleRemoveAssignment}
+                              isAdmin={isAdmin}
+                            />
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Doctor Selection Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-in fade-in zoom-in duration-200">
+          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-white/20">
+            {/* Modal Header */}
+            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-4">
+                <div className="bg-indigo-600 p-3 rounded-2xl text-white shadow-lg shadow-indigo-100">
+                  <UserCheck size={28} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-slate-800">Phân công Bác sĩ</h2>
+                  <p className="text-slate-500 font-medium">Chọn một bác sĩ cho ca {selectedSlot?.shift === 'MORNING' ? 'Sáng' : 'Chiều'} tại {rooms.find(r => r.roomId === selectedSlot?.roomId)?.roomCode}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="p-3 hover:bg-slate-200 rounded-2xl transition-all text-slate-400 hover:text-slate-600"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Modal Filters */}
+            <div className="p-6 bg-white flex items-center gap-4 border-b border-slate-50">
+              <div className="flex-1 relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={20} />
+                <input 
+                  type="text"
+                  placeholder="Tìm kiếm bác sĩ..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 bg-slate-100 border-none rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-indigo-600/20 focus:bg-white transition-all outline-none"
+                />
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-hide">
+                <button
+                  onClick={() => setSpecialtyFilter(null)}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${!specialtyFilter ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                >
+                  Tất cả
+                </button>
+                {doctorSpecialties.map(spec => (
+                  <button
+                    key={spec.id}
+                    onClick={() => setSpecialtyFilter(spec.id)}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${specialtyFilter === spec.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                  >
+                    {spec.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Modal Body - Doctor List */}
+            <div className="flex-1 overflow-y-auto p-8 grid grid-cols-2 gap-6 bg-slate-50/30">
+              {filteredDoctors.length > 0 ? (
+                filteredDoctors.map(doc => {
+                  const room = rooms.find(r => r.roomId === selectedSlot?.roomId);
+                  const isCompatible = doc.specialtyId === room?.specialtyId || doc.specialtyId === 0 || !room?.specialtyId;
+
+                  return (
+                    <button
+                      key={doc.doctorId}
+                      onClick={() => handleAssignDoctor(doc)}
+                      className={`flex items-center gap-4 p-5 rounded-[28px] border-2 transition-all text-left group relative ${
+                        isCompatible 
+                          ? 'bg-white border-slate-100 hover:border-indigo-600 hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1' 
+                          : 'bg-white border-amber-200 hover:border-amber-500 hover:shadow-xl hover:shadow-amber-500/10 hover:-translate-y-1'
+                      }`}
+                    >
+                      <div className={`p-3 rounded-2xl transition-colors ${
+                        isCompatible 
+                          ? 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white' 
+                          : 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white'
+                      }`}>
+                        <User size={32} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-black text-slate-800 text-lg truncate">{doc.fullName}</div>
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{doc.specialtyName}</div>
+                      </div>
+                      {!isCompatible && (
+                        <div className="absolute top-2 right-2 px-2 py-1 bg-amber-100 text-amber-600 text-[10px] font-black rounded-lg uppercase">Sai chuyên khoa</div>
+                      )}
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="col-span-2 py-20 text-center">
+                  <User size={64} className="mx-auto text-slate-200 mb-4" />
+                  <p className="text-xl font-bold text-slate-400">Không tìm thấy bác sĩ phù hợp</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
+    </div>
+  );
+};
 
-      {/* Calendar Grid */}
-      <div className="bg-surface-container-lowest rounded-[24px] shadow-ambient flex-1 overflow-hidden flex flex-col border border-surface-container-low relative">
-        {loading && (
-          <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex justify-center items-center z-10">
-            <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-          </div>
-        )}
-        <div className="grid grid-cols-7 border-b border-surface-container-low bg-surface-container-lowest">
-          {displayDays.map((day, idx) => (
-            <div key={idx} className={`p-4 text-center border-r border-surface-container-low last:border-r-0 ${idx === 0 ? 'bg-primary/5' : ''}`}>
-              <p className={`font-body text-xs font-bold uppercase tracking-widest ${idx === 0 ? 'text-primary' : 'text-on-surface-variant'}`}>{day.day}</p>
-              <p className={`font-display text-xl font-bold mt-1 ${idx === 0 ? 'text-primary' : 'text-on-surface'}`}>{day.date}</p>
-            </div>
-          ))}
-        </div>
+interface ShiftSlotProps {
+  shift: 'MORNING' | 'AFTERNOON';
+  day: any;
+  room: Room;
+  assignment?: Assignment;
+  onAssign: () => void;
+  onRemove: (a: Assignment) => void;
+  isAdmin: boolean;
+}
 
-        <div className="grid grid-cols-7 flex-1 min-h-[500px]">
-          {displayDays.map((day, idx) => (
-            <div key={idx} className={`border-r border-surface-container-low last:border-r-0 p-3 flex flex-col gap-3 ${idx === 0 ? 'bg-primary/5' : ''}`}>
-              {day.shifts.map((shift, sIdx) => (
-                <div key={sIdx} className={`p-3 rounded-xl border ${shift.shift === 'MORNING' ? 'bg-emerald-50 border-emerald-200' :
-                    shift.shift === 'AFTERNOON' ? 'bg-blue-50 border-blue-200' :
-                      'bg-purple-50 border-purple-200'
-                  } hover:shadow-md transition-shadow cursor-pointer`}>
-                  <p className="font-body text-xs font-bold text-on-surface mb-1 truncate">{shift.doctorName}</p>
-                  <p className="font-body text-[10px] text-on-surface-variant flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {shift.shiftStartTime || shift.shift}
-                  </p>
-                  <p className="font-body text-[10px] text-on-surface-variant flex items-center gap-1 mt-0.5">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                    {shift.roomCode}
-                  </p>
-                  <div className="mt-2 pt-2 border-t border-black/5 flex justify-between items-center">
-                    <span className="text-[9px] font-bold text-on-surface-variant">KHÁM: {shift.currentBookingCount}/{shift.maxCapacity}</span>
-                  </div>
-                </div>
-              ))}
-
-              {/* Add Shift Placeholder */}
-              <button className="mt-auto w-full py-2 rounded-lg border border-dashed border-outline-variant text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 hover:opacity-100 focus:opacity-100">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-              </button>
-            </div>
-          ))}
-        </div>
+const ShiftSlot: React.FC<ShiftSlotProps> = ({ shift, assignment, onAssign, onRemove, isAdmin }) => {
+  return (
+    <div className={`relative min-h-[50px] rounded-2xl border-2 border-dashed transition-all ${
+      assignment 
+        ? (assignment.isPending ? 'bg-indigo-50/50 border-indigo-200 ring-1 ring-indigo-200' : 'bg-emerald-50/30 border-emerald-100') 
+        : 'bg-slate-50 border-slate-100 hover:border-indigo-300 hover:bg-white cursor-pointer'
+    }`}
+    onClick={() => !assignment && !isAdmin && onAssign()}
+    >
+      <div className="absolute -top-2 -left-2 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter bg-white border border-slate-200 text-slate-400 shadow-sm">
+        {shift === 'MORNING' ? 'Sáng' : 'Chiều'}
       </div>
 
-      {/* Import Excel Modal */}
-      {isImportModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-          <div className="absolute inset-0 bg-surface-container-highest/80 backdrop-blur-sm" onClick={() => setIsImportModalOpen(false)}></div>
-
-          <div className="relative w-full max-w-3xl bg-surface-container-lowest rounded-[24px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-fade-in">
-            <div className="flex justify-between items-center p-6 border-b border-surface-container-low">
-              <h2 className="font-display text-xl font-bold text-on-surface">Nhập lịch từ Excel</h2>
-              <button onClick={() => setIsImportModalOpen(false)} className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low hover:text-error transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
+      {assignment ? (
+        <div className="p-2 flex items-center justify-between gap-2 h-full">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className={`p-1.5 rounded-xl ${assignment.isPending ? 'bg-indigo-600 text-white' : 'bg-emerald-500 text-white'}`}>
+              <User size={14} />
             </div>
-
-            <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-8">
-              {/* Drag & Drop Area */}
-              <div className="w-full border-2 border-dashed border-primary/40 rounded-[20px] bg-primary/5 flex flex-col items-center justify-center py-10 hover:bg-primary/10 transition-colors cursor-pointer group">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 text-primary group-hover:scale-110 transition-transform">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                </div>
-                <h3 className="font-display text-lg font-bold text-on-surface mb-2">Kéo và thả tệp Excel của bạn ở đây</h3>
-                <p className="font-body text-sm text-on-surface-variant mb-6">Hỗ trợ định dạng .xls, .xlsx tối đa 5MB</p>
-                <button className="px-6 py-2.5 bg-white border border-outline-variant/30 text-on-surface font-body font-bold text-sm rounded-xl hover:bg-surface-container-low shadow-sm transition-colors">
-                  Chọn tệp tin
-                </button>
-              </div>
-
-              {/* Preview Table */}
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h4 className="font-body text-[10px] font-bold tracking-widest uppercase text-on-surface-variant">Xem trước dữ liệu (4 ca trực mới)</h4>
-                  <button className="font-body text-xs font-bold text-error hover:underline">Hủy tất cả</button>
-                </div>
-                <div className="border border-surface-container-low rounded-xl overflow-hidden">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="bg-surface-container-low/50 border-b border-surface-container-low">
-                        <th className="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Tên bác sĩ</th>
-                        <th className="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Ngày trực</th>
-                        <th className="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Thời gian</th>
-                        <th className="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Phòng</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-surface-container-low/50">
-                      {mockPreviewData.map((row) => (
-                        <tr key={row.id} className="hover:bg-surface-container-low/30">
-                          <td className="py-3 px-4 font-body text-sm font-bold text-on-surface">{row.doctor}</td>
-                          <td className="py-3 px-4 font-body text-sm text-on-surface-variant">{row.date}</td>
-                          <td className="py-3 px-4 font-body text-sm text-on-surface-variant">{row.time}</td>
-                          <td className="py-3 px-4 font-body text-sm font-semibold text-on-surface">{row.room}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-surface-container-low bg-surface-container-lowest flex justify-end gap-3">
-              <button onClick={() => setIsImportModalOpen(false)} className="px-6 py-3 rounded-xl font-body text-sm font-bold text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
-                Hủy bỏ
-              </button>
-              <button onClick={() => setIsImportModalOpen(false)} className="px-6 py-3 rounded-xl font-body text-sm font-bold bg-primary text-white shadow-sm hover:opacity-90 transition-opacity">
-                Xác nhận nhập dữ liệu
-              </button>
+            <div className="truncate">
+              <div className="text-[11px] font-black text-slate-800 leading-tight truncate">{assignment.doctorName}</div>
+              {assignment.isPending && (
+                <span className="text-[9px] font-bold text-indigo-500 uppercase flex items-center gap-1">
+                  <Clock size={8} /> Chờ lưu
+                </span>
+              )}
             </div>
           </div>
+          
+          {!isAdmin && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove(assignment);
+              }}
+              className="p-1.5 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded-lg transition-colors group-hover:opacity-100"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="h-[46px] flex items-center justify-center transition-all group/plus">
+          {!isAdmin && <Plus size={24} className="text-slate-200 group-hover/plus:text-indigo-400 group-hover/plus:scale-125 transition-all" />}
         </div>
       )}
     </div>

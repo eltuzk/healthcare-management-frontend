@@ -12,7 +12,13 @@ export const importDoctorSchedules = async (file: any): Promise<any> => {
   });
 };
 
-export const getDoctorSchedules = async (params?: any): Promise<any> => {
+export const getDoctorSchedules = async (params?: {
+  date?: string;
+  startDate?: string;
+  endDate?: string;
+  doctorId?: any;
+  roomId?: any;
+}): Promise<any> => {
   return api.get("/api/doctor-schedules", { params });
 };
 

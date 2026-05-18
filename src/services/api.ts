@@ -31,9 +31,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response: AxiosResponse) => {
     const res = response.data;
-    // Handle ApiResponse wrapper: { code, result, message }
-    if (res && typeof res === "object" && "result" in res && "code" in res) {
-      return res.result;
+    // Handle ApiResponse wrapper: { code, result, message } or { success, data, message }
+    if (res && typeof res === "object") {
+      if ("result" in res && "code" in res) {
+        return res.result;
+      }
+      if ("data" in res && "success" in res) {
+        return res.data;
+      }
     }
     return res;
   },
@@ -42,16 +47,18 @@ api.interceptors.response.use(
       // Handle unauthorized (401)
       if (error.response.status === 401) {
         localStorage.removeItem("token");
-        // Only redirect if not already on the login page to avoid infinite reload/loop
-        if (window.location.pathname !== "/login") {
+        // Only redirect if not already on the login page or landing page to avoid infinite reload/loop
+        if (window.location.pathname !== "/login" && window.location.pathname !== "/") {
           window.location.href = "/login";
         }
       }
 
       // Return structured error message if available
       const data = error.response.data as any;
-      const message = data?.message || data?.error || "Something went wrong";
-      return Promise.reject(new Error(message));
+      const message = typeof data === 'string' ? data : (data?.message || data?.error || "Something went wrong");
+      const err = new Error(message) as any;
+      err.response = error.response;
+      return Promise.reject(err);
     }
     return Promise.reject(error);
   },

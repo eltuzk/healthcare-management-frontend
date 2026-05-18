@@ -29,7 +29,7 @@ const DailyPatientListPage: React.FC = () => {
         {/* Table Header Controls */}
         <div className="p-6 border-b border-surface-container-low flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="font-display font-bold text-xl text-on-surface">Hàng đợi khám</h2>
+            <h2 className="font-display font-bold text-xl text-on-surface">Tiếp nhận khám bệnh</h2>
             <p className="font-body text-sm text-on-surface-variant mt-1">Tổng cộng 24 bệnh nhân đang chờ</p>
           </div>
           

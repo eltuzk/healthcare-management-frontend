@@ -44,3 +44,7 @@ export const updatePatientInsurance = async (
 export const deletePatientInsurance = async (id: any): Promise<any> => {
   return api.delete(`/api/patient-insurances/${id}`);
 };
+
+export const searchPatient = async (query: string): Promise<any> => {
+  return api.get("/api/patients/search", { params: { query } });
+};

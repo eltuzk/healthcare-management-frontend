@@ -14,6 +14,10 @@ export const login = async (data: any): Promise<any> => {
   return api.post("/api/auth/login", data);
 };
 
+export const loginWithGoogle = async (idToken: string): Promise<any> => {
+  return api.post("/api/auth/google", { idToken });
+};
+
 export const forgotPassword = async (data: any): Promise<any> => {
   return api.post("/api/auth/forgot-password", data);
 };

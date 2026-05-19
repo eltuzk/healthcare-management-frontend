@@ -27,6 +27,7 @@ import ExaminationStatusPage from './pages/doctor/ExaminationStatusPage';
 import PrescriptionPage from './pages/doctor/PrescriptionPage';
 import InpatientAdmissionPage from './pages/doctor/InpatientAdmissionPage';
 import ProfilePage from './pages/ProfilePage';
+import MyMedicalRecordsPage from './pages/patient/MyMedicalRecordsPage';
 import MainLayout from './components/common/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
@@ -164,6 +165,14 @@ function App() {
               <HospitalFeeCollectionPage />
             </ProtectedRoute>
           } />
+          
+          {/* Patient Routes */}
+          <Route path="/patient/medical-records" element={
+            <ProtectedRoute allowedRoles={['PATIENT']}>
+              <MyMedicalRecordsPage />
+            </ProtectedRoute>
+          } />
+
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Routes>

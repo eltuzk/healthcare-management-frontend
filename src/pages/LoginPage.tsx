@@ -68,7 +68,7 @@ const LoginPage: React.FC = () => {
 		switch (response.role) {
 			case 'ADMIN': navigate('/dashboard'); break;
 			case 'DOCTOR': navigate('/doctor/schedule'); break;
-			case 'PATIENT': navigate('/'); break;
+			case 'PATIENT': navigate('/patient/medical-records'); break;
 			case 'RECEPTIONIST': navigate('/patients'); break;
 			case 'TECHNICIAN': navigate('/lab-tests'); break;
 			case 'PHARMACIST': navigate('/pharmacy-inventory'); break;

@@ -39,7 +39,7 @@
 | POST | /api/appointments | Body: `CreateAppointmentRequest` | `AppointmentResponse` | PUBLIC |
 | POST | /api/appointments/walk-in | Body: `CreateWalkInAppointmentRequest` | `AppointmentResponse` | RECEPTIONIST |
 | GET | /api/appointments/{id} | Path: id | `AppointmentResponse` | PUBLIC |
-| GET | /api/appointments | Params: patientId, doctorScheduleId, status | `List<AppointmentResponse>` | PUBLIC |
+| GET | /api/appointments | Params: patientId, doctorId, doctorScheduleId, status | `List<AppointmentResponse>` | PUBLIC |
 | POST | /api/appointments/{id}/check-in | Path: id | `AppointmentResponse` | PUBLIC |
 | POST | /api/appointments/{id}/start | Path: id | `AppointmentResponse` | PUBLIC |
 | POST | /api/appointments/{id}/cancel | Path: id | `AppointmentResponse` | PUBLIC |

@@ -71,3 +71,7 @@ export const updatePermission = async (id: any, data: any): Promise<any> => {
 export const deletePermission = async (id: any): Promise<any> => {
   return api.delete(`/api/permissions/${id}`);
 };
+
+export const getAccounts = async (page = 0, size = 10): Promise<any> => {
+  return api.get("/api/accounts", { params: { page, size } });
+};
